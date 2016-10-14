@@ -18,8 +18,8 @@ public abstract class NamedQueries {
     public static Map<String, String> getQueries() {
         Map<String, String> m = new HashMap<>();
         
-        m.put("getChild", "{ parent: DBRef(\"?0\", ObjectId(?1)) }");
-        m.put("ownedBy", "{ owner: DBRef(\"?0\", ObjectId(?1)) }");
+        m.put("getChild", "{ parent: DBRef(?0, ObjectId(?1)) }");
+        m.put("ownedBy", "{ owner: DBRef(?0, ObjectId(?1)) }");
         
         m.put("registeredUser.byEmail", "{ email: ?0 }");
         

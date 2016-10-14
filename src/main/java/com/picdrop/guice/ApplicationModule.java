@@ -14,6 +14,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import com.picdrop.guice.provider.CookieProvider;
+import com.picdrop.guice.provider.CurrentUserProvider;
 import com.picdrop.guice.provider.SessionCookieProvider;
 import com.picdrop.helper.EnvHelper;
 import com.picdrop.security.authenticator.Authenticator;
@@ -51,6 +52,8 @@ public class ApplicationModule implements Module {
         
         binder.bind(Authenticator.class).annotatedWith(Names.named("basic")).to(BasicAuthenticator.class);
         binder.bind(Authenticator.class).annotatedWith(Names.named("token")).to(TokenAuthenticator.class);
+        
+        binder.bind(CurrentUserProvider.class);
         
         binder.bind(ObjectMapper.class).toInstance(new ObjectMapper());
         
