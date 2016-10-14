@@ -6,15 +6,26 @@
 package com.picdrop.helper;
 
 import com.google.common.base.Strings;
+import javax.servlet.http.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import org.jboss.resteasy.util.MediaTypeHelper;
 
 /**
  *
  * @author i330120
  */
 public abstract class HttpHelper {
+
+    public static String getCookieValue(String withName, Cookie[] cookies) {
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if (c.getName().equals(withName)) {
+                    return c.getValue();
+                }
+            }
+        }
+        return null;
+    }
 
     private static String parseFieldFromDispositionHeader(MultivaluedMap<String, String> header, String field) {
         String[] contentDispositionHeader = header.getFirst("Content-Disposition").split(";");

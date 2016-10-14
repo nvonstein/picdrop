@@ -6,6 +6,7 @@
 package com.picdrop.security.authenticator;
 
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
@@ -24,6 +25,7 @@ public class BasicAuthenticator implements Authenticator {
     
     Repository<String, RegisteredUser> userRepo;
 
+    @Inject
     public BasicAuthenticator(Repository<String, RegisteredUser> userRepo) {
         this.userRepo = userRepo;
     }

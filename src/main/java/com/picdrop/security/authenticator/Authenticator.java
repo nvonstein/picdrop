@@ -7,7 +7,6 @@ package com.picdrop.security.authenticator;
 
 import com.picdrop.model.user.RegisteredUser;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Request;
 
 /**
  *

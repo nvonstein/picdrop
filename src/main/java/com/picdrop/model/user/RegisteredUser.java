@@ -6,6 +6,7 @@
 package com.picdrop.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
@@ -51,6 +52,7 @@ public class RegisteredUser extends User {
         return phash;
     }
 
+    @JsonProperty("phash")
     public void setPhash(String phash) {
         this.phash = phash;
     }

@@ -7,10 +7,10 @@ package com.picdrop.service.implementation;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.picdrop.annotations.Authorized;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import com.picdrop.service.CrudService;
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -22,6 +22,7 @@ import javax.ws.rs.Produces;
 @Path("/usersold")
 @Consumes("application/json")
 @Produces("application/json")
+@Authorized
 public class UserService extends CrudService<String, User, Repository<String, User>> {
 
     @Inject

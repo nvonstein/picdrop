@@ -19,6 +19,12 @@ public abstract class EnvHelper {
         
         p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
         
+        p.put("service.session.cookie.name", "token");
+        p.put("service.session.cookie.maxage", "900");
+        p.put("service.session.cookie.http", "true");
+        p.put("service.session.cookie.secure", "false");
+        
+        
         return p;
     }
 }
