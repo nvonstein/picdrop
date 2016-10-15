@@ -8,6 +8,8 @@ package com.picdrop.model.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
 
@@ -22,6 +24,8 @@ public class RegisteredUser extends User {
     protected String phash;
     @Indexed
     protected String email;
+
+    protected long lastlogin;
 
     public RegisteredUser() {
     }
@@ -41,7 +45,7 @@ public class RegisteredUser extends User {
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
-    
+
     @Override
     public boolean isRegistered() {
         return true;
@@ -64,6 +68,16 @@ public class RegisteredUser extends User {
     public void setEmail(String email) {
         this.email = email;
     }
-    
-    
+
+    public long getLastlogin() {
+        return lastlogin;
+    }
+
+    public void setLastlogin(long lastlogin) {
+        this.lastlogin = lastlogin;
+    }
+
+    public void setLastLogin() {
+        this.lastlogin = DateTime.now(DateTimeZone.UTC).getMillis();
+    }
 }

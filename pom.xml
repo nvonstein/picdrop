@@ -16,6 +16,7 @@
         <resteasy.version>3.0.19.Final</resteasy.version>
         <mongodb.version>3.3.0</mongodb.version>
         <jackson.version>2.6.3</jackson.version>
+        <nimbus.jwt.version>4.26.1</nimbus.jwt.version>
     </properties>
     
     <dependencies>
@@ -87,14 +88,14 @@
             <version>${mongodb.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.mongojack</groupId>
-            <artifactId>mongojack</artifactId>
-            <version>2.6.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.mongodb.morphia</groupId>
             <artifactId>morphia</artifactId>
             <version>1.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>${nimbus.jwt.version}</version>
         </dependency>
     </dependencies>
 

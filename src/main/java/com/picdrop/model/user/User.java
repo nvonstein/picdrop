@@ -5,16 +5,14 @@
  */
 package com.picdrop.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.picdrop.model.Identifiable;
 import java.util.Objects;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongojack.Id;
 
 /**
  *
@@ -30,14 +28,17 @@ public class User extends Identifiable {
     protected long created;
     
     public User() {
+        this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
     public User(String _id) {
         super(_id);
+        this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
     public User(ObjectId _id) {
         super(_id);
+        this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
     public String getName() {
