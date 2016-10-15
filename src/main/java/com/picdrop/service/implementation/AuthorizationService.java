@@ -31,21 +31,24 @@ public class AuthorizationService {
     Repository<String, RegisteredUser> userRepo;
     Repository<String, LoggedIn> loginRepo;
     CookieProviderFactory cookieProvFactory;
+    Authenticator authenticator;
 
     @Inject
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
             Repository<String, LoggedIn> loginRepo,
+            @Named("basic") Authenticator authenticator,
             CookieProviderFactory cookieProvFactory) {
         this.userRepo = userRepo;
         this.loginRepo = loginRepo;
         this.cookieProvFactory = cookieProvFactory;
+        this.authenticator = authenticator;
     }
 
     @Inject
     @POST
     @Path("/login")
-    public Response loginUser(@Context HttpServletRequest request, @Named("basic") Authenticator authenticator) { // TODO make redirect target injectable
+    public Response loginUser(@Context HttpServletRequest request) { // TODO make redirect target injectable
         RegisteredUser user = authenticator.authenticate(request);
         if (user == null) {
             return Response.noContent().status(Status.UNAUTHORIZED).build();

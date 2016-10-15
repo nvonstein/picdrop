@@ -7,7 +7,10 @@ package com.picdrop.service.implementation;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import com.picdrop.annotations.Authorized;
+import com.picdrop.guice.provider.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import java.util.regex.Pattern;
@@ -30,7 +33,10 @@ public class RegisteredUserService {
 
     Repository<String, RegisteredUser> repo;
 
-    Pattern emailPattern = Pattern.compile("^[^@]+[@][^@]+[.][^@]+$"); // TODO inject
+    @Inject
+    Provider<RequestContext> contextProv;
+
+    Pattern emailPattern = Pattern.compile("^[^@]+[@][^@]+[.][^@]+$");
 
     @Inject
     public RegisteredUserService(Repository<String, RegisteredUser> repo) {
@@ -62,19 +68,30 @@ public class RegisteredUserService {
 
     @GET
     @Path("/me")
+    @Authorized
     public RegisteredUser getMe() {
-        return null;
+        return contextProv.get().getPrincipal();
     }
 
     @DELETE
     @Path("/me")
+    @Authorized
     public void deleteMe() {
+        RegisteredUser me = contextProv.get().getPrincipal();
+        if (me != null) {
+            repo.delete(me.getId());
+        }
     }
 
     @PUT
     @Path("/me")
-    public RegisteredUser updateMe() {
-        return null;
+    @Authorized
+    public RegisteredUser updateMe(RegisteredUser entity) {
+        RegisteredUser me = contextProv.get().getPrincipal();
+        if (me == null) {
+            return null; // 404
+        }
+        return repo.update(me.getId(), entity);
     }
 
 }

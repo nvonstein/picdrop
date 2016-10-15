@@ -7,8 +7,10 @@ package com.picdrop.service.filter;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.picdrop.annotations.Authorized;
+import com.picdrop.guice.provider.RequestContext;
 import com.picdrop.model.LoggedIn;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
@@ -37,6 +39,8 @@ public class AuthorizationFilter implements ContainerRequestFilter { // TODO abs
     Authenticator authenticator;
     @Context
     HttpServletRequest request;
+    @Inject
+    com.google.inject.Provider<RequestContext> context;
 
     @Override
     public void filter(ContainerRequestContext crc) throws IOException {
@@ -45,6 +49,7 @@ public class AuthorizationFilter implements ContainerRequestFilter { // TODO abs
             if (methodInvoker == null) {
                 // TODO log
                 crc.abortWith(Response.serverError().build());
+                return;
             }
 
             Method method = methodInvoker.getMethod();
@@ -54,12 +59,14 @@ public class AuthorizationFilter implements ContainerRequestFilter { // TODO abs
                 RegisteredUser user = authenticator.authenticate(request);
                 if (user == null) {
                     crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+                    return;
                 }
-                crc.setProperty("user", user);
+                context.get().setPrincipal(user);
             }
         } catch (Exception e) {
             // TODO log
             crc.abortWith(Response.serverError().build());
+            return;
         }
     }
 

@@ -7,6 +7,7 @@ package com.picdrop.service.implementation;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.picdrop.annotations.Authorized;
 import com.picdrop.model.Group;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.user.User;

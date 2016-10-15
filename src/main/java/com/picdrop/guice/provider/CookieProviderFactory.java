@@ -5,9 +5,7 @@
  */
 package com.picdrop.guice.provider;
 
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import javax.ws.rs.core.NewCookie;
 
 /**
  *
