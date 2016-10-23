@@ -16,7 +16,7 @@ import com.picdrop.model.resource.Image;
 import com.picdrop.model.resource.Resource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
-import com.picdrop.mongo.NamedQueries;
+import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;

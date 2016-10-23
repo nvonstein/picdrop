@@ -17,10 +17,11 @@ import org.mongodb.morphia.annotations.Reference;
  * @author i330120
  */
 @Entity("images")
-public class Image extends Resource {
+public class Image extends Identifiable {
     
-    @Reference
+    
     @Indexed
+    @Reference
     protected Resource parent;
 
     public Image() {
@@ -56,7 +57,9 @@ public class Image extends Resource {
         this.parent = parent;
     }
     
-    static public Image withParent(Identifiable parent) {
-        return new Image(parent.getId());
+    static public Image withParent(Resource parent) {
+        Image i = new Image();
+        i.setParent(parent);
+        return i;
     }
 }

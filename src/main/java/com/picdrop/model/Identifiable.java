@@ -14,7 +14,7 @@ import org.mongodb.morphia.annotations.Id;
  * @author i330120
  */
 public class Identifiable {
-    
+
     @Id
     protected ObjectId _id;
 
@@ -24,14 +24,13 @@ public class Identifiable {
     public Identifiable(String _id) {
         this._id = new ObjectId(_id);
     }
-    
+
     public Identifiable(ObjectId _id) {
         this._id = _id;
     }
-    
 
     public String getId() {
-        return _id.toHexString();
+        return (_id != null) ? _id.toHexString() : null;
     }
 
     public void setId(String _id) {
@@ -55,6 +54,5 @@ public class Identifiable {
         }
         return true;
     }
-    
-    
+
 }

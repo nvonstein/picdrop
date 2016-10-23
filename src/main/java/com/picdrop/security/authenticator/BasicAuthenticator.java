@@ -9,13 +9,11 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import java.util.Base64;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
 
 /**
  *
@@ -38,7 +36,7 @@ public class BasicAuthenticator implements Authenticator {
         }
 
         try {
-            byte[] decoded = Base64.decode(authHdr.replace("Basic ", ""));
+            byte[] decoded = Base64.getDecoder().decode(authHdr.replace("Basic ", ""));
             String[] userAndPass = new String(decoded, "UTF-8").split(":");
             if (userAndPass.length != 2) {
                 return null;

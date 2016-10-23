@@ -13,18 +13,24 @@ import java.util.Map;
  * @author i330120
  */
 public abstract class EnvHelper {
-    
-    public static Map<String,String> getProperties() {
-        Map<String,String> p = new HashMap<>();
-        
+
+    public static Map<String, String> getProperties() {
+        Map<String, String> p = new HashMap<>();
+
         p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
-        
+
         p.put("service.session.cookie.name", "token");
         p.put("service.session.cookie.maxage", "900");
         p.put("service.session.cookie.http", "true");
         p.put("service.session.cookie.secure", "false");
         
-        
+        p.put("service.file.store", "/tmp/picdrop/store");
+
+        p.put("service.upload.store", "/tmp/picdrop/uploads"); 
+        p.put("service.upload.maxmemory", "100000000"); // 100 MB
+        p.put("service.upload.maxfilesize", "10000000"); // 10 MB
+        p.put("service.upload.maxrequestsize", "100000000"); // 100 MB
+
         return p;
     }
 }

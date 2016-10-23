@@ -15,8 +15,6 @@ import com.picdrop.repository.Repository;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 import org.joda.time.DateTime;
@@ -34,10 +32,11 @@ public class TokenAuthenticator implements Authenticator {
     @Inject
     public TokenAuthenticator(
             Repository<String, RegisteredUser> userRepo,
-            @Named("service.session.cookie.name") String authCookieName,
-            WebTokenFactory tfactory) {
+            @Named("service.session.cookie.name") String authCookieName
+//            ,WebTokenFactory tfactory
+    ) {
         this.authCookieName = authCookieName;
-        this.tfactory = tfactory;
+//        this.tfactory = tfactory;
         this.userRepo = userRepo;
     }
 
