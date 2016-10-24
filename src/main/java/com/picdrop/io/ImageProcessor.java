@@ -5,34 +5,29 @@
  */
 package com.picdrop.io;
 
-import com.google.inject.Inject;
-import com.picdrop.model.resource.Image;
+import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.model.FileType;
+import com.picdrop.model.resource.ImageDescriptor;
 import com.picdrop.model.resource.Resource;
-import com.picdrop.repository.AdvancedRepository;
-import com.picdrop.repository.Repository;
+import com.picdrop.model.resource.ResourceDescriptor;
 import java.io.IOException;
 
 /**
  *
  * @author i330120
  */
-public class ImageProcessor implements EntityProcessor<Resource> {
-
-    Repository<String, Image> repo;
-
-    @Inject
-    public ImageProcessor(AdvancedRepository<String, Image> repo) {
-        this.repo = repo;
-    }
+public class ImageProcessor implements FileProcessor<Resource> {
 
     @Override
-    public Resource process(Resource entity) throws IOException {
-        Image i = entity.toImage();
-        
-        repo.save(i);
+    public Resource process(Resource entity, InputStreamProvider in) throws IOException {
+        ResourceDescriptor rdes = entity.getDescriptor();
+        if ((rdes != null) && (rdes.getType().isCoveredBy(FileType.IMAGE_WILDTYPE))) {
+            ImageDescriptor ides = rdes.to(ImageDescriptor.class);
 
-        // TODO generate thumbnails etc.
-        
+            // calc properties
+            entity.setDescriptor(ides);
+        }
+
         return entity;
     }
 

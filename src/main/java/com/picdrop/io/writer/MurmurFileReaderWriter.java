@@ -20,18 +20,19 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import javax.xml.bind.DatatypeConverter;
 import com.picdrop.io.FileProcessor;
+import java.io.FileInputStream;
 
 /**
  *
  * @author i330120
  */
-public class MurmurFileWriter implements FileWriter {
+public class MurmurFileReaderWriter implements FileWriter, FileReader {
 
     HashFunction hashf;
     File rootdir;
 
     @Inject
-    public MurmurFileWriter(@Named("service.file.store") String rootdir) {
+    public MurmurFileReaderWriter(@Named("service.file.store") String rootdir) {
         this.hashf = Hashing.murmur3_128();
         this.rootdir = new File(rootdir);
         if (!this.rootdir.exists() || !this.rootdir.canWrite() || !this.rootdir.isDirectory()) {
@@ -64,6 +65,16 @@ public class MurmurFileWriter implements FileWriter {
         Files.copy(in, f.toPath(), StandardCopyOption.REPLACE_EXISTING);
         
         return lpath;
+    }
+
+    @Override
+    public InputStream read(String path) throws IOException {
+        File f = new File(rootdir,path);
+        if (!f.exists() || !f.canRead()) {
+            throw new IOException(String.format("'%s%s' does not exists or is not readable", rootdir.getAbsolutePath(), path));
+        }
+        
+        return new FileInputStream(f);
     }
 
 }

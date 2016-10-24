@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.io;
+package com.picdrop.guice.provider;
 
-import com.picdrop.guice.provider.InputStreamProvider;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
  * @author i330120
  */
-public interface FileProcessor<T> {
-
-    T process(T entity, InputStreamProvider in) throws IOException;
+public interface InputStreamProvider {
+    InputStream get() throws IOException;
 }

@@ -9,7 +9,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.picdrop.guice.provider.CookieProviderFactory;
+import com.picdrop.guice.factory.CookieProviderFactory;
 import com.picdrop.guice.provider.RequestContext;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.LoggedIn;

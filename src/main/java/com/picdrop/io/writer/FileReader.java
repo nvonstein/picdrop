@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.io.writer;
 
-import com.google.inject.name.Named;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
  * @author i330120
  */
-public interface CookieProviderFactory {
-
-    @Named("cookie.session")
-    CookieProvider getSessionCookieProvider(String value);
+public interface FileReader {
+    InputStream read(String path) throws IOException;
 }

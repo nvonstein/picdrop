@@ -12,7 +12,6 @@ import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Group;
-import com.picdrop.model.resource.Image;
 import com.picdrop.model.resource.Resource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
@@ -58,9 +57,6 @@ public class RepositoryModule implements Module {
         // Resource repo
         binder.bind(new TypeLiteral<AdvancedRepository<String, Resource>>() {
         }).toInstance(new MorphiaAdvancedRepository<>(ds, Resource.class));
-        // Image repo
-        binder.bind(new TypeLiteral<AdvancedRepository<String, Image>>() {
-        }).toInstance(new MorphiaAdvancedRepository<>(ds, Image.class));
     }
 
 }

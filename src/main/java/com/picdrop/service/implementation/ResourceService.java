@@ -5,22 +5,17 @@
  */
 package com.picdrop.service.implementation;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.guice.provider.RequestContext;
-import com.picdrop.io.EntityProcessor;
-import com.picdrop.io.writer.FileWriter;
-import com.picdrop.model.ProcessingState;
-import com.picdrop.model.resource.Image;
 import com.picdrop.model.resource.Resource;
 import com.picdrop.repository.AdvancedRepository;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -34,6 +29,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import com.picdrop.io.FileProcessor;
+import com.picdrop.model.FileType;
+import com.picdrop.model.resource.ResourceDescriptor;
 
 /**
  *
@@ -45,9 +42,10 @@ import com.picdrop.io.FileProcessor;
 public class ResourceService {
 
     AdvancedRepository<String, Resource> repo;
-    AdvancedRepository<String, Image> imageRepo;
-    FileProcessor<Resource> fileHandler;
-    EntityProcessor<Resource> entityHandler;
+
+    List<FileProcessor<Resource>> preStore;
+    List<FileProcessor<Resource>> postStore;
+    FileProcessor<Resource> writeProcessor;
 
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
 
@@ -58,15 +56,19 @@ public class ResourceService {
     RequestContext context;
 
     @Inject
+    InputStreamProviderFactory instProvFac;
+
+    @Inject
     public ResourceService(
             AdvancedRepository<String, Resource> repo,
-            AdvancedRepository<String, Image> imageRepo,
-            @Named("filehandler") FileProcessor<Resource> fileHandler,
-            @Named("entityhandler") EntityProcessor<Resource> entityHandler) {
+            @Named("processors.pre") List<FileProcessor<Resource>> preStore,
+            @Named("processors.post") List<FileProcessor<Resource>> postStore,
+            @Named("processor.write") FileProcessor<Resource> writeProcessor) {
         this.repo = repo;
-        this.imageRepo = imageRepo;
-        this.fileHandler = fileHandler;
-        this.entityHandler = entityHandler;
+        
+        this.preStore = preStore;
+        this.postStore = postStore;
+        this.writeProcessor = writeProcessor;
     }
 
     @GET
@@ -84,9 +86,7 @@ public class ResourceService {
     @POST
     @Path("/")
     @Consumes("multipart/form-data")
-    public List<Resource> create(
-            //            MultipartFormDataInput formdata, 
-            @Context HttpServletRequest request) throws IOException {
+    public List<Resource> create(@Context HttpServletRequest request) throws IOException {
         List<Resource> res = new ArrayList<>();
 
         List<FileItem> files = null;
@@ -101,70 +101,33 @@ public class ResourceService {
                 Resource r = new Resource();
                 r.setName(file.getName());
                 r.setOwner(context.getPrincipal());
-                r.setState(ProcessingState.PROCESSING);
 
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
+                
+                r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
 
-                if (mimeImage.contains(mime)) {
-                    r.setType(mime);
-                }
-                if (Strings.isNullOrEmpty(r.getType())) { // No legal type
-                    throw new IllegalArgumentException("illegal content type"); // 400
+                // Pre store
+                InputStreamProvider isp = instProvFac.create(file);
+                for (FileProcessor<Resource> fp : preStore) {
+                    fp.process(r, isp);
                 }
 
-                InputStream in = file.getInputStream();
-                try {
-                    fileHandler.process(r, in);
-                    res.add(this.repo.save(r));
-                    entityHandler.process(r); // TODO exception resolving
-                } finally {
-                    in.close();
+                // Store
+                writeProcessor.process(r, isp);
+                r = this.repo.save(r);
+
+                // Post store
+                isp = instProvFac.create(r);
+                for (FileProcessor<Resource> fp : postStore) {
+                    fp.process(r, isp);
                 }
+                
+                // TODO roleback?
+
+                res.add(this.repo.update(r.getId(), r));
             }
         }
 
-//        Map<String, List<InputPart>> fieldMap = formdata.getFormDataMap();
-//
-//        if (fieldMap == null) {
-//            throw new IllegalArgumentException("no files provided"); // 400
-//        }
-//
-//        List<InputPart> rawFiles = fieldMap.get("files");
-//        if ((rawFiles == null) || rawFiles.isEmpty()) {
-//            return res; // Nothing to do
-//        }
-//
-//        for (InputPart rf : rawFiles) {
-//            InputStream is = null;
-//            OutputStream os = null;
-//
-//            Resource r = new Resource();
-//            r.setName(HttpHelper.parseFilename(rf.getHeaders())); // TODO fallback name or just generate own?
-//
-//            try {
-//                is = rf.getBody(InputStream.class, null);
-//                os = new FileOutputStream("~/" + r.getName()); // TODO think about resource handling
-//                try {
-//                    byte[] data = IOUtils.toByteArray(is);
-//                    os.write(data);
-//                } catch (IOException ex) {
-//                    // cleanup?
-//                } finally {
-//                    is.close();
-//                    os.close();
-//                }
-//            } catch (IOException ex) {
-//                // skip
-//            }
-//
-//            r = this.repo.save(r);
-//            
-//            // Determine type & dispatch
-//            // case Image - process & store
-//            this.imageRepo.save(r.toImage()); // TODO maybe use processor for factoring concrete resources? 
-//
-//            res.add(r);
-//        }
         return res;
     }
 
@@ -187,28 +150,13 @@ public class ResourceService {
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") String id) {
-        try {
-            if (this.imageRepo.deleteNamed("getChild", "images", id) != 0) {
-                this.repo.delete(id);
-                return;
-            }
+//        try {
 //            if ( ...  != 0) {
 //                super.delete(id);
 //                return;
 //            }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex); // TODO think about handling exception in toplevel services
-        }
+//        } catch (IOException ex) {
+//            throw new RuntimeException(ex); // TODO think about handling exception in toplevel services
+//        }
     }
-
-    @GET
-    @Path("/images/{id}") // TODO overrides image service
-    public Image getImage(@PathParam("id") String id) throws IOException {
-        List<Image> imgs = imageRepo.queryNamed("getChild", "images", id);
-        if (imgs.isEmpty()) {
-            return null; //404
-        }
-        return imgs.get(0);
-    }
-
 }

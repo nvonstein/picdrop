@@ -32,7 +32,6 @@ public class ApplicationConfig extends Application {
         resources.add(com.picdrop.service.filter.AuthorizationFilter.class);
         resources.add(com.picdrop.service.implementation.AuthorizationService.class);
         resources.add(com.picdrop.service.implementation.GroupService.class);
-        resources.add(com.picdrop.service.implementation.ImageService.class);
         resources.add(com.picdrop.service.implementation.RegisteredUserService.class);
         resources.add(com.picdrop.service.implementation.ResourceService.class);
         resources.add(com.picdrop.service.implementation.UserService.class);

@@ -6,13 +6,12 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.user.RegisteredUser;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.Reference;
@@ -30,11 +29,11 @@ public class Resource extends Identifiable {
     protected long created;
     protected String name;
     protected String extension;
-    protected String type; // TODO change to enum?
-    
-    protected String state;
     
     protected String fileUri;
+    
+    @Embedded
+    ResourceDescriptor descriptor;
     
     @Reference
     protected RegisteredUser owner;
@@ -108,26 +107,13 @@ public class Resource extends Identifiable {
     public void setOwner(RegisteredUser owner) {
         this.owner = owner;
     }
-    
-    public String getType() {
-        return type;
-    }
-    
-    public void setType(String type) {
-        this.type = type;
-    }
 
-    public String getState() {
-        return state;
+    public ResourceDescriptor getDescriptor() {
+        return descriptor;
     }
 
     @JsonIgnore
-    public void setState(String state) {
-        this.state = state;
-    }
-    
-    @JsonIgnore
-    public Image toImage() {
-        return Image.withParent(this);
+    public void setDescriptor(ResourceDescriptor descriptor) {
+        this.descriptor = descriptor;
     }
 }
