@@ -46,7 +46,7 @@ public class ResourceDescriptor {
     public static ResourceDescriptor get(FileType ft) {
         if (ft != null) {
             if (FileType.IMAGE_WILDTYPE.isCovering(ft)) {
-                return new ImageDescriptor();
+                return new ImageDescriptor(ft);
             }
         }
         return new ResourceDescriptor(FileType.UNKNOWN);

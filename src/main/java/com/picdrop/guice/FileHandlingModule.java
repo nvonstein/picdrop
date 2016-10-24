@@ -19,6 +19,7 @@ import com.picdrop.guice.provider.ResourceInputStreamProvider;
 import com.picdrop.guice.provider.UploadHandlerProvider;
 import com.picdrop.io.FileProcessor;
 import com.picdrop.io.ImageProcessor;
+import com.picdrop.io.Processor;
 import com.picdrop.io.ResourceWriteProcessor;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
@@ -53,10 +54,8 @@ public class FileHandlingModule implements Module {
         );
 
         // File processors
-        binder.bind(new TypeLiteral<List<FileProcessor<Resource>>>() {
-        }).annotatedWith(Names.named("processors.pre")).toProvider(ProcessorListProviders.PreStoreProcessorsProvider.class);
-        binder.bind(new TypeLiteral<List<FileProcessor<Resource>>>() {
-        }).annotatedWith(Names.named("processors.post")).toProvider(ProcessorListProviders.PostStoreProcessorsProvider.class);
+        binder.bind(new TypeLiteral<List<Processor<Resource>>>() {
+        }).annotatedWith(Names.named("processors")).toProvider(ProcessorListProviders.class);
 
         binder.bind(ImageProcessor.class);
     }

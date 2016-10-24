@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.picdrop.io.FileProcessor;
 import com.picdrop.io.ImageProcessor;
+import com.picdrop.io.Processor;
 import com.picdrop.model.resource.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,42 +19,21 @@ import java.util.List;
  *
  * @author i330120
  */
-public abstract class ProcessorListProviders {
+public class ProcessorListProviders implements Provider<List<Processor<Resource>>> {
 
-    public static class PreStoreProcessorsProvider implements Provider<List<FileProcessor<Resource>>> {
+    List<Processor<Resource>> pro = new ArrayList<>();
 
-        List<FileProcessor<Resource>> preStore = new ArrayList<>();
+    @Inject
+    public ProcessorListProviders(
+            ImageProcessor imgp) {
+        // Adding handler
+        pro.add(imgp);
 
-        @Inject
-        public PreStoreProcessorsProvider() {
-            // Adding handler
-            preStore = Collections.unmodifiableList(preStore);
-        }
-
-        @Override
-        public List<FileProcessor<Resource>> get() {
-            return preStore;
-        }
-
+        pro = Collections.unmodifiableList(pro);
     }
 
-    public static class PostStoreProcessorsProvider implements Provider<List<FileProcessor<Resource>>> {
-
-        List<FileProcessor<Resource>> postStore = new ArrayList<>();
-
-        @Inject
-        public PostStoreProcessorsProvider(
-                ImageProcessor imgp) {
-            // Adding handler
-            postStore.add(imgp);
-            
-            postStore = Collections.unmodifiableList(postStore);
-        }
-
-        @Override
-        public List<FileProcessor<Resource>> get() {
-            return postStore;
-        }
-
-    }
+    @Override
+    public List<Processor<Resource>> get() {
+        return pro;
+    } 
 }

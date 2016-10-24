@@ -12,7 +12,7 @@ import com.google.inject.Module;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import com.picdrop.guice.provider.CookieProvider;
-import com.picdrop.guice.provider.RequestContext;
+import com.picdrop.model.RequestContext;
 import com.picdrop.guice.provider.SessionCookieProvider;
 import com.picdrop.helper.EnvHelper;
 import com.picdrop.security.authenticator.Authenticator;

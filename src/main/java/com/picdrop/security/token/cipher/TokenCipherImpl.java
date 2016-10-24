@@ -7,7 +7,6 @@ package com.picdrop.security.token.cipher;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;

@@ -6,6 +6,7 @@
 package com.picdrop.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  *
@@ -25,11 +26,12 @@ public enum FileType {
         this.name = name;
     }
 
+    @JsonValue
     @Override
     public String toString() {
         return name;
     }
-
+    
     @JsonCreator
     public static FileType forName(String name) {
         for (FileType ft : FileType.values()) {
@@ -39,6 +41,8 @@ public enum FileType {
         }
         return FileType.UNKNOWN;
     }
+    
+    
 
     private static boolean isWildType(String type) {
         return "*".equals(type);

@@ -7,12 +7,9 @@ package com.picdrop.service.implementation;
 
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.picdrop.guice.factory.CookieProviderFactory;
-import com.picdrop.guice.provider.RequestContext;
-import com.picdrop.model.Identifiable;
-import com.picdrop.model.LoggedIn;
+import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authenticator.Authenticator;
@@ -36,7 +33,6 @@ import org.joda.time.DateTime;
 public class AuthorizationService {
 
     Repository<String, RegisteredUser> userRepo;
-    Repository<String, LoggedIn> loginRepo;
 
     CookieProviderFactory cookieProvFactory;
     WebTokenFactory tokenFactory;
@@ -52,14 +48,12 @@ public class AuthorizationService {
     @Inject
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
-            Repository<String, LoggedIn> loginRepo,
             @Named("basic") Authenticator authenticator,
             CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
             @Named("service.session.jwt.exp") int jwtExpiry,
             @Named("service.session.jwt.iss") String jwtIssuer) {
         this.userRepo = userRepo;
-        this.loginRepo = loginRepo;
         this.cookieProvFactory = cookieProvFactory;
         this.tokenFactory = tokenFactory;
         this.authenticator = authenticator;

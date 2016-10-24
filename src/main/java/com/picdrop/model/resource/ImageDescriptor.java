@@ -6,7 +6,9 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.picdrop.model.FileType;
+import java.util.HashMap;
 import java.util.Map;
 import org.mongodb.morphia.annotations.Embedded;
 
@@ -14,15 +16,20 @@ import org.mongodb.morphia.annotations.Embedded;
  *
  * @author i330120
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ImageDescriptor extends ResourceDescriptor {
 
     @Embedded("thumbnailUris")
-    Map<String, String> thumbnailUris;
+    Map<String, String> thumbnailUris = new HashMap<>();
     String orientation; // TODO enum?
 
-    public ImageDescriptor() {
+    ImageDescriptor() {
         super(FileType.IMAGE_WILDTYPE);
-    }  
+    }
+
+    ImageDescriptor(FileType ft) {
+        super(ft);
+    }
 
     public Map<String, String> getThumbnailUris() {
         return thumbnailUris;
@@ -39,9 +46,14 @@ public class ImageDescriptor extends ResourceDescriptor {
     public void setOrientation(String orientation) {
         this.orientation = orientation;
     }
-    
+
     @JsonIgnore
     public String getThumbnailUri(String key) {
         return this.thumbnailUris.get(key);
+    }
+
+    @JsonIgnore
+    public void addThumbnailUri(String key, String value) {
+        this.thumbnailUris.put(key, value);
     }
 }

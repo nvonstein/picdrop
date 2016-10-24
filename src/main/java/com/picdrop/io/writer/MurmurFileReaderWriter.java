@@ -54,7 +54,7 @@ public class MurmurFileReaderWriter implements FileWriter, FileReader {
                     .append(rawpath.substring(0, 8))
                     .append(File.separatorChar)
                     .append(rawpath.substring(8));
-            lpath = sb.toString();
+            lpath = sb.toString().toLowerCase();
         }
         
         File f = new File(rootdir, lpath);

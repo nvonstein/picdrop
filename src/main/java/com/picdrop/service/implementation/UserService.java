@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.picdrop.annotations.Authorized;
-import com.picdrop.guice.provider.RequestContext;
+import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;

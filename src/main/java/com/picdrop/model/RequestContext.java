@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.model;
 
 import com.picdrop.model.user.RegisteredUser;
 import org.jboss.resteasy.plugins.guice.RequestScoped;

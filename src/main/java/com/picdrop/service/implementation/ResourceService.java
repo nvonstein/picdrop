@@ -5,11 +5,12 @@
  */
 package com.picdrop.service.implementation;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
-import com.picdrop.guice.provider.RequestContext;
+import com.picdrop.model.RequestContext;
 import com.picdrop.model.resource.Resource;
 import com.picdrop.repository.AdvancedRepository;
 import java.io.IOException;
@@ -29,8 +30,10 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import com.picdrop.io.FileProcessor;
+import com.picdrop.io.Processor;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.ResourceDescriptor;
+import javax.ws.rs.PUT;
 
 /**
  *
@@ -43,9 +46,8 @@ public class ResourceService {
 
     AdvancedRepository<String, Resource> repo;
 
-    List<FileProcessor<Resource>> preStore;
-    List<FileProcessor<Resource>> postStore;
     FileProcessor<Resource> writeProcessor;
+    List<Processor<Resource>> processors;
 
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
 
@@ -61,14 +63,60 @@ public class ResourceService {
     @Inject
     public ResourceService(
             AdvancedRepository<String, Resource> repo,
-            @Named("processors.pre") List<FileProcessor<Resource>> preStore,
-            @Named("processors.post") List<FileProcessor<Resource>> postStore,
-            @Named("processor.write") FileProcessor<Resource> writeProcessor) {
+            @Named("processor.write") FileProcessor<Resource> writeProcessor,
+            @Named("processors") List<Processor<Resource>> processors) {
         this.repo = repo;
-        
-        this.preStore = preStore;
-        this.postStore = postStore;
+
         this.writeProcessor = writeProcessor;
+        this.processors = processors;
+    }
+
+    protected List<FileItem> parseRequest(HttpServletRequest request) {
+        List<FileItem> files = null;
+        try {
+            files = upload.parseRequest(request);
+        } catch (FileUploadException ex) {
+            throw new IllegalArgumentException("bad upload request: " + ex.getMessage(), ex); // 400
+        }
+        return files;
+    }
+
+    protected Resource processCreateUpdate(Resource e, FileItem file) throws IOException {
+        Resource loce = e;
+        // Pre store
+        InputStreamProvider isp = instProvFac.create(file);
+        for (Processor<Resource> p : processors) {
+            loce = p.onPreStore(loce, isp);
+        }
+
+        // Store
+        writeProcessor.process(loce, isp);
+        if (Strings.isNullOrEmpty(loce.getId())) {
+            loce = this.repo.save(loce);
+        } else {
+            loce = this.repo.update(loce.getId(), loce);
+        }
+
+        // Post store
+        isp = instProvFac.create(loce);
+        for (Processor<Resource> p : processors) {
+            loce = p.onPostStore(loce, isp);
+        }
+
+        return this.repo.update(loce.getId(), loce);
+    }
+
+    protected void processDelete(Resource e) throws IOException {
+        for (Processor<Resource> p : processors) {
+            p.onPreDelete(e);
+        }
+        
+        // TODO remove file?
+        this.repo.delete(e.getId());
+        
+        for (Processor<Resource> p : processors) {
+            p.onPostDelete(e);
+        }
     }
 
     @GET
@@ -89,12 +137,7 @@ public class ResourceService {
     public List<Resource> create(@Context HttpServletRequest request) throws IOException {
         List<Resource> res = new ArrayList<>();
 
-        List<FileItem> files = null;
-        try {
-            files = upload.parseRequest(request);
-        } catch (FileUploadException ex) {
-            throw new IllegalArgumentException("bad upload request: " + ex.getMessage(), ex); // 400
-        }
+        List<FileItem> files = parseRequest(request);
 
         for (FileItem file : files) {
             if (!file.isFormField()) {
@@ -103,60 +146,49 @@ public class ResourceService {
                 r.setOwner(context.getPrincipal());
 
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
-                
+
                 r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
 
-                // Pre store
-                InputStreamProvider isp = instProvFac.create(file);
-                for (FileProcessor<Resource> fp : preStore) {
-                    fp.process(r, isp);
-                }
-
-                // Store
-                writeProcessor.process(r, isp);
-                r = this.repo.save(r);
-
-                // Post store
-                isp = instProvFac.create(r);
-                for (FileProcessor<Resource> fp : postStore) {
-                    fp.process(r, isp);
-                }
-                
-                // TODO roleback?
-
-                res.add(this.repo.update(r.getId(), r));
+                res.add(processCreateUpdate(r, file));
             }
         }
 
         return res;
     }
 
-    public Resource update(String id, Resource entity) {
-//        try {
-//            if (this.imageRepo.deleteNamed("updateChild", "images", id) != 0) {
-//                super.delete(id);
-//                return;
-//            }
-////            if ( ...  != 0) {
-////                super.delete(id);
-////                return;
-////            }
-//        } catch (IOException ex) {
-//            throw new RuntimeException(ex); // TODO think about handling exception in toplevel services
-//        }
-        return null;
+    @PUT
+    @Path("/{id}")
+    @Consumes("multipart/form-data")
+    public Resource update(@PathParam("id") String id, @Context HttpServletRequest request) throws IOException {
+        Resource r = getResource(id);
+        if (r == null) {
+            return null; // 404
+        }
+
+        List<FileItem> files = parseRequest(request);
+
+        for (FileItem file : files) {
+            if (!file.isFormField()) {
+//                r.setName(file.getName());
+//                r.setOwner(context.getPrincipal());
+
+                String mime = file.getContentType(); // TODO do content guess and dont trust client
+
+                r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
+
+                r = processCreateUpdate(r, file);
+            }
+        }
+
+        return r;
     }
 
     @DELETE
     @Path("/{id}")
-    public void delete(@PathParam("id") String id) {
-//        try {
-//            if ( ...  != 0) {
-//                super.delete(id);
-//                return;
-//            }
-//        } catch (IOException ex) {
-//            throw new RuntimeException(ex); // TODO think about handling exception in toplevel services
-//        }
+    public void delete(@PathParam("id") String id) throws IOException {
+        Resource r = getResource(id);
+        if (r != null) {
+            processDelete(r);
+        }
     }
 }

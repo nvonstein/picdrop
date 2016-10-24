@@ -16,19 +16,23 @@ import java.io.IOException;
  *
  * @author i330120
  */
-public class ImageProcessor implements FileProcessor<Resource> {
+public class ImageProcessor extends AbstractProcessor<Resource>{
 
     @Override
-    public Resource process(Resource entity, InputStreamProvider in) throws IOException {
+    public Resource onPostStore(Resource entity, InputStreamProvider in) throws IOException {
         ResourceDescriptor rdes = entity.getDescriptor();
         if ((rdes != null) && (rdes.getType().isCoveredBy(FileType.IMAGE_WILDTYPE))) {
             ImageDescriptor ides = rdes.to(ImageDescriptor.class);
 
             // calc properties
+            ides.addThumbnailUri("small", "dummy");
+            ides.addThumbnailUri("medium", "dummy2");
+            
             entity.setDescriptor(ides);
         }
-
-        return entity;
+        return super.onPostStore(entity, in);
     }
+
+   
 
 }

@@ -6,6 +6,7 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.user.RegisteredUser;
 import org.bson.types.ObjectId;
@@ -38,9 +39,6 @@ public class Resource extends Identifiable {
     @Reference
     protected RegisteredUser owner;
     
-    @NotSaved
-    protected byte[] file;
-    
     public Resource() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
@@ -55,18 +53,22 @@ public class Resource extends Identifiable {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
     
+    @JsonProperty
     public long getCreated() {
         return created;
     }
     
+    @JsonIgnore
     public void setCreated(long created) {
         this.created = created;
     }
     
+    @JsonProperty
     public String getName() {
         return name;
     }
     
+    @JsonIgnore
     public void setName(String name) {
         this.name = name;
         String[] tmp = name.split("\\.");
@@ -75,6 +77,7 @@ public class Resource extends Identifiable {
         }
     }
     
+    @JsonProperty
     public String getFileUri() {
         return fileUri;
     }
@@ -84,30 +87,27 @@ public class Resource extends Identifiable {
         this.fileUri = fileUri;
     }
     
+    @JsonProperty
     public String getExtension() {
         return extension;
     }
     
+    @JsonProperty
     public void setExtension(String extension) {
         this.extension = extension;
     }
     
-    public byte[] getFile() {
-        return file;
-    }
-    
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-    
+    @JsonProperty
     public RegisteredUser getOwner() {
         return owner;
     }
     
+    @JsonIgnore
     public void setOwner(RegisteredUser owner) {
         this.owner = owner;
     }
 
+    @JsonProperty
     public ResourceDescriptor getDescriptor() {
         return descriptor;
     }
