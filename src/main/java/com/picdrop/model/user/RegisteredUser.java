@@ -28,20 +28,25 @@ public class RegisteredUser extends User {
     protected long lastlogin;
 
     public RegisteredUser() {
+        this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
     public RegisteredUser(String _id) {
         super(_id);
+        this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
     public RegisteredUser(ObjectId _id) {
         super(_id);
+        this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
+    @JsonProperty
     public String getLastname() {
         return lastname;
     }
 
+    @JsonProperty
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
@@ -56,27 +61,32 @@ public class RegisteredUser extends User {
         return phash;
     }
 
-    @JsonProperty("phash")
+    @JsonProperty()
     public void setPhash(String phash) {
         this.phash = phash;
     }
 
+    @JsonProperty
     public String getEmail() {
         return email;
     }
 
+    @JsonProperty
     public void setEmail(String email) {
         this.email = email;
     }
 
+    @JsonProperty
     public long getLastlogin() {
         return lastlogin;
     }
 
+    @JsonIgnore
     public void setLastlogin(long lastlogin) {
         this.lastlogin = lastlogin;
     }
 
+    @JsonIgnore
     public void setLastLogin() {
         this.lastlogin = DateTime.now(DateTimeZone.UTC).getMillis();
     }

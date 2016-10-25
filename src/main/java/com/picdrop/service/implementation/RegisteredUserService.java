@@ -26,7 +26,7 @@ import javax.ws.rs.Produces;
  *
  * @author i330120
  */
-@Path("users")
+@Path("/app/users")
 @Consumes("application/json")
 @Produces("application/json")
 public class RegisteredUserService {

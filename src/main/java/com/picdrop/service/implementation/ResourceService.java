@@ -7,7 +7,9 @@ package com.picdrop.service.implementation;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import com.picdrop.annotations.Authorized;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.model.RequestContext;
@@ -33,6 +35,7 @@ import com.picdrop.io.FileProcessor;
 import com.picdrop.io.Processor;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.ResourceDescriptor;
+import com.picdrop.repository.Repository;
 import javax.ws.rs.PUT;
 
 /**
@@ -42,9 +45,10 @@ import javax.ws.rs.PUT;
 @Path("/app/resources")
 @Consumes("application/json")
 @Produces("application/json")
+@Authorized
 public class ResourceService {
 
-    AdvancedRepository<String, Resource> repo;
+    Repository<String, Resource> repo;
 
     FileProcessor<Resource> writeProcessor;
     List<Processor<Resource>> processors;
@@ -55,14 +59,14 @@ public class ResourceService {
     ServletFileUpload upload;
 
     @Inject
-    RequestContext context;
+    Provider<RequestContext> contextProv;
 
     @Inject
     InputStreamProviderFactory instProvFac;
 
     @Inject
     public ResourceService(
-            AdvancedRepository<String, Resource> repo,
+            Repository<String, Resource> repo,
             @Named("processor.write") FileProcessor<Resource> writeProcessor,
             @Named("processors") List<Processor<Resource>> processors) {
         this.repo = repo;
@@ -103,7 +107,7 @@ public class ResourceService {
             loce = p.onPostStore(loce, isp);
         }
 
-        return this.repo.update(loce.getId(), loce);
+        return loce;
     }
 
     protected void processDelete(Resource e) throws IOException {
@@ -143,7 +147,7 @@ public class ResourceService {
             if (!file.isFormField()) {
                 Resource r = new Resource();
                 r.setName(file.getName());
-                r.setOwner(context.getPrincipal());
+                r.setOwner(contextProv.get().getPrincipal());
 
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
@@ -169,9 +173,6 @@ public class ResourceService {
 
         for (FileItem file : files) {
             if (!file.isFormField()) {
-//                r.setName(file.getName());
-//                r.setOwner(context.getPrincipal());
-
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
                 r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
