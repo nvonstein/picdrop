@@ -48,6 +48,10 @@ public class User extends Identifiable {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public String getFullName() {
+        return getName();
+    }
 
     public long getCreated() {
         return created;

@@ -13,7 +13,7 @@ import com.picdrop.annotations.Authorized;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.model.RequestContext;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import com.picdrop.repository.AdvancedRepository;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,10 +48,10 @@ import javax.ws.rs.PUT;
 @Authorized
 public class ResourceService {
 
-    Repository<String, Resource> repo;
+    Repository<String, FileResource> repo;
 
-    FileProcessor<Resource> writeProcessor;
-    List<Processor<Resource>> processors;
+    FileProcessor<FileResource> writeProcessor;
+    List<Processor<FileResource>> processors;
 
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
 
@@ -66,9 +66,9 @@ public class ResourceService {
 
     @Inject
     public ResourceService(
-            Repository<String, Resource> repo,
-            @Named("processor.write") FileProcessor<Resource> writeProcessor,
-            @Named("processors") List<Processor<Resource>> processors) {
+            Repository<String, FileResource> repo,
+            @Named("processor.write") FileProcessor<FileResource> writeProcessor,
+            @Named("processors") List<Processor<FileResource>> processors) {
         this.repo = repo;
 
         this.writeProcessor = writeProcessor;
@@ -85,11 +85,11 @@ public class ResourceService {
         return files;
     }
 
-    protected Resource processCreateUpdate(Resource e, FileItem file) throws IOException {
-        Resource loce = e;
+    protected FileResource processCreateUpdate(FileResource e, FileItem file) throws IOException {
+        FileResource loce = e;
         // Pre store
         InputStreamProvider isp = instProvFac.create(file);
-        for (Processor<Resource> p : processors) {
+        for (Processor<FileResource> p : processors) {
             loce = p.onPreStore(loce, isp);
         }
 
@@ -103,49 +103,49 @@ public class ResourceService {
 
         // Post store
         isp = instProvFac.create(loce);
-        for (Processor<Resource> p : processors) {
+        for (Processor<FileResource> p : processors) {
             loce = p.onPostStore(loce, isp);
         }
 
         return loce;
     }
 
-    protected void processDelete(Resource e) throws IOException {
-        for (Processor<Resource> p : processors) {
+    protected void processDelete(FileResource e) throws IOException {
+        for (Processor<FileResource> p : processors) {
             p.onPreDelete(e);
         }
         
         // TODO remove file?
         this.repo.delete(e.getId());
         
-        for (Processor<Resource> p : processors) {
+        for (Processor<FileResource> p : processors) {
             p.onPostDelete(e);
         }
     }
 
     @GET
     @Path("/{id}")
-    public Resource getResource(@PathParam("id") String id) {
+    public FileResource getResource(@PathParam("id") String id) {
         return this.repo.get(id);
     }
 
     @GET
     @Path("/")
-    public List<Resource> listResource() {
+    public List<FileResource> listResource() {
         return this.repo.list();
     }
 
     @POST
     @Path("/")
     @Consumes("multipart/form-data")
-    public List<Resource> create(@Context HttpServletRequest request) throws IOException {
-        List<Resource> res = new ArrayList<>();
+    public List<FileResource> create(@Context HttpServletRequest request) throws IOException {
+        List<FileResource> res = new ArrayList<>();
 
         List<FileItem> files = parseRequest(request);
 
         for (FileItem file : files) {
             if (!file.isFormField()) {
-                Resource r = new Resource();
+                FileResource r = new FileResource();
                 r.setName(file.getName());
                 r.setOwner(contextProv.get().getPrincipal());
 
@@ -163,8 +163,8 @@ public class ResourceService {
     @PUT
     @Path("/{id}")
     @Consumes("multipart/form-data")
-    public Resource update(@PathParam("id") String id, @Context HttpServletRequest request) throws IOException {
-        Resource r = getResource(id);
+    public FileResource update(@PathParam("id") String id, @Context HttpServletRequest request) throws IOException {
+        FileResource r = getResource(id);
         if (r == null) {
             return null; // 404
         }
@@ -187,7 +187,7 @@ public class ResourceService {
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") String id) throws IOException {
-        Resource r = getResource(id);
+        FileResource r = getResource(id);
         if (r != null) {
             processDelete(r);
         }

@@ -10,7 +10,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

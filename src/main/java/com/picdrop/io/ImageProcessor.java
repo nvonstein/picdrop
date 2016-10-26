@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.ImageDescriptor;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.ResourceDescriptor;
 import com.picdrop.repository.Repository;
 import java.io.IOException;
@@ -18,15 +18,15 @@ import java.io.IOException;
  *
  * @author i330120
  */
-public class ImageProcessor extends AbstractUpdateProcessor<Resource> {
+public class ImageProcessor extends AbstractUpdateProcessor<FileResource> {
 
     @Inject
-    public ImageProcessor(Repository<String, Resource> repo) {
+    public ImageProcessor(Repository<String, FileResource> repo) {
         super(repo);
     }
 
     @Override
-    public Resource onPostStore(Resource entity, InputStreamProvider in) throws IOException {
+    public FileResource onPostStore(FileResource entity, InputStreamProvider in) throws IOException {
         ResourceDescriptor rdes = entity.getDescriptor();
         if ((rdes != null) && (rdes.getType().isCoveredBy(FileType.IMAGE_WILDTYPE))) {
             ImageDescriptor ides = rdes.to(ImageDescriptor.class);

@@ -8,7 +8,7 @@ package com.picdrop.guice.provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.picdrop.io.writer.FileReader;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -18,13 +18,13 @@ import java.io.InputStream;
  */
 public class ResourceInputStreamProvider implements InputStreamProvider {
 
-    Resource res;
+    FileResource res;
     FileReader reader;
 
     @AssistedInject
     public ResourceInputStreamProvider(
             FileReader reader,
-            @Assisted Resource res) {
+            @Assisted FileResource res) {
         this.reader = reader;
         this.res = res;
     }

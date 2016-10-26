@@ -24,7 +24,7 @@ import com.picdrop.io.ResourceWriteProcessor;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
 import com.picdrop.io.writer.MurmurFileReaderWriter;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import java.util.List;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -44,7 +44,7 @@ public class FileHandlingModule implements Module {
         // File writing
         binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
-        binder.bind(new TypeLiteral<FileProcessor<Resource>>() {
+        binder.bind(new TypeLiteral<FileProcessor<FileResource>>() {
         }).annotatedWith(Names.named("processor.write")).to(ResourceWriteProcessor.class);
 
         binder.install(new FactoryModuleBuilder()
@@ -54,7 +54,7 @@ public class FileHandlingModule implements Module {
         );
 
         // File processors
-        binder.bind(new TypeLiteral<List<Processor<Resource>>>() {
+        binder.bind(new TypeLiteral<List<Processor<FileResource>>>() {
         }).annotatedWith(Names.named("processors")).toProvider(ProcessorListProviders.class);
 
         binder.bind(ImageProcessor.class);

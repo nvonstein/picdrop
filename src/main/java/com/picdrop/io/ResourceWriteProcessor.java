@@ -8,20 +8,20 @@ package com.picdrop.io;
 import com.google.inject.Inject;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.io.writer.FileWriter;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import java.io.IOException;
 
 /**
  *
  * @author i330120
  */
-public class ResourceWriteProcessor implements FileProcessor<Resource> {
+public class ResourceWriteProcessor implements FileProcessor<FileResource> {
 
     @Inject
     protected FileWriter writer;
 
     @Override
-    public Resource process(Resource entity, InputStreamProvider in) throws IOException {
+    public FileResource process(FileResource entity, InputStreamProvider in) throws IOException {
         String fileUri = this.writer.write(entity.getFileUri(), in.get());
         entity.setFileUri(fileUri);
 

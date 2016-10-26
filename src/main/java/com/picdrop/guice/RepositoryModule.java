@@ -12,13 +12,11 @@ import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Group;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.mongo.NamedQueries;
-import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.Repository;
-import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.MorphiaRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
 import com.picdrop.repository.mongo.implementation.TypedGroupRepository;
@@ -56,8 +54,8 @@ public class RepositoryModule implements Module {
         binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
         }).toInstance(new MorphiaRepository<>(ds, RegisteredUser.class));
         // Resource repo
-        binder.bind(new TypeLiteral<Repository<String, Resource>>() {
-        }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, Resource.class));
+        binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
+        }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, FileResource.class));
     }
 
 }

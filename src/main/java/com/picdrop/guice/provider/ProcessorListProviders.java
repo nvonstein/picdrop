@@ -10,7 +10,7 @@ import com.google.inject.Provider;
 import com.picdrop.io.FileProcessor;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
-import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.FileResource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,9 +19,9 @@ import java.util.List;
  *
  * @author i330120
  */
-public class ProcessorListProviders implements Provider<List<Processor<Resource>>> {
+public class ProcessorListProviders implements Provider<List<Processor<FileResource>>> {
 
-    List<Processor<Resource>> pro = new ArrayList<>();
+    List<Processor<FileResource>> pro = new ArrayList<>();
 
     @Inject
     public ProcessorListProviders(
@@ -33,7 +33,7 @@ public class ProcessorListProviders implements Provider<List<Processor<Resource>
     }
 
     @Override
-    public List<Processor<Resource>> get() {
+    public List<Processor<FileResource>> get() {
         return pro;
     } 
 }
