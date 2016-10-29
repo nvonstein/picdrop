@@ -15,13 +15,13 @@ import com.picdrop.guice.provider.CookieProvider;
 import com.picdrop.model.RequestContext;
 import com.picdrop.guice.provider.SessionCookieProvider;
 import com.picdrop.helper.EnvHelper;
-import com.picdrop.security.authenticator.Authenticator;
-import com.picdrop.security.authenticator.BasicAuthenticator;
-import com.picdrop.security.authenticator.TokenAuthenticator;
-import com.picdrop.service.filter.AuthorizationFilter;
+import com.picdrop.security.authentication.authenticator.Authenticator;
+import com.picdrop.security.authentication.authenticator.BasicAuthenticator;
+import com.picdrop.security.authentication.authenticator.TokenAuthenticator;
+import com.picdrop.service.filter.AuthenticationFilter;
 import com.picdrop.service.implementation.GroupService;
 import com.picdrop.service.implementation.RegisteredUserService;
-import com.picdrop.service.implementation.ResourceService;
+import com.picdrop.service.implementation.FileResourceService;
 import com.picdrop.service.implementation.UserService;
 import javax.inject.Singleton;
 import org.jboss.resteasy.plugins.guice.RequestScoped;
@@ -37,7 +37,7 @@ public class ApplicationModule implements Module {
         // Services
         binder.bind(UserService.class).in(Singleton.class);
         binder.bind(GroupService.class).in(Singleton.class);
-        binder.bind(ResourceService.class).in(Singleton.class);
+        binder.bind(FileResourceService.class).in(Singleton.class);
         binder.bind(RegisteredUserService.class).in(Singleton.class);
 
         // Session management
@@ -47,7 +47,7 @@ public class ApplicationModule implements Module {
         );
 
         // Authorization
-        binder.bind(AuthorizationFilter.class);
+        binder.bind(AuthenticationFilter.class);
 
         binder.bind(RequestContext.class).in(RequestScoped.class);
 

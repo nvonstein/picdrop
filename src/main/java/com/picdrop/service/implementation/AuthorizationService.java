@@ -11,8 +11,9 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.picdrop.guice.factory.CookieProviderFactory;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
-import com.picdrop.security.authenticator.Authenticator;
+import com.picdrop.security.authentication.authenticator.Authenticator;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
 import javax.inject.Inject;
@@ -96,8 +97,8 @@ public class AuthorizationService {
 
     @POST
     @Path("/logout")
-    public Response logoutUser() {
-        RegisteredUser user = contextProv.get().getPrincipal();
+    public Response logoutUser() { // TODO rework login/logout
+        User user = contextProv.get().getPrincipal();
         if (user == null) {
             return Response.ok().build(); // TODO ???
         }

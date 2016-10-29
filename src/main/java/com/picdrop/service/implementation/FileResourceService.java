@@ -9,12 +9,10 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.picdrop.annotations.Authorized;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.resource.FileResource;
-import com.picdrop.repository.AdvancedRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,8 +33,11 @@ import com.picdrop.io.FileProcessor;
 import com.picdrop.io.Processor;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.ResourceDescriptor;
+import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import javax.ws.rs.PUT;
+import com.picdrop.security.authentication.Authenticated;
+import com.picdrop.security.authentication.RoleType;
 
 /**
  *
@@ -45,8 +46,8 @@ import javax.ws.rs.PUT;
 @Path("/app/resources")
 @Consumes("application/json")
 @Produces("application/json")
-@Authorized
-public class ResourceService {
+@Authenticated(include = {RoleType.REGISTERED})
+public class FileResourceService {
 
     Repository<String, FileResource> repo;
 
@@ -65,7 +66,7 @@ public class ResourceService {
     InputStreamProviderFactory instProvFac;
 
     @Inject
-    public ResourceService(
+    public FileResourceService(
             Repository<String, FileResource> repo,
             @Named("processor.write") FileProcessor<FileResource> writeProcessor,
             @Named("processors") List<Processor<FileResource>> processors) {
@@ -147,7 +148,7 @@ public class ResourceService {
             if (!file.isFormField()) {
                 FileResource r = new FileResource();
                 r.setName(file.getName());
-                r.setOwner(contextProv.get().getPrincipal());
+                r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
 
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 

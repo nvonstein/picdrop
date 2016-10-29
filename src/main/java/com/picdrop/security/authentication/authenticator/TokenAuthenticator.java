@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.security.authenticator;
+package com.picdrop.security.authentication.authenticator;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;

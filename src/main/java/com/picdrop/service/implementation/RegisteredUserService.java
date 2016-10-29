@@ -9,9 +9,9 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.picdrop.annotations.Authorized;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
@@ -21,6 +21,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import com.picdrop.security.authentication.Authenticated;
+import com.picdrop.security.authentication.RoleType;
 
 /**
  *
@@ -68,16 +70,16 @@ public class RegisteredUserService {
 
     @GET
     @Path("/me")
-    @Authorized
-    public RegisteredUser getMe() {
+    @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
+    public User getMe() {
         return contextProv.get().getPrincipal();
     }
 
     @DELETE
     @Path("/me")
-    @Authorized
+    @Authenticated(include = {RoleType.REGISTERED})
     public void deleteMe() {
-        RegisteredUser me = contextProv.get().getPrincipal();
+        User me = contextProv.get().getPrincipal();
         if (me != null) {
             repo.delete(me.getId());
         }
@@ -85,9 +87,9 @@ public class RegisteredUserService {
 
     @PUT
     @Path("/me")
-    @Authorized
+    @Authenticated(include = {RoleType.REGISTERED})
     public RegisteredUser updateMe(RegisteredUser entity) {
-        RegisteredUser me = contextProv.get().getPrincipal();
+        User me = contextProv.get().getPrincipal();
         if (me == null) {
             return null; // 404
         }

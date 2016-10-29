@@ -9,8 +9,6 @@ import com.picdrop.model.user.NameOnlyUserReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.picdrop.model.Identifiable;
-import com.picdrop.model.user.User;
-import com.picdrop.model.user.UserReference;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -18,7 +16,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Reference;
 
 /**
@@ -48,6 +45,7 @@ public class Collection extends Resource {
         return elements;
     }
 
+    @JsonProperty
     public void setResources(List<CollectionElement> resources) {
         this.elements = resources;
     }
@@ -63,7 +61,7 @@ public class Collection extends Resource {
     }
 
     @Entity("collectionelements")
-    public class CollectionElement extends Identifiable {
+    public static class CollectionElement extends Identifiable {
 
         @Reference
         FileResource resource;
@@ -128,7 +126,7 @@ public class Collection extends Resource {
         
     }
 
-    public class Rating extends NameOnlyUserReference {
+    public static class Rating extends NameOnlyUserReference {
 
         int rate = 0;
 
@@ -144,7 +142,7 @@ public class Collection extends Resource {
         }
     }
 
-    public class Comment extends NameOnlyUserReference {
+    public static class Comment extends NameOnlyUserReference {
 
         String comment = "";
         long created;

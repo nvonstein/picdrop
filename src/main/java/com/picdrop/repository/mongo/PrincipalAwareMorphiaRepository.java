@@ -12,6 +12,7 @@ import com.mongodb.DBObject;
 import com.mongodb.DBRef;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.User;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> {
 
     protected DBObject addPrincipalClause(DBObject dbObj) {
         RequestContext context = contextProv.get();
-        RegisteredUser principal = context.getPrincipal();
+        User principal = context.getPrincipal();
 
         if ((principal == null)) {
             return null;

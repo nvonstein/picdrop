@@ -5,9 +5,13 @@
  */
 package com.picdrop.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.picdrop.model.Identifiable;
+import com.picdrop.security.authentication.Role;
+import com.picdrop.security.authentication.RoleType;
+import java.io.IOException;
 import java.util.Objects;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -22,11 +26,12 @@ import org.mongodb.morphia.annotations.Entity;
 @JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonTypeName(value = "user")
 @Entity("users")
+@Role(roles = RoleType.USER)
 public class User extends Identifiable {
-    
-    protected String name;        
+
+    protected String name;
     protected long created;
-    
+
     public User() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
@@ -48,7 +53,7 @@ public class User extends Identifiable {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getFullName() {
         return getName();
     }
@@ -60,7 +65,7 @@ public class User extends Identifiable {
     public void setCreated(long created) {
         this.created = created;
     }
-    
+
     public boolean isRegistered() {
         return false;
     }
@@ -82,6 +87,15 @@ public class User extends Identifiable {
         }
         return true;
     }
-       
     
+    @JsonIgnore
+    public <T extends User> T to(Class<T> type) throws IOException {
+        if (type == null) {
+            throw new IllegalArgumentException("type is null");
+        }
+        if (!type.isInstance(this)) {
+            throw new IOException(String.format("cannot cast to type '%s'", type.getName()));
+        }
+        return type.cast(this);
+    }
 }

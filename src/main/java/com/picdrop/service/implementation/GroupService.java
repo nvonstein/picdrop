@@ -7,7 +7,6 @@ package com.picdrop.service.implementation;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.picdrop.annotations.Authorized;
 import com.picdrop.model.Group;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.user.User;
@@ -16,6 +15,7 @@ import com.picdrop.service.ExtendedCrudService;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import com.picdrop.security.authentication.Authenticated;
 
 /**
  *

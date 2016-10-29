@@ -8,7 +8,6 @@ package com.picdrop.service.implementation;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.picdrop.annotations.Authorized;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
@@ -18,6 +17,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import com.picdrop.security.authentication.Authenticated;
 
 /**
  *
@@ -26,7 +26,7 @@ import javax.ws.rs.Produces;
 @Path("/usersold")
 @Consumes("application/json")
 @Produces("application/json")
-@Authorized
+@Authenticated
 public class UserService extends CrudService<String, User, Repository<String, User>> {
     
     @Inject
@@ -39,8 +39,8 @@ public class UserService extends CrudService<String, User, Repository<String, Us
 
     @Path("/me")
     @GET
-    public RegisteredUser user() {
-        RegisteredUser current = context.get().getPrincipal();
+    public User user() {
+        User current = context.get().getPrincipal();
         return current; //To change body of generated methods, choose Tools | Templates.
     }
     

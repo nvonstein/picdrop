@@ -5,7 +5,7 @@
  */
 package com.picdrop.model;
 
-import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.User;
 import org.jboss.resteasy.plugins.guice.RequestScoped;
 
 /**
@@ -15,13 +15,13 @@ import org.jboss.resteasy.plugins.guice.RequestScoped;
 @RequestScoped
 public class RequestContext {
 
-    RegisteredUser principal;
+    User principal;
 
-    public RegisteredUser getPrincipal() {
+    public User getPrincipal() {
         return principal;
     }
 
-    public void setPrincipal(RegisteredUser principal) {
+    public void setPrincipal(User principal) {
         this.principal = principal;
     }
 
