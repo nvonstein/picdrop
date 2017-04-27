@@ -34,7 +34,7 @@ public class WebTokenFactoryImpl implements WebTokenFactory {
     @Override
     public String getToken(JWTClaimsSet claims) throws IOException {
         SignedJWT sjwt = tsigner.sign(claims);
-        JWEObject jwe = tcipher.encrypt(new Payload(sjwt));
+        JWEObject jwe = tcipher.encrypt(new Payload(sjwt),"JWT");
 
         return jwe.serialize();
     }
