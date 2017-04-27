@@ -10,16 +10,13 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.picdrop.model.resource.FileResource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import javax.xml.bind.DatatypeConverter;
-import com.picdrop.io.FileProcessor;
 import java.io.FileInputStream;
 
 /**
@@ -63,7 +60,7 @@ public class MurmurFileReaderWriter implements FileWriter, FileReader {
         }
         
         Files.copy(in, f.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        
+
         return lpath;
     }
 
