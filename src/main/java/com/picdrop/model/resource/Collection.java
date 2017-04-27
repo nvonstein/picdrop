@@ -26,7 +26,7 @@ import org.mongodb.morphia.annotations.Reference;
 public class Collection extends Resource {
 
     @Reference
-    protected List<CollectionElement> elements;
+    protected List<CollectionItem> items;
 
     public Collection() {
         super();
@@ -41,27 +41,27 @@ public class Collection extends Resource {
     }
 
     @JsonIgnore
-    public List<CollectionElement> getResources() {
-        return elements;
+    public List<CollectionItem> getResources() {
+        return items;
     }
 
     @JsonProperty
-    public void setResources(List<CollectionElement> resources) {
-        this.elements = resources;
+    public void setResources(List<CollectionItem> resources) {
+        this.items = resources;
     }
 
     @JsonIgnore
-    public void addResource(CollectionElement resource) {
-        this.elements.add(resource);
+    public void addResource(CollectionItem resource) {
+        this.items.add(resource);
     }
 
     @JsonIgnore
-    public void removeResource(CollectionElement resource) {
-        this.elements.remove(resource);
+    public void removeResource(CollectionItem resource) {
+        this.items.remove(resource);
     }
 
-    @Entity("collectionelements")
-    public static class CollectionElement extends Identifiable {
+    @Entity("citems")
+    public static class CollectionItem extends Identifiable {
 
         @Reference
         FileResource resource;
@@ -72,14 +72,14 @@ public class Collection extends Resource {
         @Embedded
         List<NameOnlyUserReference> blockings = new ArrayList<>();
 
-        public CollectionElement() {
+        public CollectionItem() {
         }
 
-        public CollectionElement(String _id) {
+        public CollectionItem(String _id) {
             super(_id);
         }
 
-        public CollectionElement(ObjectId _id) {
+        public CollectionItem(ObjectId _id) {
             super(_id);
         }
 

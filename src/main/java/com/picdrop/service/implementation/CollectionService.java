@@ -33,7 +33,7 @@ import javax.ws.rs.PathParam;
 @Path("/collections")
 public class CollectionService extends CrudService<String, Collection, Repository<String, Collection>> {
 
-    Repository<String, Collection.CollectionElement> cRepo;
+    Repository<String, Collection.CollectionItem> cRepo;
     Repository<String, FileResource> fRepo;
     
     @Inject
@@ -41,7 +41,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @Inject
     public CollectionService(Repository<String, Collection> repo,
-            Repository<String, Collection.CollectionElement> cRepo,
+            Repository<String, Collection.CollectionItem> cRepo,
             Repository<String, FileResource> fRepo) {
         super(repo);
         this.cRepo = cRepo;
@@ -87,7 +87,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @GET
     @Path("/{id}/elements")
     @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
-    public List<Collection.CollectionElement> listElements(@PathParam("id") String id) {
+    public List<Collection.CollectionItem> listElements(@PathParam("id") String id) {
         Collection c = get(id);
         if (c == null) {
             return null; // 404
@@ -98,13 +98,13 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @GET
     @Path("/{id}/elements/{eid}")
     @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
-    public Collection.CollectionElement getElement(@PathParam("id") String id, @PathParam("eid") String eid) {
+    public Collection.CollectionItem getElement(@PathParam("id") String id, @PathParam("eid") String eid) {
         Collection c = get(id);
         if (c == null) {
             return null; // 404
         }
 
-        Collection.CollectionElement ce = cRepo.get(eid);
+        Collection.CollectionItem ce = cRepo.get(eid);
 
         return (c.getResources().contains(ce))
                 ? ce
@@ -120,7 +120,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
             return;// 404
         }
 
-        Collection.CollectionElement ce = cRepo.get(eid);
+        Collection.CollectionItem ce = cRepo.get(eid);
 
         if (c.getResources().contains(ce)) {
             c.getResources().remove(ce);
@@ -134,7 +134,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @POST
     @Path("/{id}/elements")
     @Authenticated(include = RoleType.REGISTERED)
-    public Collection.CollectionElement addElement(@PathParam("id") String id, Collection.CollectionElement entity) {
+    public Collection.CollectionItem addElement(@PathParam("id") String id, Collection.CollectionItem entity) {
         Collection c = get(id);
         if (c == null) {
             return null;// 404
@@ -150,7 +150,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
             return null; // 400
         }
 
-        Collection.CollectionElement ce = new Collection.CollectionElement();
+        Collection.CollectionItem ce = new Collection.CollectionItem();
         ce.setResource(fr);
 
         ce = cRepo.save(ce);
