@@ -20,6 +20,7 @@ public class SessionCookieProvider implements CookieProvider {
     int ttl;
     boolean http;
     boolean secure;
+    String domain;
 
     String value;
 
@@ -29,17 +30,19 @@ public class SessionCookieProvider implements CookieProvider {
             @Named("service.session.cookie.maxage") int ttl,
             @Named("service.session.cookie.http") boolean http,
             @Named("service.session.cookie.secure") boolean secure,
+            @Named("service.session.cookie.domain") String domain,
             @Assisted String value) {
         this.name = name;
         this.http = http;
         this.ttl = ttl;
         this.secure = secure;
         this.value = value;
+        this.domain = domain;
     }
 
     @Override
     public NewCookie get() {
-        NewCookie c = new NewCookie(name, value, "domain", "/", "", ttl, secure);
+        NewCookie c = new NewCookie(name, value, "/*", this.domain, "", ttl, secure);
         return c;
     }
 

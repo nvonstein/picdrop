@@ -20,9 +20,16 @@ public abstract class EnvHelper {
         p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
 
         p.put("service.session.cookie.name", "token");
+        p.put("service.session.cookie.domain", "localhost");
         p.put("service.session.cookie.maxage", "900");
         p.put("service.session.cookie.http", "true");
-        p.put("service.session.cookie.secure", "false");
+        p.put("service.session.cookie.secure", "false");       
+        p.put("service.session.jwt.exp", "3600");
+        p.put("service.session.jwt.iss", "picdrop");
+        
+        p.put("token.signer.alg", "HS256");
+        p.put("token.cipher.alg", "dir");
+        p.put("token.cipher.meth", "A128CBC-HS256");
         
         p.put("service.file.store", "/tmp/picdrop/store");
 
