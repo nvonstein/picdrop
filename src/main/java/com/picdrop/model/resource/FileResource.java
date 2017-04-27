@@ -22,7 +22,8 @@ import org.mongodb.morphia.annotations.Entity;
 public class FileResource extends Resource {
 
     protected String extension;
-
+    protected String fileId;
+    @Deprecated
     protected String fileUri;
 
     @Embedded
@@ -52,11 +53,13 @@ public class FileResource extends Resource {
     }
 
     @JsonProperty
+    @Deprecated
     public String getFileUri() {
         return fileUri;
     }
 
     @JsonIgnore
+    @Deprecated
     public void setFileUri(String fileUri) {
         this.fileUri = fileUri;
     }
@@ -80,4 +83,14 @@ public class FileResource extends Resource {
     public void setDescriptor(ResourceDescriptor descriptor) {
         this.descriptor = descriptor;
     }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+    
+    
 }
