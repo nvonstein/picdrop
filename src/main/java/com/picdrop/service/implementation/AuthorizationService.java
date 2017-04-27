@@ -30,7 +30,7 @@ import org.joda.time.DateTime;
  *
  * @author i330120
  */
-@Path("/")
+@Path("/app")
 public class AuthorizationService {
 
     Repository<String, RegisteredUser> userRepo;
