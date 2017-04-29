@@ -32,6 +32,7 @@ import com.picdrop.security.token.signer.TokenSigner;
 import com.picdrop.security.token.signer.TokenSignerImpl;
 import com.picdrop.service.filter.AuthenticationFilter;
 import com.picdrop.service.implementation.AuthorizationService;
+import com.picdrop.service.implementation.CollectionService;
 import com.picdrop.service.implementation.GroupService;
 import com.picdrop.service.implementation.RegisteredUserService;
 import com.picdrop.service.implementation.FileResourceService;
@@ -53,6 +54,7 @@ public class ApplicationModule implements Module {
         binder.bind(FileResourceService.class).in(Singleton.class);
         binder.bind(RegisteredUserService.class).in(Singleton.class);
         binder.bind(AuthorizationService.class).in(Singleton.class);
+        binder.bind(CollectionService.class).in(Singleton.class);
 
         // Session management
         binder.install(new FactoryModuleBuilder()

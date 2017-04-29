@@ -20,17 +20,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 
 /**
  *
  * @author i330120
  */
-@Path("/collections")
+@Path("/app/collections")
+@Consumes("application/json")
+@Produces("application/json")
 public class CollectionService extends CrudService<String, Collection, Repository<String, Collection>> {
 
     Repository<String, Collection.CollectionItem> cRepo;
@@ -48,30 +53,39 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         this.fRepo = fRepo;
     }
 
+    @PUT
+    @Path("/{id}")
     @Override
     @Authenticated(include = RoleType.REGISTERED)
-    public Collection update(String id, Collection entity) {
+    public Collection update(@PathParam("id") String id, Collection entity) {
         return super.update(id, entity); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @GET
+    @Path("/{id}")
     @Override
     @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
-    public Collection get(String id) {
+    public Collection get(@PathParam("id") String id) {
         return super.get(id);
     }
 
+    @DELETE
+    @Path("/{id}")
     @Override
     @Authenticated(include = RoleType.REGISTERED)
-    public void delete(String id) {
+    public void delete(@PathParam("id") String id) {
         super.delete(id);
     }
 
+    @GET
+    @Path("/")
     @Override
     @Authenticated(include = RoleType.REGISTERED)
     public List<Collection> list() {
         return super.list();
     }
 
+    @POST
     @Override
     @Authenticated(include = RoleType.REGISTERED)
     public Collection create(Collection entity) {      

@@ -12,6 +12,7 @@ import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Group;
+import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
@@ -56,6 +57,12 @@ public class RepositoryModule implements Module {
         // Resource repo
         binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
         }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, FileResource.class));
+        // Collections repo
+        binder.bind(new TypeLiteral<Repository<String, Collection>>() {
+        }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, Collection.class));
+        // Collectionitem repo
+        binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
+        }).toInstance(new MorphiaRepository<>(ds, Collection.CollectionItem.class));
     }
 
 }
