@@ -32,11 +32,11 @@ public class TokenAuthenticator implements Authenticator {
     @Inject
     public TokenAuthenticator(
             Repository<String, RegisteredUser> userRepo,
-            @Named("service.session.cookie.name") String authCookieName
-//            ,WebTokenFactory tfactory
+            @Named("service.session.cookie.name") String authCookieName,
+             WebTokenFactory tfactory
     ) {
         this.authCookieName = authCookieName;
-//        this.tfactory = tfactory;
+        this.tfactory = tfactory;
         this.userRepo = userRepo;
     }
 

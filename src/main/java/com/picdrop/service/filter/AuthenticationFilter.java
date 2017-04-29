@@ -34,7 +34,7 @@ import javax.annotation.Priority;
 public class AuthenticationFilter implements ContainerRequestFilter { // TODO abstraction for making injectable
 
     @Inject
-    @Named("basic")
+    @Named("token")
     Authenticator authenticator;
     @Context
     HttpServletRequest request;
