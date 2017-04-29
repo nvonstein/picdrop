@@ -45,6 +45,7 @@ public class AuthorizationService {
 
     final int configJwtExpiry;
     final String configJwtIssuer;
+    final boolean cookieEnabled;
 
     @Inject
     public AuthorizationService(
@@ -53,13 +54,15 @@ public class AuthorizationService {
             CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
             @Named("service.session.jwt.exp") int jwtExpiry,
-            @Named("service.session.jwt.iss") String jwtIssuer) {
+            @Named("service.session.jwt.iss") String jwtIssuer,
+            @Named("service.session.cookie.enabled") boolean cookieEnabled) {
         this.userRepo = userRepo;
         this.cookieProvFactory = cookieProvFactory;
         this.tokenFactory = tokenFactory;
         this.authenticator = authenticator;
         this.configJwtExpiry = jwtExpiry;
         this.configJwtIssuer = jwtIssuer;
+        this.cookieEnabled = cookieEnabled;
     }
 
     @POST
