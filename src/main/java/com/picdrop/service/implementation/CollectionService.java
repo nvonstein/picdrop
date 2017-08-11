@@ -23,11 +23,13 @@ import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 /**
  *
@@ -131,9 +133,8 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     public void deleteElement(@PathParam("id") String id, @PathParam("eid") String eid) {
         Collection c = get(id);
         if (c == null) {
-            return;// 404
+            return; // 404
         }
-
         Collection.CollectionItem ce = cRepo.get(eid);
 
         if (c.getResources().contains(ce)) {

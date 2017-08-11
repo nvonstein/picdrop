@@ -23,7 +23,11 @@ public class ServletConfig extends GuiceResteasyBootstrapServletContextListener 
 
     @Override
     protected List<? extends Module> getModules(ServletContext context) {
-        List<Module> l = Arrays.asList(new ApplicationModule(), new FileHandlingModule(), new RepositoryModule(), new RequestScopeModule());
+        List<Module> l = Arrays.asList(
+                new ApplicationModule(), 
+                new FileHandlingModule(), 
+                new RepositoryModule(), 
+                new RequestScopeModule());
 
         return l;
     }

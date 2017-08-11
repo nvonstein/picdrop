@@ -40,12 +40,12 @@ public class Collection extends Resource {
         super(_id);
     }
 
-    @JsonIgnore
+    @JsonProperty
     public List<CollectionItem> getResources() {
         return items;
     }
 
-    @JsonProperty
+    @JsonIgnore
     public void setResources(List<CollectionItem> resources) {
         this.items = resources;
     }

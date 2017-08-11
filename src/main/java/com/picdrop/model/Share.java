@@ -12,6 +12,7 @@ import com.picdrop.model.user.RegisteredUser;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Reference;
 
@@ -19,6 +20,7 @@ import org.mongodb.morphia.annotations.Reference;
  *
  * @author i330120
  */
+@Entity("shares")
 public class Share extends Identifiable {
       
     protected long created;
