@@ -38,7 +38,7 @@ public class FileHandlingModule implements Module {
     @Override
     public void configure(Binder binder) {
         // Upload handeling
-        bindUploadHanler(binder);
+        bindUploadHandler(binder);
 
         // File writing
         bindFileIOProcessors(binder);
@@ -52,7 +52,7 @@ public class FileHandlingModule implements Module {
         bindProcessors(binder);
     }
 
-    protected void bindUploadHanler(Binder binder) {
+    protected void bindUploadHandler(Binder binder) {
         binder.bind(FileItemFactory.class).toProvider(FileItemFactoryProvider.class).asEagerSingleton();
         binder.bind(ServletFileUpload.class).toProvider(UploadHandlerProvider.class);
     }
