@@ -38,26 +38,45 @@ public class FileHandlingModule implements Module {
     @Override
     public void configure(Binder binder) {
         // Upload handeling
-        binder.bind(FileItemFactory.class).toProvider(FileItemFactoryProvider.class).asEagerSingleton();
-        binder.bind(ServletFileUpload.class).toProvider(UploadHandlerProvider.class);
+        bindUploadHanler(binder);
 
         // File writing
-        binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
-        binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
+        bindFileIOProcessors(binder);
+        bindFileStreamProvider(binder);
         binder.bind(new TypeLiteral<FileProcessor<FileResource>>() {
         }).annotatedWith(Names.named("processor.write")).to(ResourceWriteProcessor.class);
 
+        // File processors
+        bindProcessorList(binder);
+
+        bindProcessors(binder);
+    }
+
+    protected void bindUploadHanler(Binder binder) {
+        binder.bind(FileItemFactory.class).toProvider(FileItemFactoryProvider.class).asEagerSingleton();
+        binder.bind(ServletFileUpload.class).toProvider(UploadHandlerProvider.class);
+    }
+
+    protected void bindFileIOProcessors(Binder binder) {
+        binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
+        binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
+
+    }
+
+    protected void bindFileStreamProvider(Binder binder) {
         binder.install(new FactoryModuleBuilder()
                 .implement(InputStreamProvider.class, Names.named("inputstream.resource"), ResourceInputStreamProvider.class)
                 .implement(InputStreamProvider.class, Names.named("inputstream.fileitem"), FileItemInputStreamProvider.class)
                 .build(InputStreamProviderFactory.class)
         );
-
-        // File processors
+    }
+    
+    protected void bindProcessorList(Binder binder) {
         binder.bind(new TypeLiteral<List<Processor<FileResource>>>() {
         }).annotatedWith(Names.named("processors")).toProvider(ProcessorListProviders.class);
-
+    }
+    
+    protected void bindProcessors(Binder binder) {
         binder.bind(ImageProcessor.class);
     }
-
 }

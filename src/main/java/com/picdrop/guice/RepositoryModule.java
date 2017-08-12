@@ -37,12 +37,27 @@ public class RepositoryModule implements Module {
         binder.bind(new TypeLiteral<Map<String, String>>() {
         }).annotatedWith(Names.named("queries")).toInstance(NamedQueries.getQueries());
 
+        // <OLD ---------
         binder.bind(new TypeLiteral<Repository<String, User>>() {
         }).annotatedWith(Names.named("users")).to(TypedUserRepository.class);
 
         binder.bind(new TypeLiteral<Repository<String, Group>>() {
         }).annotatedWith(Names.named("groups")).to(TypedGroupRepository.class);
+        // OLD> ---------
 
+        Datastore ds = bindDatastore(binder);
+
+        // Registered user repo
+        bindRegisteredUserRepo(binder, ds);
+        // Resource repo
+        bindResourceRepo(binder, ds);
+        // Collections repo
+        bindCollectionsRepo(binder, ds);
+        // Collectionitem repo
+        bindCollectionItemRepo(binder, ds);
+    }
+
+    protected Datastore bindDatastore(Binder binder) {
         MongoClient client = new MongoClient();
         Morphia morphia = new Morphia();
         morphia.mapPackage("com.picdrop.model");
@@ -50,19 +65,26 @@ public class RepositoryModule implements Module {
 
         binder.bind(MongoDatabase.class).toInstance(client.getDatabase("test"));
         binder.bind(Datastore.class).toInstance(ds);
+        return ds;
+    }
 
-        // Registered user repo
+    protected void bindRegisteredUserRepo(Binder binder, Datastore ds) {
         binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
         }).toInstance(new MorphiaRepository<>(ds, RegisteredUser.class));
-        // Resource repo
+    }
+
+    protected void bindResourceRepo(Binder binder, Datastore ds) {
         binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
         }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, FileResource.class));
-        // Collections repo
+    }
+
+    protected void bindCollectionsRepo(Binder binder, Datastore ds) {
         binder.bind(new TypeLiteral<Repository<String, Collection>>() {
         }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, Collection.class));
-        // Collectionitem repo
+    }
+
+    protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
         binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
         }).toInstance(new MorphiaRepository<>(ds, Collection.CollectionItem.class));
     }
-
 }

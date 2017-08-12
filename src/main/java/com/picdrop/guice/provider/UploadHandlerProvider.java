@@ -31,6 +31,14 @@ public class UploadHandlerProvider implements Provider<ServletFileUpload> {
         this.maxrequestsize = maxrequestsize;
     }
 
+    public FileItemFactory getFactory() {
+        return factory;
+    }
+
+    public void setFactory(FileItemFactory factory) {
+        this.factory = factory;
+    }
+
     @Override
     public ServletFileUpload get() {
         ServletFileUpload handler = new ServletFileUpload(factory);

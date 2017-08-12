@@ -7,6 +7,7 @@ package com.picdrop;
 
 import com.picdrop.guice.ApplicationModule;
 import com.google.inject.Module;
+import com.picdrop.guice.AuthorizationModule;
 import com.picdrop.guice.FileHandlingModule;
 import com.picdrop.guice.RepositoryModule;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ public class ServletConfig extends GuiceResteasyBootstrapServletContextListener 
     protected List<? extends Module> getModules(ServletContext context) {
         List<Module> l = Arrays.asList(
                 new ApplicationModule(), 
+                new AuthorizationModule(),
                 new FileHandlingModule(), 
                 new RepositoryModule(), 
                 new RequestScopeModule());

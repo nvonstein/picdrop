@@ -44,34 +44,55 @@ import org.jboss.resteasy.plugins.guice.RequestScoped;
  *
  * @author i330120
  */
-public class ApplicationModule implements Module {
+public class AuthorizationModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        // Services
-        bindServices(binder);
+        // Session management
+        bindSessionCookieFactory(binder);
 
-        // Json
-        bindObjectMapper(binder);
+        // Authorization
+        bindAuthenticationFilter(binder);
 
-        // Environment
-        bindProperties(binder);
+        bindRequestContext(binder);
+
+        bindAuthenticators(binder);
+        
+        bindWebTokenFactory(binder);
+        
+        bindCipherSignerProviders(binder);
     }
     
-    protected void bindProperties(Binder binder) {
-        Names.bindProperties(binder, EnvHelper.getProperties());
+    protected void bindSessionCookieFactory(Binder binder) {
+        binder.install(new FactoryModuleBuilder()
+                .implement(CookieProvider.class, Names.named("cookie.session"), SessionCookieProvider.class)
+                .build(CookieProviderFactory.class)
+        );
     }
     
-    protected void bindObjectMapper(Binder binder) {
-        binder.bind(ObjectMapper.class).toInstance(new ObjectMapper());
+    protected void bindAuthenticationFilter(Binder binder) {
+        binder.bind(AuthenticationFilter.class);
     }
     
-    protected void bindServices(Binder binder) {
-        binder.bind(UserService.class).in(Singleton.class);
-        binder.bind(GroupService.class).in(Singleton.class);
-        binder.bind(FileResourceService.class).in(Singleton.class);
-        binder.bind(RegisteredUserService.class).in(Singleton.class);
-        binder.bind(AuthorizationService.class).in(Singleton.class);
-        binder.bind(CollectionService.class).in(Singleton.class);
+    protected void bindRequestContext(Binder binder) {
+        binder.bind(RequestContext.class).in(RequestScoped.class);
+    }
+    
+    protected void bindAuthenticators(Binder binder) {
+        binder.bind(Authenticator.class).annotatedWith(Names.named("basic")).to(BasicAuthenticator.class);
+        binder.bind(Authenticator.class).annotatedWith(Names.named("token")).to(TokenAuthenticator.class);
+    }
+    
+    protected void bindWebTokenFactory(Binder binder) {
+        binder.bind(WebTokenFactory.class).to(WebTokenFactoryImpl.class);
+        binder.bind(TokenSigner.class).to(TokenSignerImpl.class);
+        binder.bind(TokenCipher.class).to(TokenCipherImpl.class);
+    }
+    
+    protected void bindCipherSignerProviders(Binder binder) {
+        binder.bind(JWEDecrypter.class).toProvider(JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectDecrypterProvider.class);
+        binder.bind(JWEEncrypter.class).toProvider(JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectEncrypterProvider.class);
+        binder.bind(JWSSigner.class).toProvider(JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider.class);
+        binder.bind(JWSVerifier.class).toProvider(JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider.class);
     }
 }
