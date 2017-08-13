@@ -38,6 +38,7 @@ import com.picdrop.repository.Repository;
 import javax.ws.rs.PUT;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
+import java.nio.file.Files;
 
 /**
  *
@@ -75,7 +76,7 @@ public class FileResourceService {
         this.writeProcessor = writeProcessor;
         this.processors = processors;
     }
-    
+
     protected List<FileItem> parseRequest(HttpServletRequest request) {
         List<FileItem> files = null;
         try {
@@ -95,7 +96,7 @@ public class FileResourceService {
         }
 
         // Store
-        writeProcessor.process(loce, isp);
+        writeProcessor.write(loce, isp);
         if (Strings.isNullOrEmpty(loce.getId())) {
             loce = this.repo.save(loce);
         } else {
@@ -115,12 +116,15 @@ public class FileResourceService {
         for (Processor<FileResource> p : processors) {
             p.onPreDelete(e);
         }
-        
-        // TODO remove file?
-        this.repo.delete(e.getId());
-        
-        for (Processor<FileResource> p : processors) {
-            p.onPostDelete(e);
+
+        if (writeProcessor.delete(e)) {
+            this.repo.delete(e.getId());
+
+            for (Processor<FileResource> p : processors) {
+                p.onPostDelete(e);
+            }
+        } else {
+
         }
     }
 

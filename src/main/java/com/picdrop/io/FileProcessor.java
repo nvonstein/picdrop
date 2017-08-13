@@ -7,12 +7,14 @@ package com.picdrop.io;
 
 import com.picdrop.guice.provider.InputStreamProvider;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
  * @author i330120
  */
 public interface FileProcessor<T> {
-
-    T process(T entity, InputStreamProvider in) throws IOException;
+    T write(T entity, InputStreamProvider in) throws IOException;
+    InputStream read(T entity) throws IOException;
+    boolean delete(T entity) throws IOException;
 }
