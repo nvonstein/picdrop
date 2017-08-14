@@ -13,7 +13,7 @@ import java.io.InputStream;
  *
  * @author i330120
  */
-public interface FileProcessor<T> {
+public interface FileRepository<T> {
     T write(T entity, InputStreamProvider in) throws IOException;
     InputStream read(T entity) throws IOException;
     boolean delete(T entity) throws IOException;

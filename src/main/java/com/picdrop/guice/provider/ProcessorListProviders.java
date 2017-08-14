@@ -7,13 +7,13 @@ package com.picdrop.guice.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.picdrop.io.FileProcessor;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
 import com.picdrop.model.resource.FileResource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.picdrop.io.FileRepository;
 
 /**
  *

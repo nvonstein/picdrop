@@ -17,10 +17,9 @@ import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.provider.ProcessorListProviders;
 import com.picdrop.guice.provider.ResourceInputStreamProvider;
 import com.picdrop.guice.provider.UploadHandlerProvider;
-import com.picdrop.io.FileProcessor;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
-import com.picdrop.io.ResourceWriteProcessor;
+import com.picdrop.io.MurmurFileRepository;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
 import com.picdrop.io.writer.MurmurFileReaderWriter;
@@ -28,6 +27,7 @@ import com.picdrop.model.resource.FileResource;
 import java.util.List;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import com.picdrop.io.FileRepository;
 
 /**
  *
@@ -59,8 +59,8 @@ public class FileHandlingModule implements Module {
         binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
 
-        binder.bind(new TypeLiteral<FileProcessor<String>>() {
-        }).annotatedWith(Names.named("processor.write")).to(ResourceWriteProcessor.class);
+        binder.bind(new TypeLiteral<FileRepository<String>>() {
+        }).annotatedWith(Names.named("processor.write")).to(MurmurFileRepository.class);
     }
 
     protected void bindFileStreamProvider(Binder binder) {

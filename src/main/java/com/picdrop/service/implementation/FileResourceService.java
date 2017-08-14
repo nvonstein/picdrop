@@ -31,7 +31,6 @@ import javax.ws.rs.core.Context;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import com.picdrop.io.FileProcessor;
 import com.picdrop.io.Processor;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.ResourceDescriptor;
@@ -40,6 +39,7 @@ import com.picdrop.repository.Repository;
 import javax.ws.rs.PUT;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
+import com.picdrop.io.FileRepository;
 
 /**
  *
@@ -53,7 +53,7 @@ public class FileResourceService {
 
     Repository<String, FileResource> repo;
 
-    FileProcessor<String> writeProcessor;
+    FileRepository<String> writeProcessor;
     List<Processor<FileResource>> processors;
 
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
@@ -70,7 +70,7 @@ public class FileResourceService {
     @Inject
     public FileResourceService(
             Repository<String, FileResource> repo,
-            @Named("processor.write") FileProcessor<String> writeProcessor,
+            @Named("processor.write") FileRepository<String> writeProcessor,
             @Named("processors") List<Processor<FileResource>> processors) {
         this.repo = repo;
 

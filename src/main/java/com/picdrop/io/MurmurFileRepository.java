@@ -25,13 +25,13 @@ import javax.xml.bind.DatatypeConverter;
  *
  * @author i330120
  */
-public class ResourceWriteProcessor implements FileProcessor<String> {
+public class MurmurFileRepository implements FileRepository<String> {
 
     HashFunction hashf;
     File rootdir;
 
     @Inject
-    public ResourceWriteProcessor(@Named("service.file.store") String rootdir) {
+    public MurmurFileRepository(@Named("service.file.store") String rootdir) {
         this.hashf = Hashing.murmur3_128();
         this.rootdir = new File(rootdir);
         if (!this.rootdir.exists() || !this.rootdir.canWrite() || !this.rootdir.isDirectory()) {
