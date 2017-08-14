@@ -6,6 +6,7 @@
 package com.picdrop.io;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.ImageDescriptor;
@@ -20,9 +21,13 @@ import java.io.IOException;
  */
 public class ImageProcessor extends AbstractUpdateProcessor<FileResource> {
 
+    FileRepository<String> fileRepo;
+    
     @Inject
-    public ImageProcessor(Repository<String, FileResource> repo) {
+    public ImageProcessor(Repository<String, FileResource> repo,
+            @Named("repository.file.thumbnails") FileRepository<String> fileRepo) {
         super(repo);
+        this.fileRepo = fileRepo;
     }
 
     @Override

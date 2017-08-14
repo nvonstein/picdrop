@@ -7,6 +7,7 @@ package com.picdrop.guice;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
@@ -60,7 +61,9 @@ public class FileHandlingModule implements Module {
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
 
         binder.bind(new TypeLiteral<FileRepository<String>>() {
-        }).annotatedWith(Names.named("repository.file.main")).to(MurmurFileRepository.class);
+        }).annotatedWith(Names.named("repository.file.main")).to(MurmurFileRepository.class).in(Singleton.class);
+        binder.bind(new TypeLiteral<FileRepository<String>>() {
+        }).annotatedWith(Names.named("repository.file.thumbnails")).to(MurmurFileRepository.class).in(Singleton.class);
     }
 
     protected void bindFileStreamProvider(Binder binder) {
