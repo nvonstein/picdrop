@@ -26,6 +26,7 @@ public class JacksonObjectMerger implements ObjectMerger {
 
     @Override
     public <T> T merge(T defaults, T update) throws IOException {
+        // TODO take care of field erasures / How do we actually indicate erasures?
         ObjectReader reader = mapper.readerForUpdating(defaults);
         return reader.readValue(mapper.writeValueAsString(update));
     }

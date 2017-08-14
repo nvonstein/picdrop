@@ -441,6 +441,7 @@ public class FileResourceServiceTest {
         assertEquals("File was not updated", ID2, file.getFileId());
     }
 
+    // TODO modify test to only test error proning. Move Merger test to sep. file
     @Test
     public void updateTestValidName() throws Exception {
         FileResource file = new FileResource(ID1);
