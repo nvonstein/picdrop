@@ -11,7 +11,6 @@ import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.picdrop.guice.provider.InputStreamProvider;
-import com.picdrop.io.writer.FileWriter;
 import com.picdrop.model.resource.FileResource;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +25,7 @@ import javax.xml.bind.DatatypeConverter;
  *
  * @author i330120
  */
-public class ResourceWriteProcessor implements FileProcessor<FileResource> {
+public class ResourceWriteProcessor implements FileProcessor<String> {
 
     HashFunction hashf;
     File rootdir;
@@ -51,38 +50,39 @@ public class ResourceWriteProcessor implements FileProcessor<FileResource> {
 //    }
 
     @Override
-    public InputStream read(FileResource entity) throws IOException {
-        if ((entity == null) || Strings.isNullOrEmpty(entity.getFileId())) {
+    public InputStream read(String entity) throws IOException {
+        if ((entity == null) || Strings.isNullOrEmpty(entity)) {
             throw new IllegalArgumentException("No file entity provided!");
         }
-        
-        File file = new File(rootdir, entity.getFileId());
+
+        File file = new File(rootdir, entity);
         return new FileInputStream(file);
     }
 
     @Override
-    public boolean delete(FileResource entity) throws IOException {
-        if ((entity == null) || Strings.isNullOrEmpty(entity.getFileId())) {
+    public boolean delete(String entity) throws IOException {
+        if ((entity == null) || Strings.isNullOrEmpty(entity)) {
             return true;
         }
-        
-        File file = new File(rootdir,entity.getFileId());
+
+        File file = new File(rootdir, entity);
         return file.delete();
     }
 
     @Override
-    public FileResource write(FileResource entity, InputStreamProvider in) throws IOException {
-        String uuid = UUID.randomUUID().toString();
-        byte[] hash = hashf.hashUnencodedChars(uuid).asBytes();
+    public String write(String entity, InputStreamProvider in) throws IOException {
+        String fileId = entity;
+        if ((fileId == null) || Strings.isNullOrEmpty(fileId)) {
+            String uuid = UUID.randomUUID().toString();
+            byte[] hash = hashf.hashUnencodedChars(uuid).asBytes();
+            fileId = DatatypeConverter.printHexBinary(hash);
+        }
 
-        String fileId = DatatypeConverter.printHexBinary(hash);
-        
         File f = new File(rootdir, fileId);
-        
+
         Files.copy(in.get(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-        entity.setFileId(fileId);
-        return entity;
+        return fileId;
     }
 
 }

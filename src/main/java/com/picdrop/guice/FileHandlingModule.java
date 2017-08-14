@@ -59,7 +59,7 @@ public class FileHandlingModule implements Module {
         binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
 
-        binder.bind(new TypeLiteral<FileProcessor<FileResource>>() {
+        binder.bind(new TypeLiteral<FileProcessor<String>>() {
         }).annotatedWith(Names.named("processor.write")).to(ResourceWriteProcessor.class);
     }
 
