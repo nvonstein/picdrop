@@ -93,7 +93,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     public Collection create(Collection entity) {      
         try {
             entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
-        } catch (IOException ex) {
+        } catch (IllegalArgumentException ex) {
             return null; // 500
         }
         
