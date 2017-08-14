@@ -10,6 +10,8 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 import com.picdrop.helper.EnvHelper;
+import com.picdrop.helper.JacksonObjectMerger;
+import com.picdrop.helper.ObjectMerger;
 import com.picdrop.service.implementation.AuthorizationService;
 import com.picdrop.service.implementation.CollectionService;
 import com.picdrop.service.implementation.GroupService;
@@ -42,6 +44,10 @@ public class ApplicationModule implements Module {
     
     protected void bindObjectMapper(Binder binder) {
         binder.bind(ObjectMapper.class).toInstance(new ObjectMapper());
+    }
+    
+    protected void binObjectMerger(Binder binder) {
+        binder.bind(ObjectMerger.class).to(JacksonObjectMerger.class);
     }
     
     protected void bindServices(Binder binder) {
