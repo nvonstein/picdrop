@@ -41,10 +41,8 @@ public class FileHandlingModule implements Module {
         bindUploadHandler(binder);
 
         // File writing
-        bindFileIOProcessors(binder);
         bindFileStreamProvider(binder);
-        binder.bind(new TypeLiteral<FileProcessor<FileResource>>() {
-        }).annotatedWith(Names.named("processor.write")).to(ResourceWriteProcessor.class);
+        bindFileIOProcessors(binder);
 
         // File processors
         bindProcessorList(binder);
@@ -61,6 +59,8 @@ public class FileHandlingModule implements Module {
         binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
 
+        binder.bind(new TypeLiteral<FileProcessor<FileResource>>() {
+        }).annotatedWith(Names.named("processor.write")).to(ResourceWriteProcessor.class);
     }
 
     protected void bindFileStreamProvider(Binder binder) {
@@ -70,12 +70,12 @@ public class FileHandlingModule implements Module {
                 .build(InputStreamProviderFactory.class)
         );
     }
-    
+
     protected void bindProcessorList(Binder binder) {
         binder.bind(new TypeLiteral<List<Processor<FileResource>>>() {
         }).annotatedWith(Names.named("processors")).toProvider(ProcessorListProviders.class);
     }
-    
+
     protected void bindProcessors(Binder binder) {
         binder.bind(ImageProcessor.class);
     }
