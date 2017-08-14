@@ -84,10 +84,12 @@ public class FileResource extends Resource {
         this.descriptor = descriptor;
     }
 
+    @JsonProperty
     public String getFileId() {
         return fileId;
     }
 
+    @JsonIgnore
     public void setFileId(String fileId) {
         this.fileId = fileId;
     }
