@@ -33,6 +33,9 @@ public class ApplicationModule implements Module {
 
         // Json
         bindObjectMapper(binder);
+        
+        // Merger
+        binObjectMerger(binder);
 
         // Environment
         bindProperties(binder);
