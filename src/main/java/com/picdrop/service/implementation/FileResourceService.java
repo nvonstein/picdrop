@@ -88,6 +88,7 @@ public class FileResourceService {
 
     protected FileResource processCreateUpdate(FileResource e, FileItem file) throws ApplicationException {
         FileResource loce = e;
+        String fileId;
         // Pre store
         InputStreamProvider isp = instProvFac.create(file);
         try {
@@ -96,18 +97,18 @@ public class FileResourceService {
             }
         } catch (IOException ex) {
             throw new ApplicationException(ex)
-                    .status(400)
+                    .status(500)
                     .code(ErrorMessageCode.ERROR_UPLOAD)
                     .devMessage("Error while pre-store phase: " + ex.getMessage());
         }
 
         // Store
         try {
-            String fileId = fileRepo.write(null, isp);
+            fileId = fileRepo.write(null, isp);
             loce.setFileId(fileId);
         } catch (IOException ex) {
             throw new ApplicationException(ex)
-                    .status(400)
+                    .status(500)
                     .code(ErrorMessageCode.ERROR_UPLOAD)
                     .devMessage("Error while store phase: " + ex.getMessage());
         }
@@ -125,7 +126,7 @@ public class FileResourceService {
             }
         } catch (IOException ex) {
             throw new ApplicationException(ex)
-                    .status(400)
+                    .status(500)
                     .code(ErrorMessageCode.ERROR_UPLOAD)
                     .devMessage("Error while post-store phase: " + ex.getMessage());
         }
@@ -148,32 +149,33 @@ public class FileResourceService {
                     .devMessage("Error while pre-delete phase: " + ex.getMessage());
         }
 
+        // Delete in DB
+        res = this.repo.delete(e.getId());
+        if (!res) {
+            throw new ApplicationException()
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500)
+                    .devMessage("Repository returned 'false'");
+        }
+
         // Delete file
         try {
             res = fileRepo.delete(e.getFileId());
         } catch (IOException ex) {
+            // Roleback
+            this.repo.save(e);
             throw new ApplicationException(ex)
                     .code(ErrorMessageCode.ERROR_DELETE)
                     .status(500)
                     .devMessage("Error while delete file phase: " + ex.getMessage());
         }
-
         if (!res) {
-            // TODO roleback
+            // Roleback
+            this.repo.save(e);
             throw new ApplicationException()
                     .code(ErrorMessageCode.ERROR_DELETE)
                     .status(500)
                     .devMessage("File repository returned 'false'");
-        }
-
-        // Delete in DB
-        res = this.repo.delete(e.getId());
-        if (!res) {
-            // TODO roleback
-            throw new ApplicationException()
-                    .code(ErrorMessageCode.ERROR_DELETE)
-                    .status(500)
-                    .devMessage("Repository returned 'false'");
         }
 
         // Post process
@@ -228,10 +230,8 @@ public class FileResourceService {
         for (FileItem file : files) {
             if (!file.isFormField()) {
                 FileResource r = new FileResource();
-                r.setName(file.getName());
-                r
-                        .setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class
-                        ));
+                r.setName(file.getName()); // TODO get extension
+                r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
 
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
@@ -246,12 +246,32 @@ public class FileResourceService {
 
     @PUT
     @Path("/{id}")
+    public FileResource update(
+            @PathParam("id") String id,
+            @Context HttpServletRequest request,
+            FileResource entity) throws ApplicationException {
+        FileResource r = getResource(id);
+        if (r == null) {
+            throw new ApplicationException()
+                    .status(404)
+                    .code(ErrorMessageCode.NOT_FOUND)
+                    .devMessage(String.format("Object with id '%s' not found", id));
+        }
+
+        return repo.update(id, entity);
+    }
+
+    @PUT
+    @Path("/{id}")
     @Consumes("multipart/form-data")
-    public FileResource update(@PathParam("id") String id, @Context HttpServletRequest request) throws ApplicationException {
+    public FileResource updateFile(@PathParam("id") String id, @Context HttpServletRequest request) throws ApplicationException {
         FileResource r = getResource(id);
         List<FileItem> files = null;
         if (r == null) {
-            return null; // 404
+            throw new ApplicationException()
+                    .status(404)
+                    .code(ErrorMessageCode.NOT_FOUND)
+                    .devMessage(String.format("Object with id '%s' not found", id));
         }
 
         try {
