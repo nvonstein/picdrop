@@ -37,10 +37,8 @@ public class ImageProcessor extends AbstractUpdateProcessor<FileResource> {
             ImageDescriptor ides = rdes.to(ImageDescriptor.class);
 
             // calc properties
-            ides.addThumbnailUri("small", "dummy");
-            ides.addThumbnailUri("medium", "dummy2");
-            
-            // TODO generate thumbnails
+//            ides.addThumbnailUri("small", "dummy");
+//            ides.addThumbnailUri("medium", "dummy2");
 
             entity.setDescriptor(ides);
         }
