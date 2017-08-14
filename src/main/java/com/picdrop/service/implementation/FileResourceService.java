@@ -133,30 +133,61 @@ public class FileResourceService {
         return loce;
     }
 
-    protected void processDelete(FileResource e) throws IOException, ApplicationException {
-        for (Processor<FileResource> p : processors) {
-            p.onPreDelete(e);
+    protected void processDelete(FileResource e) throws ApplicationException {
+        boolean res = false;
+
+        // Pre process
+        try {
+            for (Processor<FileResource> p : processors) {
+                p.onPreDelete(e);
+            }
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500)
+                    .devMessage("Error while pre-delete phase: " + ex.getMessage());
         }
 
-        if (fileRepo.delete(e.getFileId())) {
-            if (!this.repo.delete(e.getId())) {
-                // TODO roleback
-                throw new ApplicationException()
-                        .code(ErrorMessageCode.ERROR_DELETE)
-                        .status(500)
-                        .devMessage("Repository returned 'false'");
-            }
+        // Delete file
+        try {
+            res = fileRepo.delete(e.getFileId());
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500)
+                    .devMessage("Error while delete file phase: " + ex.getMessage());
+        }
 
-            for (Processor<FileResource> p : processors) {
-                p.onPostDelete(e);
-            }
-        } else {
+        if (!res) {
             // TODO roleback
             throw new ApplicationException()
                     .code(ErrorMessageCode.ERROR_DELETE)
                     .status(500)
-                    .devMessage("FileProcessor returned 'false'");
+                    .devMessage("File repository returned 'false'");
         }
+
+        // Delete in DB
+        res = this.repo.delete(e.getId());
+        if (!res) {
+            // TODO roleback
+            throw new ApplicationException()
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500)
+                    .devMessage("Repository returned 'false'");
+        }
+
+        // Post process
+        try {
+            for (Processor<FileResource> p : processors) {
+                p.onPostDelete(e);
+            }
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500)
+                    .devMessage("Error while pre-delete phase: " + ex.getMessage());
+        }
+
     }
 
     @GET
@@ -198,7 +229,9 @@ public class FileResourceService {
             if (!file.isFormField()) {
                 FileResource r = new FileResource();
                 r.setName(file.getName());
-                r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
+                r
+                        .setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class
+                        ));
 
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
@@ -248,14 +281,7 @@ public class FileResourceService {
     public void delete(@PathParam("id") String id) throws ApplicationException {
         FileResource r = getResource(id);
         if (r != null) {
-            try {
-                processDelete(r);
-            } catch (IOException e) {
-                throw new ApplicationException(e)
-                        .code(ErrorMessageCode.ERROR_DELETE)
-                        .status(500)
-                        .devMessage(e.getMessage());
-            }
+            processDelete(r);
         } else {
             throw new ApplicationException()
                     .status(404)
