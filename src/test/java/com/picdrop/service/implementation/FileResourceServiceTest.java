@@ -5,6 +5,9 @@
  */
 package com.picdrop.service.implementation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.picdrop.exception.ApplicationException;
@@ -436,5 +439,30 @@ public class FileResourceServiceTest {
 
         assertNotNull("Resource is null", file);
         assertEquals("File was not updated", ID2, file.getFileId());
+    }
+
+    @Test
+    public void updateTestValidName() throws Exception {
+        FileResource file = new FileResource(ID1);
+        file.setName("some name");
+        file.setFileId(ID1);
+
+        FileResource fileMod = new FileResource(ID1);
+        fileMod.setName(ID2);
+
+        when(repo.get(ID1)).thenReturn(file);
+        when(repo.update(eq(ID1), any())).thenAnswer(new Answer<FileResource>() {
+            @Override
+            public FileResource answer(InvocationOnMock arg0) throws Throwable {
+                return arg0.getArgument(1);
+            }
+        });
+
+        file = service.update(ID1, fileMod);
+
+        assertNotNull("File is null", file);
+        assertNotNull("Name is null", file.getName());
+        assertEquals("Names differ", ID2, file.getName());
+        assertEquals("File id overwritten", ID1, file.getFileId());
     }
 }
