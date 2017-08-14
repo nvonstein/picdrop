@@ -13,6 +13,7 @@ import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
+import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.resource.FileResource;
 import java.io.IOException;
@@ -66,6 +67,9 @@ public class FileResourceService {
 
     @Inject
     InputStreamProviderFactory instProvFac;
+
+    @Inject
+    ObjectMerger merger;
 
     @Inject
     public FileResourceService(
@@ -248,7 +252,6 @@ public class FileResourceService {
     @Path("/{id}")
     public FileResource update(
             @PathParam("id") String id,
-            @Context HttpServletRequest request,
             FileResource entity) throws ApplicationException {
         FileResource r = getResource(id);
         if (r == null) {
@@ -258,7 +261,15 @@ public class FileResourceService {
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
 
-        return repo.update(id, entity);
+        try {
+            r = merger.merge(r, entity);
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .status(500)
+                    .code(ErrorMessageCode.ERROR_OBJ_MERGE)
+                    .devMessage(ex.getMessage());
+        }
+        return repo.update(id, r);
     }
 
     @PUT
