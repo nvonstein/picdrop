@@ -9,6 +9,8 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import com.picdrop.exception.ApplicationException;
+import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.model.RequestContext;
@@ -38,7 +40,6 @@ import com.picdrop.repository.Repository;
 import javax.ws.rs.PUT;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
-import java.nio.file.Files;
 
 /**
  *
@@ -77,26 +78,38 @@ public class FileResourceService {
         this.processors = processors;
     }
 
-    protected List<FileItem> parseRequest(HttpServletRequest request) {
+    protected List<FileItem> parseRequest(HttpServletRequest request) throws FileUploadException {
         List<FileItem> files = null;
-        try {
-            files = upload.parseRequest(request);
-        } catch (FileUploadException ex) {
-            throw new IllegalArgumentException("bad upload request: " + ex.getMessage(), ex); // 400
-        }
+
+        files = upload.parseRequest(request);
+
         return files;
     }
 
-    protected FileResource processCreateUpdate(FileResource e, FileItem file) throws IOException {
+    protected FileResource processCreateUpdate(FileResource e, FileItem file) throws ApplicationException {
         FileResource loce = e;
         // Pre store
         InputStreamProvider isp = instProvFac.create(file);
-        for (Processor<FileResource> p : processors) {
-            loce = p.onPreStore(loce, isp);
+        try {
+            for (Processor<FileResource> p : processors) {
+                loce = p.onPreStore(loce, isp);
+            }
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .status(400)
+                    .code(ErrorMessageCode.ERROR_UPLOAD)
+                    .devMessage("Error while pre-store phase: " + ex.getMessage());
         }
 
         // Store
-        writeProcessor.write(loce, isp);
+        try {
+            writeProcessor.write(loce, isp);
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .status(400)
+                    .code(ErrorMessageCode.ERROR_UPLOAD)
+                    .devMessage("Error while store phase: " + ex.getMessage());
+        }
         if (Strings.isNullOrEmpty(loce.getId())) {
             loce = this.repo.save(loce);
         } else {
@@ -105,33 +118,57 @@ public class FileResourceService {
 
         // Post store
         isp = instProvFac.create(loce);
-        for (Processor<FileResource> p : processors) {
-            loce = p.onPostStore(loce, isp);
+        try {
+            for (Processor<FileResource> p : processors) {
+                loce = p.onPostStore(loce, isp);
+            }
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .status(400)
+                    .code(ErrorMessageCode.ERROR_UPLOAD)
+                    .devMessage("Error while post-store phase: " + ex.getMessage());
         }
 
         return loce;
     }
 
-    protected void processDelete(FileResource e) throws IOException {
+    protected void processDelete(FileResource e) throws IOException, ApplicationException {
         for (Processor<FileResource> p : processors) {
             p.onPreDelete(e);
         }
 
         if (writeProcessor.delete(e)) {
-            this.repo.delete(e.getId());
+            if (!this.repo.delete(e.getId())) {
+                // TODO roleback
+                throw new ApplicationException()
+                        .code(ErrorMessageCode.ERROR_DELETE)
+                        .status(500)
+                        .devMessage("Repository returned 'false'");
+            }
 
             for (Processor<FileResource> p : processors) {
                 p.onPostDelete(e);
             }
         } else {
-
+            // TODO roleback
+            throw new ApplicationException()
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500)
+                    .devMessage("FileProcessor returned 'false'");
         }
     }
 
     @GET
     @Path("/{id}")
-    public FileResource getResource(@PathParam("id") String id) {
-        return this.repo.get(id);
+    public FileResource getResource(@PathParam("id") String id) throws ApplicationException {
+        FileResource fr = this.repo.get(id);
+        if (fr == null) {
+            throw new ApplicationException()
+                    .status(404)
+                    .code(ErrorMessageCode.NOT_FOUND)
+                    .devMessage(String.format("Object with id '%s' not found", id));
+        }
+        return fr;
     }
 
     @GET
@@ -143,10 +180,18 @@ public class FileResourceService {
     @POST
     @Path("/")
     @Consumes("multipart/form-data")
-    public List<FileResource> create(@Context HttpServletRequest request) throws IOException {
+    public List<FileResource> create(@Context HttpServletRequest request) throws ApplicationException {
         List<FileResource> res = new ArrayList<>();
+        List<FileItem> files;
 
-        List<FileItem> files = parseRequest(request);
+        try {
+            files = parseRequest(request);
+        } catch (FileUploadException ex) {
+            throw new ApplicationException(ex)
+                    .status(400)
+                    .devMessage(ex.getMessage())
+                    .code(ErrorMessageCode.BAD_UPLOAD);
+        }
 
         for (FileItem file : files) {
             if (!file.isFormField()) {
@@ -168,13 +213,21 @@ public class FileResourceService {
     @PUT
     @Path("/{id}")
     @Consumes("multipart/form-data")
-    public FileResource update(@PathParam("id") String id, @Context HttpServletRequest request) throws IOException {
+    public FileResource update(@PathParam("id") String id, @Context HttpServletRequest request) throws ApplicationException {
         FileResource r = getResource(id);
+        List<FileItem> files = null;
         if (r == null) {
             return null; // 404
         }
 
-        List<FileItem> files = parseRequest(request);
+        try {
+            files = parseRequest(request);
+        } catch (FileUploadException ex) {
+            throw new ApplicationException(ex)
+                    .status(400)
+                    .devMessage(ex.getMessage())
+                    .code(ErrorMessageCode.BAD_UPLOAD);
+        }
 
         for (FileItem file : files) {
             if (!file.isFormField()) {
@@ -191,10 +244,22 @@ public class FileResourceService {
 
     @DELETE
     @Path("/{id}")
-    public void delete(@PathParam("id") String id) throws IOException {
+    public void delete(@PathParam("id") String id) throws ApplicationException {
         FileResource r = getResource(id);
         if (r != null) {
-            processDelete(r);
+            try {
+                processDelete(r);
+            } catch (IOException e) {
+                throw new ApplicationException(e)
+                        .code(ErrorMessageCode.ERROR_DELETE)
+                        .status(500)
+                        .devMessage(e.getMessage());
+            }
+        } else {
+            throw new ApplicationException()
+                    .status(404)
+                    .code(ErrorMessageCode.NOT_FOUND)
+                    .devMessage(String.format("Object with id '%s' not found", id));
         }
     }
 }

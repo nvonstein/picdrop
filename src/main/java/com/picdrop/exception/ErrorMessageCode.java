@@ -11,7 +11,10 @@ package com.picdrop.exception;
  */
 public enum ErrorMessageCode {
     
-    UNABLE_DELETE("ec00001", "Unable to delete file!");
+    ERROR_DELETE("ec00001", "Unable to delete file."),
+    BAD_UPLOAD("ec00002", "Bad request: Unable to parse upload request."),
+    ERROR_UPLOAD("ec00003", "Unable to process upload."),
+    NOT_FOUND("ec00004","Resource not found");
     
     private String code;
     private String defaultMessage;

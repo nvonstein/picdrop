@@ -89,12 +89,12 @@ public class User extends Identifiable {
     }
     
     @JsonIgnore
-    public <T extends User> T to(Class<T> type) throws IOException {
+    public <T extends User> T to(Class<T> type) {
         if (type == null) {
             throw new IllegalArgumentException("type is null");
         }
         if (!type.isInstance(this)) {
-            throw new IOException(String.format("cannot cast to type '%s'", type.getName()));
+            throw new IllegalArgumentException(String.format("cannot cast to type '%s'", type.getName()));
         }
         return type.cast(this);
     }
