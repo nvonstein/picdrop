@@ -60,7 +60,7 @@ public class FileHandlingModule implements Module {
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
 
         binder.bind(new TypeLiteral<FileRepository<String>>() {
-        }).annotatedWith(Names.named("processor.write")).to(MurmurFileRepository.class);
+        }).annotatedWith(Names.named("repository.file.main")).to(MurmurFileRepository.class);
     }
 
     protected void bindFileStreamProvider(Binder binder) {

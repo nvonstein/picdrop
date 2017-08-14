@@ -53,7 +53,7 @@ public class FileResourceService {
 
     Repository<String, FileResource> repo;
 
-    FileRepository<String> writeProcessor;
+    FileRepository<String> fileRepo;
     List<Processor<FileResource>> processors;
 
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
@@ -70,11 +70,11 @@ public class FileResourceService {
     @Inject
     public FileResourceService(
             Repository<String, FileResource> repo,
-            @Named("processor.write") FileRepository<String> writeProcessor,
+            @Named("repository.file.main") FileRepository<String> fileRepo,
             @Named("processors") List<Processor<FileResource>> processors) {
         this.repo = repo;
 
-        this.writeProcessor = writeProcessor;
+        this.fileRepo = fileRepo;
         this.processors = processors;
     }
 
@@ -103,7 +103,7 @@ public class FileResourceService {
 
         // Store
         try {
-            String fileId = writeProcessor.write(null, isp);
+            String fileId = fileRepo.write(null, isp);
             loce.setFileId(fileId);
         } catch (IOException ex) {
             throw new ApplicationException(ex)
@@ -138,7 +138,7 @@ public class FileResourceService {
             p.onPreDelete(e);
         }
 
-        if (writeProcessor.delete(e.getFileId())) {
+        if (fileRepo.delete(e.getFileId())) {
             if (!this.repo.delete(e.getId())) {
                 // TODO roleback
                 throw new ApplicationException()
