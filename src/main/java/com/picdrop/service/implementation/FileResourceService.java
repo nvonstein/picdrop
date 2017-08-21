@@ -40,6 +40,8 @@ import javax.ws.rs.PUT;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
 import com.picdrop.io.FileRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -50,6 +52,8 @@ import com.picdrop.io.FileRepository;
 @Produces("application/json")
 @Authenticated(include = {RoleType.REGISTERED})
 public class FileResourceService {
+
+    Logger log = LogManager.getLogger(this.getClass());
 
     Repository<String, FileResource> repo;
 
@@ -76,6 +80,7 @@ public class FileResourceService {
 
         this.fileRepo = fileRepo;
         this.processors = processors;
+        log.trace("created with ({},{},{})", repo, fileRepo, processors);
     }
 
     protected List<FileItem> parseRequest(HttpServletRequest request) throws FileUploadException {
@@ -87,6 +92,7 @@ public class FileResourceService {
     }
 
     protected FileResource processCreateUpdate(FileResource e, FileItem file) throws ApplicationException {
+        log.entry(e);
         FileResource loce = e;
         String fileId;
         // Pre store
@@ -131,10 +137,12 @@ public class FileResourceService {
                     .devMessage("Error while post-store phase: " + ex.getMessage());
         }
 
+        log.traceExit(loce);
         return loce;
     }
 
     protected void processDelete(FileResource e) throws ApplicationException {
+        log.entry(e);
         boolean res = false;
 
         // Pre process
@@ -187,14 +195,15 @@ public class FileResourceService {
             throw new ApplicationException(ex)
                     .code(ErrorMessageCode.ERROR_DELETE)
                     .status(500)
-                    .devMessage("Error while pre-delete phase: " + ex.getMessage());
+                    .devMessage("Error while post-delete phase: " + ex.getMessage());
         }
-
+        log.traceExit();
     }
 
     @GET
     @Path("/{id}")
     public FileResource getResource(@PathParam("id") String id) throws ApplicationException {
+        log.entry(id);
         FileResource fr = this.repo.get(id);
         if (fr == null) {
             throw new ApplicationException()
@@ -202,19 +211,22 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
+        log.traceExit(fr);
         return fr;
     }
 
     @GET
     @Path("/")
     public List<FileResource> listResource() {
-        return this.repo.list();
+        log.traceEntry();
+        return log.traceExit(this.repo.list());
     }
 
     @POST
     @Path("/")
     @Consumes("multipart/form-data")
     public List<FileResource> create(@Context HttpServletRequest request) throws ApplicationException {
+        log.traceEntry();
         List<FileResource> res = new ArrayList<>();
         List<FileItem> files;
 
@@ -240,7 +252,7 @@ public class FileResourceService {
                 res.add(processCreateUpdate(r, file));
             }
         }
-
+        log.traceExit(res);
         return res;
     }
 
@@ -249,6 +261,7 @@ public class FileResourceService {
     public FileResource update(
             @PathParam("id") String id,
             FileResource entity) throws ApplicationException {
+        log.entry(id, entity);
         FileResource r = getResource(id);
         if (r == null) {
             throw new ApplicationException()
@@ -265,13 +278,14 @@ public class FileResourceService {
                     .code(ErrorMessageCode.ERROR_OBJ_MERGE)
                     .devMessage(ex.getMessage());
         }
-        return repo.update(id, r);
+        return log.traceExit(repo.update(id, r));
     }
 
     @PUT
     @Path("/{id}")
     @Consumes("multipart/form-data")
     public FileResource updateFile(@PathParam("id") String id, @Context HttpServletRequest request) throws ApplicationException {
+        log.entry(id);
         FileResource r = getResource(id);
         List<FileItem> files = null;
         if (r == null) {
@@ -300,12 +314,14 @@ public class FileResourceService {
             }
         }
 
+        log.traceExit(r);
         return r;
     }
 
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") String id) throws ApplicationException {
+        log.entry(id);
         FileResource r = getResource(id);
         if (r != null) {
             processDelete(r);
@@ -315,5 +331,6 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
+        log.traceExit();
     }
 }
