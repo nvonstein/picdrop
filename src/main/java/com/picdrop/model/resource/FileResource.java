@@ -7,6 +7,9 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.picdrop.helper.ObjectMerger;
+import com.picdrop.model.Mergeable;
+import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -93,6 +96,13 @@ public class FileResource extends Resource {
     public void setFileId(String fileId) {
         this.fileId = fileId;
     }
-    
-    
+
+    @Override
+    public FileResource merge(Resource update, ObjectMerger merger) throws IOException {
+        super.merge(update, merger);
+        if (update instanceof FileResource) {
+            merger.merge(this, (FileResource) update);
+        }
+        return this;
+    }
 }

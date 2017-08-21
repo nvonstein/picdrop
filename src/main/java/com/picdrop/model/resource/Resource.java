@@ -7,8 +7,11 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.Identifiable;
+import com.picdrop.model.Mergeable;
 import com.picdrop.model.user.RegisteredUser;
+import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -18,7 +21,7 @@ import org.mongodb.morphia.annotations.Reference;
  *
  * @author i330120
  */
-public abstract class Resource extends Identifiable {
+public abstract class Resource extends Identifiable implements Mergeable<Resource>{
     
     protected long created;
     protected String name;
@@ -69,5 +72,11 @@ public abstract class Resource extends Identifiable {
     public void setOwner(RegisteredUser owner) {
         this.owner = owner;
     }
+
+    @Override
+    public Resource merge(Resource update, ObjectMerger merger) throws IOException {
+        return merger.merge(this, update);
+    }
+
     
 }
