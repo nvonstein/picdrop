@@ -25,4 +25,7 @@ public class RequestContext {
         this.principal = principal;
     }
 
+    public boolean hasPrincipal() {
+        return this.principal != null;
+    }
 }
