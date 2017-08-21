@@ -325,6 +325,7 @@ public class FileResourceService {
         FileResource r = getResource(id);
         if (r != null) {
             processDelete(r);
+            // TODO delete open shares
         } else {
             throw new ApplicationException()
                     .status(404)

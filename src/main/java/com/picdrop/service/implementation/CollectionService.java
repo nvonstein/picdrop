@@ -77,6 +77,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Override
     @Authenticated(include = RoleType.REGISTERED)
     public void delete(@PathParam("id") String id) throws ApplicationException {
+        // TODO delete open shares
         super.delete(id);
     }
 

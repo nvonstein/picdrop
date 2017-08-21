@@ -11,6 +11,8 @@ import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
 import com.picdrop.model.user.RegisteredUser;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -27,6 +29,8 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     
     @Reference
     protected RegisteredUser owner;
+    
+    protected List<String> shareIds = new ArrayList<>();
 
     public Resource() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -72,6 +76,28 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         this.owner = owner;
     }
 
+    @JsonProperty
+    public List<String> getShareIds() {
+        return shareIds;
+    }
+    
+    @JsonIgnore
+    public Resource addShareId(String id) {
+        this.shareIds.add(id);
+        return this;
+    }
+    
+    @JsonIgnore
+    public Resource deleteShareId(String id) {
+        this.shareIds.remove(id);
+        return this;
+    }
+
+    @JsonIgnore
+    public void setShareIds(List<String> shareIds) {
+        this.shareIds = shareIds;
+    }
+    
     @Override
     public Resource merge(Resource update) throws IOException {
         if (update == null) {
