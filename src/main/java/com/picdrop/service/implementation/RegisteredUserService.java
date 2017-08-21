@@ -25,6 +25,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
+import java.io.IOException;
+import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -107,14 +109,22 @@ public class RegisteredUserService {
     @Authenticated(include = {RoleType.REGISTERED})
     public RegisteredUser updateMe(RegisteredUser entity) throws ApplicationException {
         log.entry(entity);
-        User me = contextProv.get().getPrincipal();
+        RegisteredUser me = contextProv.get().getPrincipal().to(RegisteredUser.class);
         if (me == null) {
             throw new ApplicationException()
                     .status(404)
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage("No principal set");
         }
-        return log.traceExit(repo.update(me.getId(), entity));
+        try {
+            me = me.merge(entity);
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .status(500)
+                    .code(ErrorMessageCode.ERROR_OBJ_MERGE)
+                    .devMessage(ex.getMessage());
+        }
+        return log.traceExit(repo.update(me.getId(), me));
     }
 
 }
