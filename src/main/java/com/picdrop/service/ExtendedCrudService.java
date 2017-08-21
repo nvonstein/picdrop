@@ -5,6 +5,7 @@
  */
 package com.picdrop.service;
 
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.model.Identifiable;
 import com.picdrop.repository.Repository;
 import javax.ws.rs.DELETE;
@@ -38,7 +39,7 @@ public abstract class ExtendedCrudService<T extends Identifiable, REPO extends R
 
     @POST
     @Path("/{id}/{field}")
-    public Object addSubResource(@PathParam("id") String id, @PathParam("field") String field, Identifiable entity) {
+    public Object addSubResource(@PathParam("id") String id, @PathParam("field") String field, Identifiable entity) throws ApplicationException {
         T model = super.get(id);
         if (model == null) {
             return null; // 404
@@ -49,7 +50,7 @@ public abstract class ExtendedCrudService<T extends Identifiable, REPO extends R
 
     @GET
     @Path("/{id}/{field}")
-    public Object getSubResource(@PathParam("id") String id, @PathParam("field") String field) {
+    public Object getSubResource(@PathParam("id") String id, @PathParam("field") String field) throws ApplicationException {
         T model = super.get(id);
         if (model == null) {
             return null; // 404
@@ -60,7 +61,7 @@ public abstract class ExtendedCrudService<T extends Identifiable, REPO extends R
 
     @DELETE
     @Path("/{id}/{field}/{eid}")
-    public Object deleteSubResource(@PathParam("id") String id, @PathParam("field") String field, @PathParam("eid") String eid) {
+    public Object deleteSubResource(@PathParam("id") String id, @PathParam("field") String field, @PathParam("eid") String eid) throws ApplicationException {
         T model = super.get(id);
         if (model == null) {
             return null; // 404

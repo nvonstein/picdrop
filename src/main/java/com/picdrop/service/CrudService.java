@@ -5,6 +5,7 @@
  */
 package com.picdrop.service;
 
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.repository.Repository;
 import java.util.List;
 import javax.inject.Inject;
@@ -32,33 +33,33 @@ public abstract class CrudService<ID, T, REPO extends Repository<ID, T>> {
     @POST
     @Path(value = "/")
     @Transactional
-    public T create(T entity) {
+    public T create(T entity) throws ApplicationException {
         return this.repo.save(entity);
     }
 
     @GET
     @Path("/")
-    public List<T> list() {
+    public List<T> list() throws ApplicationException {
         return this.repo.list();
     }
 
     @DELETE
     @Path(value = "/{id}")
     @Transactional
-    public void delete(@PathParam(value = "id") ID id) {
+    public void delete(@PathParam(value = "id") ID id) throws ApplicationException {
         this.repo.delete(id);
     }
 
     @GET
     @Path(value = "/{id}")
-    public T get(@PathParam(value = "id") ID id) {
+    public T get(@PathParam(value = "id") ID id) throws ApplicationException {
         return this.repo.get(id);
     }
 
     @PUT
     @Path(value = "/{id}")
     @Transactional
-    public T update(@PathParam(value = "id") ID id, T entity) {
+    public T update(@PathParam(value = "id") ID id, T entity) throws ApplicationException {
         return this.repo.update(id, entity);
     }
 }

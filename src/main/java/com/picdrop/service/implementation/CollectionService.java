@@ -8,6 +8,7 @@ package com.picdrop.service.implementation;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
@@ -59,7 +60,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Path("/{id}")
     @Override
     @Authenticated(include = RoleType.REGISTERED)
-    public Collection update(@PathParam("id") String id, Collection entity) {
+    public Collection update(@PathParam("id") String id, Collection entity) throws ApplicationException {
         return super.update(id, entity); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -67,7 +68,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Path("/{id}")
     @Override
     @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
-    public Collection get(@PathParam("id") String id) {
+    public Collection get(@PathParam("id") String id) throws ApplicationException {
         return super.get(id);
     }
 
@@ -75,7 +76,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Path("/{id}")
     @Override
     @Authenticated(include = RoleType.REGISTERED)
-    public void delete(@PathParam("id") String id) {
+    public void delete(@PathParam("id") String id) throws ApplicationException {
         super.delete(id);
     }
 
@@ -83,14 +84,14 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Path("/")
     @Override
     @Authenticated(include = RoleType.REGISTERED)
-    public List<Collection> list() {
+    public List<Collection> list() throws ApplicationException {
         return super.list();
     }
 
     @POST
     @Override
     @Authenticated(include = RoleType.REGISTERED)
-    public Collection create(Collection entity) {      
+    public Collection create(Collection entity) throws ApplicationException {      
         try {
             entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
         } catch (IllegalArgumentException ex) {
@@ -103,7 +104,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @GET
     @Path("/{id}/elements")
     @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
-    public List<Collection.CollectionItem> listElements(@PathParam("id") String id) {
+    public List<Collection.CollectionItem> listElements(@PathParam("id") String id) throws ApplicationException {
         Collection c = get(id);
         if (c == null) {
             return null; // 404
@@ -114,7 +115,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @GET
     @Path("/{id}/elements/{eid}")
     @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
-    public Collection.CollectionItem getElement(@PathParam("id") String id, @PathParam("eid") String eid) {
+    public Collection.CollectionItem getElement(@PathParam("id") String id, @PathParam("eid") String eid) throws ApplicationException {
         Collection c = get(id);
         if (c == null) {
             return null; // 404
@@ -130,7 +131,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @DELETE
     @Path("/{id}/elements/{eid}")
     @Authenticated(include = RoleType.REGISTERED)
-    public void deleteElement(@PathParam("id") String id, @PathParam("eid") String eid) {
+    public void deleteElement(@PathParam("id") String id, @PathParam("eid") String eid) throws ApplicationException {
         Collection c = get(id);
         if (c == null) {
             return; // 404
@@ -149,7 +150,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @POST
     @Path("/{id}/elements")
     @Authenticated(include = RoleType.REGISTERED)
-    public Collection.CollectionItem addElement(@PathParam("id") String id, Collection.CollectionItem entity) {
+    public Collection.CollectionItem addElement(@PathParam("id") String id, Collection.CollectionItem entity) throws ApplicationException {
         Collection c = get(id);
         if (c == null) {
             return null;// 404
