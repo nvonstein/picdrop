@@ -24,25 +24,24 @@ import org.apache.logging.log4j.Logger;
 @Provider
 @Produces("application/json")
 public class ApplicationExeptionMapper implements ExceptionMapper<ApplicationException> {
-
+    
     Logger log = LogManager.getRootLogger();
-
+    
     @Inject
     ObjectMapper mapper;
-
+    
+    protected void logMessage(ApplicationException e) {       
+        if (e.getStatus() >= 500) {
+            doLogError(e);
+        } else {
+            doLogDebug(e);
+        }
+    }
+    
     @Override
     public Response toResponse(ApplicationException exception) {
+        logMessage(exception);
         try {
-            if (exception.getCause() != null) {
-                log.debug(Strings.isNullOrEmpty(exception.getDevMessage())
-                        ? exception.getMessage()
-                        : exception.getDevMessage(),
-                        exception);
-            } else {
-                log.debug(Strings.isNullOrEmpty(exception.getDevMessage())
-                        ? exception.getMessage()
-                        : exception.getDevMessage());
-            }
             return Response
                     .status(exception.getStatus())
                     .entity(
@@ -54,5 +53,29 @@ public class ApplicationExeptionMapper implements ExceptionMapper<ApplicationExc
             return Response.status(exception.getStatus()).entity("{}").build();
         }
     }
-
+    
+    private void doLogError(ApplicationException e) {
+        String msg = Strings.isNullOrEmpty(e.getDevMessage())
+                ? e.getMessage()
+                : e.getDevMessage();
+        
+        if (e.getCause() != null) {
+            log.error(msg, e);
+        } else {
+            log.error(msg);
+        }
+    }
+    
+    private void doLogDebug(ApplicationException e) {
+        String msg = Strings.isNullOrEmpty(e.getDevMessage())
+                ? e.getMessage()
+                : e.getDevMessage();
+        
+        if (e.getCause() != null) {
+            log.debug(msg, e);
+        } else {
+            log.debug(msg);
+        }
+    }
+    
 }
