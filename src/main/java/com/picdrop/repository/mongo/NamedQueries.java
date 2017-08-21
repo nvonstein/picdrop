@@ -23,6 +23,7 @@ public abstract class NamedQueries {
         m.put("ownedBy", "{ owner: DBRef(?0, ObjectId(?1)) }");
         
         m.put("registeredUser.byEmail", "{ email: ?0 }");
+         m.put("shares.byUri", "{ uri: ?0 }");
         
         return Collections.unmodifiableMap(m);
     }
