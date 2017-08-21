@@ -11,6 +11,7 @@ import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.picdrop.helper.HttpHelper;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import org.joda.time.DateTime;
  *
  * @author i330120
  */
-public class TokenAuthenticator implements Authenticator {
+public class TokenAuthenticator implements Authenticator<User> {
 
     String authCookieName;
     WebTokenFactory tfactory;
@@ -41,7 +42,7 @@ public class TokenAuthenticator implements Authenticator {
     }
 
     @Override
-    public RegisteredUser authenticate(HttpServletRequest request) {
+    public User authenticate(HttpServletRequest request) {
         String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (Strings.isNullOrEmpty(auth)) {
             auth = HttpHelper.getCookieValue(authCookieName, request.getCookies());

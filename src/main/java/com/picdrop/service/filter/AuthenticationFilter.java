@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.User;
 import com.picdrop.security.authentication.authenticator.Authenticator;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -35,7 +36,7 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
 
     @Inject
     @Named("token")
-    Authenticator authenticator;
+    Authenticator<User> authenticator;
     @Context
     HttpServletRequest request;
     @Inject
@@ -61,7 +62,7 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
                 return;
             }
 
-            RegisteredUser user = authenticator.authenticate(request);
+            User user = authenticator.authenticate(request);
             if (user == null) {
                 crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
                 return;

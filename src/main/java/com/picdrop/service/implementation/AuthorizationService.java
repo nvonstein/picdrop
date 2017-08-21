@@ -38,7 +38,7 @@ public class AuthorizationService {
     CookieProviderFactory cookieProvFactory;
     WebTokenFactory tokenFactory;
 
-    Authenticator authenticator;
+    Authenticator<RegisteredUser> authenticator;
 
     @com.google.inject.Inject
     Provider<RequestContext> contextProv;
@@ -50,7 +50,7 @@ public class AuthorizationService {
     @Inject
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
-            @Named("basic") Authenticator authenticator,
+            @Named("basic") Authenticator<RegisteredUser> authenticator,
             CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
             @Named("service.session.jwt.exp") int jwtExpiry,

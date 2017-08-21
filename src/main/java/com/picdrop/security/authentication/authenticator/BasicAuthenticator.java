@@ -19,7 +19,7 @@ import javax.ws.rs.core.HttpHeaders;
  *
  * @author i330120
  */
-public class BasicAuthenticator implements Authenticator {
+public class BasicAuthenticator implements Authenticator<RegisteredUser> {
     
     Repository<String, RegisteredUser> userRepo;
 

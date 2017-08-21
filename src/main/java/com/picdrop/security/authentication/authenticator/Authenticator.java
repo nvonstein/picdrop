@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author i330120
  */
-public interface Authenticator {
+public interface Authenticator<T> {
     
-    RegisteredUser authenticate(HttpServletRequest request);
+    T authenticate(HttpServletRequest request);
 }
