@@ -47,6 +47,10 @@ public enum FileType {
     private static boolean isWildType(String type) {
         return "*".equals(type);
     }
+    
+    private boolean isUnknown() {
+        return this == FileType.UNKNOWN;
+    }
 
     private static boolean covers(String[] source, String[] target) {
         if ((source == null) || (target == null)) {
@@ -68,6 +72,13 @@ public enum FileType {
         if (ft == null) {
             return false;
         }
+        if (this.isUnknown() && ft.isUnknown()) {
+            return true;
+        }
+        if (this.isUnknown() || ft.isUnknown()) {
+            return false;
+        }
+        
         String[] extChain = ft.name.split("/");
         String[] intChain = this.name.split("/");
 
@@ -78,6 +89,13 @@ public enum FileType {
         if (ft == null) {
             return false;
         }
+        if (this.isUnknown() && ft.isUnknown()) {
+            return true;
+        }
+        if (this.isUnknown() || ft.isUnknown()) {
+            return false;
+        }
+        
         String[] extChain = ft.name.split("/");
         String[] intChain = this.name.split("/");
 
