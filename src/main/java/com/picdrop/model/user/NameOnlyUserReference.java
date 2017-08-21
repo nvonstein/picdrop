@@ -17,22 +17,26 @@ import org.mongodb.morphia.annotations.Reference;
  */
 public class NameOnlyUserReference {
 
-    @Reference
-    User user; // TODO RegisteredUser?
+    String userId;
     String name;
 
     public NameOnlyUserReference() {
     }
 
     @JsonIgnore
-    public User getUser() {
-        return user;
+    public String getUser() {
+        return userId;
     }
 
     @JsonIgnore
+    public void setUser(String userId) {
+        this.userId = userId;
+    }
+    
+    @JsonIgnore
     public void setUser(User user) {
-        this.user = user;
-        setName(user.getFullName());
+        this.userId = user.getId();
+        this.name = user.getFullName();
     }
 
     @JsonProperty
@@ -60,7 +64,7 @@ public class NameOnlyUserReference {
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
-        if ((this.user != null) && !this.user.equals(other.getUser())) {
+        if ((this.userId != null) && !this.userId.equals(other.getUser())) {
             return false;
         }
         return true;
