@@ -81,6 +81,12 @@ public class RegisteredUser extends User {
         this.email = email;
     }
 
+    @JsonIgnore
+    @Override
+    public String getFullName() {
+        return this.name + " " + this.lastname;
+    }
+
     @JsonProperty
     public long getLastlogin() {
         return lastlogin;
@@ -102,7 +108,7 @@ public class RegisteredUser extends User {
         if (update instanceof RegisteredUser) {
             RegisteredUser nup = (RegisteredUser) update;
             if (nup.lastname != null) {
-               this.lastname = nup.lastname;
+                this.lastname = nup.lastname;
             }
             if (!Strings.isNullOrEmpty(nup.email)) {
                 this.email = nup.email;
