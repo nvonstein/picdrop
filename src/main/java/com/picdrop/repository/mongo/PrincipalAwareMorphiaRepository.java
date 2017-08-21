@@ -134,6 +134,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public T get(String id, User context) {
+        if (context == null) {
+            return super.get(id);
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj, context);
@@ -149,6 +152,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public boolean delete(String id, User context) {
+        if (context == null) {
+            return super.delete(id);
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj, context);
@@ -164,6 +170,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public T update(String id, T entity, User context) {
+        if (context == null) {
+            return super.update(id, entity);
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj, context);
@@ -180,6 +189,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public List<T> list(User context) {
+        if (context == null) {
+            return super.list();
+        }
         DBObject dbObj = addPrincipalClause(new BasicDBObject(), context);
 
         if (dbObj == null) {
@@ -193,6 +205,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public List<T> queryNamed(String qname, User context, Object... params) throws IOException {
+        if (context == null) {
+            return super.queryNamed(qname, params);
+        }
         DBObject dbObj = compileQuery(qname, params);
 
         dbObj = addPrincipalClause(dbObj, context);
