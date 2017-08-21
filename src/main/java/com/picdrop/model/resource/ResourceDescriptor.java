@@ -6,9 +6,8 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.FileType;
-import com.picdrop.model.Mergeable;
+import com.picdrop.model.merger.Mergeable;
 import java.io.IOException;
 
 /**
@@ -70,8 +69,16 @@ public class ResourceDescriptor implements Mergeable<ResourceDescriptor>{
     }
     
     @Override
-    public ResourceDescriptor merge(ResourceDescriptor update, ObjectMerger merger) throws IOException {
-        return merger.merge(this, update);
+    public ResourceDescriptor merge(ResourceDescriptor update) throws IOException {
+        if (update == null) {
+            return this;
+        }
+        if ((update.type != null) && !this.isGlobalWildtype()) {
+            if (this.type.isCovering(update.type)) {
+                this.type = update.type;
+            }
+        }
+        return this;
     }
 
 }

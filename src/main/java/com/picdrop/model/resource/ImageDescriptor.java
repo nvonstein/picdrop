@@ -7,7 +7,6 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.FileType;
 import java.io.IOException;
 import java.util.HashMap;
@@ -60,10 +59,17 @@ public class ImageDescriptor extends ResourceDescriptor {
     }
 
     @Override
-    public ImageDescriptor merge(ResourceDescriptor update, ObjectMerger merger) throws IOException {
-        super.merge(update, merger);
+    public ImageDescriptor merge(ResourceDescriptor update) throws IOException {
+        if (update == null) {
+            return this;
+        }
+        
+        super.merge(update);
         if (update.isImage()) {
-            merger.merge(this, update.to(ImageDescriptor.class));
+            ImageDescriptor nup = update.to(ImageDescriptor.class);
+            if (nup.orientation != null) {
+                this.orientation = nup.orientation;
+            }
         }
         return this;
     }

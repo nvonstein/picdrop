@@ -13,7 +13,6 @@ import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
-import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.resource.FileResource;
 import java.io.IOException;
@@ -67,9 +66,6 @@ public class FileResourceService {
 
     @Inject
     InputStreamProviderFactory instProvFac;
-
-    @Inject
-    ObjectMerger merger;
 
     @Inject
     public FileResourceService(
@@ -262,7 +258,7 @@ public class FileResourceService {
         }
 
         try {
-            r = merger.merge(r, entity);
+            r = r.merge(entity);
         } catch (IOException ex) {
             throw new ApplicationException(ex)
                     .status(500)

@@ -7,9 +7,8 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.Identifiable;
-import com.picdrop.model.Mergeable;
+import com.picdrop.model.merger.Mergeable;
 import com.picdrop.model.user.RegisteredUser;
 import java.io.IOException;
 import org.bson.types.ObjectId;
@@ -74,8 +73,17 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     }
 
     @Override
-    public Resource merge(Resource update, ObjectMerger merger) throws IOException {
-        return merger.merge(this, update);
+    public Resource merge(Resource update) throws IOException {
+        if (update == null) {
+            return this;
+        }
+        if (update.name != null) {
+            this.name = update.name;
+        }
+        if ((update.owner != null) && !update.owner.equals(this.owner)) {
+            this.owner = update.owner;
+        }
+        return this;
     }
 
     
