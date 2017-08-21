@@ -123,7 +123,17 @@ public class Collection extends Resource {
             this.comments = comments;
         }
         
+        @JsonIgnore
+        public CollectionItem addRating(Rating r) {
+            this.ratings.add(r);
+            return this;
+        }
         
+        @JsonIgnore
+        public CollectionItem addComment(Comment c) {
+            this.comments.add(c);
+            return this;
+        }
     }
 
     public static class Rating extends NameOnlyUserReference {
