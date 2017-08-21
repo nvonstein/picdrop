@@ -8,7 +8,7 @@ package com.picdrop.model.resource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.picdrop.model.Identifiable;
-import com.picdrop.model.merger.Mergeable;
+import com.picdrop.model.Mergeable;
 import com.picdrop.model.user.RegisteredUser;
 import java.io.IOException;
 import org.bson.types.ObjectId;

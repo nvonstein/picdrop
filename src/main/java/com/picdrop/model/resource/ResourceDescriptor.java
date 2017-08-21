@@ -7,7 +7,7 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.picdrop.model.FileType;
-import com.picdrop.model.merger.Mergeable;
+import com.picdrop.model.Mergeable;
 import java.io.IOException;
 
 /**
