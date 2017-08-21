@@ -86,5 +86,13 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         return this;
     }
 
+    @JsonIgnore
+    public boolean isCollection() {
+        return false;
+    }
+    
+    public boolean isFile() {
+        return false;
+    }
     
 }

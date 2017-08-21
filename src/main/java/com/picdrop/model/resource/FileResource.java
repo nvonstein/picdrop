@@ -114,4 +114,11 @@ public class FileResource extends Resource {
         }
         return this;
     }
+
+    @Override
+    public boolean isFile() {
+        return true;
+    }
+    
+    
 }

@@ -173,4 +173,9 @@ public class Collection extends Resource {
             this.created = created;
         } 
     }
+
+    @Override
+    public boolean isCollection() {
+        return true;}
+    
 }
