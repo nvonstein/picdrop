@@ -23,6 +23,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -32,6 +34,8 @@ import com.picdrop.security.authentication.RoleType;
 @Consumes("application/json")
 @Produces("application/json")
 public class RegisteredUserService {
+    
+    Logger log = LogManager.getLogger(this.getClass());
 
     Repository<String, RegisteredUser> repo;
 
@@ -43,6 +47,7 @@ public class RegisteredUserService {
     @Inject
     public RegisteredUserService(Repository<String, RegisteredUser> repo) {
         this.repo = repo;
+        log.trace("created with ({})", repo);
     }
 
     @Inject
@@ -53,6 +58,7 @@ public class RegisteredUserService {
     @POST
     @Path("/")
     public RegisteredUser create(RegisteredUser entity) {
+        log.entry(entity);
         if (Strings.isNullOrEmpty(entity.getPhash())) {
             throw new IllegalArgumentException("no phash provided"); // 400
         }
@@ -65,35 +71,39 @@ public class RegisteredUserService {
             entity.setName("PicdropUser");
         }
 
-        return repo.save(entity);
+        return log.traceExit(repo.save(entity));
     }
 
     @GET
     @Path("/me")
     @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
     public User getMe() {
-        return contextProv.get().getPrincipal();
+        log.traceEntry();
+        return log.traceExit(contextProv.get().getPrincipal());
     }
 
     @DELETE
     @Path("/me")
     @Authenticated(include = {RoleType.REGISTERED})
     public void deleteMe() {
+        log.traceEntry();
         User me = contextProv.get().getPrincipal();
         if (me != null) {
             repo.delete(me.getId());
         }
+        log.traceExit();
     }
 
     @PUT
     @Path("/me")
     @Authenticated(include = {RoleType.REGISTERED})
     public RegisteredUser updateMe(RegisteredUser entity) {
+        log.entry(entity);
         User me = contextProv.get().getPrincipal();
         if (me == null) {
             return null; // 404
         }
-        return repo.update(me.getId(), entity);
+        return log.traceExit(repo.update(me.getId(), entity));
     }
 
 }
