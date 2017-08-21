@@ -7,6 +7,7 @@ package com.picdrop.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Strings;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -14,6 +15,7 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
 import com.picdrop.security.authentication.Role;
 import com.picdrop.security.authentication.RoleType;
+import java.io.IOException;
 
 /**
  *
@@ -93,4 +95,23 @@ public class RegisteredUser extends User {
     public void setLastLogin() {
         this.lastlogin = DateTime.now(DateTimeZone.UTC).getMillis();
     }
+
+    @Override
+    public RegisteredUser merge(User update) throws IOException {
+        super.merge(update);
+        if (update instanceof RegisteredUser) {
+            RegisteredUser nup = (RegisteredUser) update;
+            if (nup.lastname != null) {
+               this.lastname = nup.lastname;
+            }
+            if (!Strings.isNullOrEmpty(nup.email)) {
+                this.email = nup.email;
+            }
+            if (!Strings.isNullOrEmpty(nup.phash)) {
+                this.phash = nup.phash;
+            }
+        }
+        return this;
+    }
+
 }

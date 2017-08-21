@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.picdrop.model.Identifiable;
+import com.picdrop.model.Mergeable;
 import com.picdrop.security.authentication.Role;
 import com.picdrop.security.authentication.RoleType;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import org.mongodb.morphia.annotations.Entity;
 //@JsonTypeName(value = "user")
 @Entity("users")
 @Role(roles = RoleType.USER)
-public class User extends Identifiable {
+public class User extends Identifiable implements Mergeable<User>{
 
     protected String name;
     protected long created;
@@ -97,5 +98,13 @@ public class User extends Identifiable {
             throw new IllegalArgumentException(String.format("cannot cast to type '%s'", type.getName()));
         }
         return type.cast(this);
+    }
+
+    @Override
+    public User merge(User update) throws IOException {
+        if (update.name != null) {
+            this.name = update.name;
+        }
+        return this;
     }
 }
