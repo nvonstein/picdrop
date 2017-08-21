@@ -9,6 +9,8 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import com.picdrop.exception.ApplicationException;
+import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
@@ -34,7 +36,7 @@ import org.apache.logging.log4j.Logger;
 @Consumes("application/json")
 @Produces("application/json")
 public class RegisteredUserService {
-    
+
     Logger log = LogManager.getLogger(this.getClass());
 
     Repository<String, RegisteredUser> repo;
@@ -57,15 +59,21 @@ public class RegisteredUserService {
 
     @POST
     @Path("/")
-    public RegisteredUser create(RegisteredUser entity) {
+    public RegisteredUser create(RegisteredUser entity) throws ApplicationException {
         log.entry(entity);
         if (Strings.isNullOrEmpty(entity.getPhash())) {
-            throw new IllegalArgumentException("no phash provided"); // 400
+            throw new ApplicationException()
+                    .code(ErrorMessageCode.BAD_PHASH)
+                    .status(400);
         }
         if (Strings.isNullOrEmpty(entity.getEmail())) {
-            throw new IllegalArgumentException("no email provided"); // 400
+            throw new ApplicationException()
+                    .code(ErrorMessageCode.BAD_EMAIL)
+                    .status(400);
         } else if (!emailPattern.matcher(entity.getEmail()).matches()) {
-            throw new IllegalArgumentException("invalid email provided"); // 400
+            throw new ApplicationException()
+                    .code(ErrorMessageCode.BAD_EMAIL)
+                    .status(400);
         }
         if (Strings.isNullOrEmpty(entity.getName())) {
             entity.setName("PicdropUser");
@@ -97,11 +105,14 @@ public class RegisteredUserService {
     @PUT
     @Path("/me")
     @Authenticated(include = {RoleType.REGISTERED})
-    public RegisteredUser updateMe(RegisteredUser entity) {
+    public RegisteredUser updateMe(RegisteredUser entity) throws ApplicationException {
         log.entry(entity);
         User me = contextProv.get().getPrincipal();
         if (me == null) {
-            return null; // 404
+            throw new ApplicationException()
+                    .status(404)
+                    .code(ErrorMessageCode.NOT_FOUND)
+                    .devMessage("No principal set");
         }
         return log.traceExit(repo.update(me.getId(), entity));
     }

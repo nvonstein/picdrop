@@ -15,7 +15,9 @@ public enum ErrorMessageCode {
     BAD_UPLOAD("ec00002", "Bad request: Unable to parse upload request."),
     ERROR_UPLOAD("ec00003", "Unable to process upload."),
     NOT_FOUND("ec00004", "Resource not found"),
-    ERROR_OBJ_MERGE("ec00005", "Error while merging state with database.");
+    ERROR_OBJ_MERGE("ec00005", "Error while merging state with database."),
+    BAD_PHASH("ec00006","Bad request: No password provided."),
+    BAD_EMAIL("ec00007","Bad request: No or invalid email provided.");
 
     private String code;
     private String defaultMessage;
