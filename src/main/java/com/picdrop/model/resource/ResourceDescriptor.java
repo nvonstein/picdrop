@@ -6,14 +6,16 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.FileType;
+import com.picdrop.model.Mergeable;
 import java.io.IOException;
 
 /**
  *
  * @author i330120
  */
-public class ResourceDescriptor {
+public class ResourceDescriptor implements Mergeable<ResourceDescriptor>{
 
     protected FileType type;
 
@@ -51,4 +53,25 @@ public class ResourceDescriptor {
         }
         return new ResourceDescriptor(FileType.UNKNOWN);
     }
+
+    @JsonIgnore
+    public boolean isImage() {
+        return FileType.IMAGE_WILDTYPE.isCovering(this.type);
+    }
+
+    @JsonIgnore
+    public boolean isUnknown() {
+        return FileType.UNKNOWN.isCovering(this.type);
+    }
+    
+    @JsonIgnore
+    public boolean isGlobalWildtype() {
+        return this.type.isCovering(FileType.WILDTYPE);
+    }
+    
+    @Override
+    public ResourceDescriptor merge(ResourceDescriptor update, ObjectMerger merger) throws IOException {
+        return merger.merge(this, update);
+    }
+
 }

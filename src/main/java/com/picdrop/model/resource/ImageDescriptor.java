@@ -7,7 +7,9 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.picdrop.helper.ObjectMerger;
 import com.picdrop.model.FileType;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.mongodb.morphia.annotations.Embedded;
@@ -56,4 +58,14 @@ public class ImageDescriptor extends ResourceDescriptor {
     public void addThumbnailUri(String key, String value) {
         this.thumbnailUris.put(key, value);
     }
+
+    @Override
+    public ImageDescriptor merge(ResourceDescriptor update, ObjectMerger merger) throws IOException {
+        super.merge(update, merger);
+        if (update.isImage()) {
+            merger.merge(this, update.to(ImageDescriptor.class));
+        }
+        return this;
+    }
+
 }
