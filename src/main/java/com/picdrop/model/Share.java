@@ -28,6 +28,7 @@ public class Share extends Identifiable {
     @Indexed
     protected String uri;
     
+    @Reference
     protected Resource resource;
     
     @Reference

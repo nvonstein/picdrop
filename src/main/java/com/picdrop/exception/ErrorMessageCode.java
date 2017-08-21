@@ -17,7 +17,9 @@ public enum ErrorMessageCode {
     NOT_FOUND("ec00004", "Resource not found"),
     ERROR_OBJ_MERGE("ec00005", "Error while merging state with database."),
     BAD_PHASH("ec00006","Bad request: No password provided."),
-    BAD_EMAIL("ec00007","Bad request: No or invalid email provided.");
+    BAD_EMAIL("ec00007","Bad request: No or invalid email provided."),
+    BAD_OPERATION("ec00008","Bad request: This operation is not possible on this entity type"),
+    BAD_NAME("ec00009","Bad request: Name has not a valid format or is too long");
 
     private String code;
     private String defaultMessage;
