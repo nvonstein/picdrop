@@ -95,7 +95,7 @@ public class User extends Identifiable implements Mergeable<User>{
             throw new IllegalArgumentException("type is null");
         }
         if (!type.isInstance(this)) {
-            throw new IllegalArgumentException(String.format("cannot cast to type '%s'", type.getName()));
+            throw new IllegalArgumentException(String.format("cannot cast to type '%s'", type.getName())); // TODO maybe change to IOException
         }
         return type.cast(this);
     }
