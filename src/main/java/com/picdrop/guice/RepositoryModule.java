@@ -55,6 +55,8 @@ public class RepositoryModule implements Module {
         bindCollectionsRepo(binder, ds);
         // Collectionitem repo
         bindCollectionItemRepo(binder, ds);
+        // Share repo
+        bindShareRepo(binder, ds);
     }
 
     protected Datastore bindDatastore(Binder binder) {
@@ -86,5 +88,9 @@ public class RepositoryModule implements Module {
     protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
         binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
         }).toInstance(new MorphiaRepository<>(ds, Collection.CollectionItem.class));
+    }
+    
+    protected void bindShareRepo(Binder binder, Datastore ds) {
+        
     }
 }

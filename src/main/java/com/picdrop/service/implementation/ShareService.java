@@ -48,6 +48,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     @Inject
     Provider<RequestContext> contextProv;
 
+    @Inject
     public ShareService(AwareRepository<String, Share, User> repo) {
         super(repo);
         log.trace("created with ({})", repo);

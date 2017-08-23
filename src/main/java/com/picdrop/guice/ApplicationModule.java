@@ -15,6 +15,7 @@ import com.picdrop.service.implementation.CollectionService;
 import com.picdrop.service.implementation.GroupService;
 import com.picdrop.service.implementation.RegisteredUserService;
 import com.picdrop.service.implementation.FileResourceService;
+import com.picdrop.service.implementation.ShareService;
 import com.picdrop.service.implementation.UserService;
 import javax.inject.Singleton;
 
@@ -51,5 +52,6 @@ public class ApplicationModule implements Module {
         binder.bind(RegisteredUserService.class).in(Singleton.class);
         binder.bind(AuthorizationService.class).in(Singleton.class);
         binder.bind(CollectionService.class).in(Singleton.class);
+        binder.bind(ShareService.class).in(Singleton.class);
     }
 }
