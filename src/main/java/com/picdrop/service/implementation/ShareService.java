@@ -53,6 +53,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
 
     Repository<String, Collection> crepo;
     Repository<String, FileResource> frepo;
+    Repository<String, Collection.CollectionItem> cirepo;
 
     @Inject
     Provider<RequestContext> contextProv;
@@ -60,13 +61,15 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     @Inject
     public ShareService(AwareRepository<String, Share, User> repo,
             Repository<String, Collection> crepo,
+            Repository<String, Collection.CollectionItem> cirepo,
             Repository<String, FileResource> frepo) {
         super(repo);
 
         this.crepo = crepo;
         this.frepo = frepo;
+        this.cirepo = cirepo;
 
-        log.trace("created with ({},{},{})", repo, crepo, frepo);
+        log.trace("created with ({},{},{},{})", repo, crepo, cirepo, frepo);
     }
 
     private boolean verifyName(NameOnlyUserReference entity) throws ApplicationException {
@@ -113,8 +116,10 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         }
         Collection c = (Collection) s.getResource();
         for (Collection.CollectionItem item : c.getResources()) {
-            if (c.getId().equals(eid)) {
+            if (item.getId().equals(eid)) {
                 item.addRating(entity);
+
+                item = cirepo.update(item.getId(), item);
                 log.traceExit(item);
                 return item;
             }
@@ -161,8 +166,10 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
         Collection c = (Collection) s.getResource();
         for (Collection.CollectionItem item : c.getResources()) {
-            if (c.getId().equals(eid)) {
+            if (item.getId().equals(eid)) {
                 item.addComment(entity);
+
+                item = this.cirepo.update(item.getId(), item);
                 log.traceExit(item);
                 return item;
             }
