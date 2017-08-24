@@ -116,12 +116,8 @@ public class CollectionService extends CrudService<String, Collection, Repositor
             ciRepo.delete(ci.getId());
         }
         
-        if (!repo.delete(id)) { // TODO rethink capturing error on deletion
-            throw new ApplicationException()
-                    .status(500)
-                    .code(ErrorMessageCode.ERROR_DELETE)
-                    .devMessage("Repository returned 'false'");
-        }
+        repo.delete(id);
+        
         log.traceExit();
     }
     
