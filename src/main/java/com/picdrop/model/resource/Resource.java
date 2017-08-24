@@ -106,9 +106,6 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         if (update.name != null) {
             this.name = update.name;
         }
-        if ((update.owner != null) && !update.owner.equals(this.owner)) {
-            this.owner = update.owner;
-        }
         return this;
     }
 
