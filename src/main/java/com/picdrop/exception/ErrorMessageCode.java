@@ -18,10 +18,12 @@ public enum ErrorMessageCode {
     ERROR_OBJ_MERGE("ec00005", "Error while merging state with database."),
     BAD_PHASH("ec00006","Bad request: No password provided."),
     BAD_EMAIL("ec00007","Bad request: No or invalid email provided."),
-    BAD_OPERATION("ec00008","Bad request: This operation is not possible on this entity type"),
-    BAD_NAME("ec00009","Bad request: Name has not a valid format or is too long"), 
-    BAD_RESOURCE("ec000010","Bad request: Resource is not set or invalid"), 
-    BAD_REQUEST_BODY("ec000011","Bad request: No request body");
+    BAD_OPERATION("ec00008","Bad request: This operation is not possible on this entity type."),
+    BAD_NAME("ec00009","Bad request: Name has not a valid format or is too long."), 
+    BAD_RESOURCE("ec000010","Bad request: Resource is not set or invalid."), 
+    BAD_REQUEST_BODY("ec000011","Bad request: No request body."), 
+    BAD_CITEM("ec000012","Bad request: Collection item is not set or invalid."), 
+    BAD_CITEM_NOT_FOUND("ec000013","Bad request: Collection item's resource could not be resolved given id.");
 
     private String code;
     private String defaultMessage;
