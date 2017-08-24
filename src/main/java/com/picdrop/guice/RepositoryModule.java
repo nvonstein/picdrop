@@ -12,10 +12,12 @@ import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Group;
+import com.picdrop.model.Share;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
+import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaRepository;
@@ -76,13 +78,21 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindResourceRepo(Binder binder, Datastore ds) {
+        PrincipalAwareMorphiaRepository<FileResource> repo = new PrincipalAwareMorphiaRepository<>(ds, FileResource.class);
+
         binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
-        }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, FileResource.class));
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AwareRepository<String, FileResource, User>>() {
+        }).toInstance(repo);
     }
 
     protected void bindCollectionsRepo(Binder binder, Datastore ds) {
+        PrincipalAwareMorphiaRepository<Collection> repo = new PrincipalAwareMorphiaRepository<>(ds, Collection.class);
+
         binder.bind(new TypeLiteral<Repository<String, Collection>>() {
-        }).toInstance(new PrincipalAwareMorphiaRepository<>(ds, Collection.class));
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AwareRepository<String, Collection, User>>() {
+        }).toInstance(repo);
     }
 
     protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
@@ -91,6 +101,11 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindShareRepo(Binder binder, Datastore ds) {
+        PrincipalAwareMorphiaRepository<Share> repo = new PrincipalAwareMorphiaRepository<>(ds, Share.class);
 
+        binder.bind(new TypeLiteral<Repository<String, Share>>() {
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
+        }).toInstance(repo);
     }
 }
