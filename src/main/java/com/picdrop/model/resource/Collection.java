@@ -51,13 +51,15 @@ public class Collection extends Resource {
     }
 
     @JsonIgnore
-    public void addResource(CollectionItem resource) {
+    public Collection addResource(CollectionItem resource) {
         this.items.add(resource);
+        return this;
     }
 
     @JsonIgnore
-    public void removeResource(CollectionItem resource) {
+    public Collection removeResource(CollectionItem resource) {
         this.items.remove(resource);
+        return this;
     }
 
     @Entity("citems")
