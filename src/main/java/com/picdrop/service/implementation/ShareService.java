@@ -204,7 +204,12 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-        super.delete(id);
+        if (!repo.delete(id)) {
+            throw new ApplicationException()
+                    .status(500)
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .devMessage("Repositotry returned 'false'");
+        }
         log.traceExit();
     }
 
