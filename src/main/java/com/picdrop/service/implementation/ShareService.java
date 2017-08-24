@@ -237,7 +237,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
             throw new ApplicationException()
                     .status(500)
                     .code(ErrorMessageCode.ERROR_DELETE)
-                    .devMessage("Repositotry returned 'false'");
+                    .devMessage("Repository returned 'false'");
         }
         log.traceExit();
     }
