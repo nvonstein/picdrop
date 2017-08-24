@@ -33,6 +33,9 @@ public class Share extends Identifiable {
     
     @Reference
     protected RegisteredUser owner;
+    
+    protected boolean allowComment = false;
+    protected boolean allowRating = false;
 
     public Share() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -86,6 +89,26 @@ public class Share extends Identifiable {
     @JsonIgnore
     public void setOwner(RegisteredUser owner) {
         this.owner = owner;
+    }
+
+    @JsonProperty
+    public boolean isAllowComment() {
+        return allowComment;
+    }
+
+    @JsonProperty
+    public void setAllowComment(boolean allowComment) {
+        this.allowComment = allowComment;
+    }
+
+    @JsonProperty
+    public boolean isAllowRating() {
+        return allowRating;
+    }
+
+    @JsonProperty
+    public void setAllowRating(boolean allowRating) {
+        this.allowRating = allowRating;
     }
     
     
