@@ -186,6 +186,12 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     @Override
     public Share update(@PathParam("id") String id, Share entity) throws ApplicationException {
         log.entry(id, entity);
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
+        
         Share s = super.get(id);
         if (s == null) {
             throw new ApplicationException()
@@ -255,6 +261,11 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     @Override
     public Share create(Share entity) throws ApplicationException {
         log.entry(entity);
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
 
         entity.setCreated(DateTime.now().getMillis());
         entity.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));

@@ -20,7 +20,8 @@ public enum ErrorMessageCode {
     BAD_EMAIL("ec00007","Bad request: No or invalid email provided."),
     BAD_OPERATION("ec00008","Bad request: This operation is not possible on this entity type"),
     BAD_NAME("ec00009","Bad request: Name has not a valid format or is too long"), 
-    BAD_RESOURCE("ec000010","Bad request: Resource is not set or invalid");
+    BAD_RESOURCE("ec000010","Bad request: Resource is not set or invalid"), 
+    BAD_REQUEST_BODY("ec000011","Bad request: No request body");
 
     private String code;
     private String defaultMessage;

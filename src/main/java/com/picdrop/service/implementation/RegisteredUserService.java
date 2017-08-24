@@ -63,6 +63,12 @@ public class RegisteredUserService {
     @Path("/")
     public RegisteredUser create(RegisteredUser entity) throws ApplicationException {
         log.entry(entity);
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
+        
         if (Strings.isNullOrEmpty(entity.getPhash())) {
             throw new ApplicationException()
                     .code(ErrorMessageCode.BAD_PHASH)

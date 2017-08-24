@@ -275,6 +275,12 @@ public class FileResourceService {
             @PathParam("id") String id,
             FileResource entity) throws ApplicationException {
         log.entry(id, entity);
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
+
         FileResource r = getResource(id);
         if (r == null) {
             throw new ApplicationException()
