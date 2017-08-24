@@ -7,8 +7,10 @@ package com.picdrop.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Strings;
 import com.picdrop.model.resource.Resource;
 import com.picdrop.model.user.RegisteredUser;
+import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -21,19 +23,19 @@ import org.mongodb.morphia.annotations.Reference;
  * @author i330120
  */
 @Entity("shares")
-public class Share extends Identifiable {
-      
+public class Share extends Identifiable implements Mergeable<Share> {
+
     protected long created;
-   
+
     @Indexed
     protected String uri;
-    
+
     @Reference
     protected Resource resource;
-    
+
     @Reference
     protected RegisteredUser owner;
-    
+
     protected boolean allowComment = false;
     protected boolean allowRating = false;
 
@@ -110,6 +112,19 @@ public class Share extends Identifiable {
     public void setAllowRating(boolean allowRating) {
         this.allowRating = allowRating;
     }
-    
-    
+
+    @Override
+    public Share merge(Share update) throws IOException {
+        if (this.allowComment != update.allowComment) {
+            this.allowComment = update.allowComment;
+        }
+        if (this.allowRating != update.allowRating) {
+            this.allowRating = update.allowRating;
+        }
+        if (!Strings.isNullOrEmpty(update.uri)) {
+            this.uri = update.uri;
+        }
+        return this;
+    }
+
 }
