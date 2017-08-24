@@ -39,6 +39,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import static com.picdrop.helper.TestHelper.*;
+import com.picdrop.model.resource.Collection;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,6 +59,8 @@ public class ShareServiceTest {
 
     @Mock
     Repository<String, FileResource> frepo;
+    @Mock
+    Repository<String, Collection> crepo;
 
     Map<String, String> config = EnvHelper.getPropertiesTest();
 
@@ -83,6 +86,8 @@ public class ShareServiceTest {
                 RepositoryModuleMockNoDB
                         .builder()
                         .shareRepo(repo)
+                        .resRepo(frepo)
+                        .cRepo(crepo)
                         .build(),
                 new FileHandlingModule(),
                 new RequestScopeModule());
@@ -124,7 +129,6 @@ public class ShareServiceTest {
         verify(repo, times(0)).get(ID1);
     }
 
-    @Ignore
     @Test
     public void createTestFileResourceValid() throws Exception {
         Share obj = new Share();
@@ -149,9 +153,36 @@ public class ShareServiceTest {
 
         verify(repo).save(obj);
         verify(frepo, times(1)).get(ID2);
+        verify(frepo, times(1)).update(eq(ID2), any());
     }
 
-    @Ignore
+    @Test
+    public void createTestCollectionValid() throws Exception {
+        Share obj = new Share();
+        obj.setResource(new Collection(ID2));
+
+        when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID2));
+        when(crepo.get(ID2)).thenReturn(new Collection(ID2));
+        when(repo.save(any())).thenAnswer(reflectWithId(0, ID1));
+
+        Share dut = service.create(obj);
+
+        assertNotNull("DUT is null", dut);
+        assertEquals("Id mismatch", ID1, dut.getId());
+
+        User owner = dut.getOwner();
+        assertNotNull("Owner is null", owner);
+        assertEquals("Id owner mismatch", ID2, owner.getId());
+
+        Resource r = dut.getResource();
+        assertNotNull("Resource is null", r);
+        assertTrue("Share id not set on resource", r.getShareIds().contains(ID1));
+
+        verify(repo).save(obj);
+        verify(crepo, times(1)).get(ID2);
+        verify(crepo, times(1)).update(eq(ID2), any());
+    }
+
     @Test(expected = ApplicationException.class)
     public void createTestInvalidOwner() throws Exception {
         Share dut;
@@ -160,20 +191,18 @@ public class ShareServiceTest {
 
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID2));
 
-        FileResource mock = mock(FileResource.class);
-        when(mock.getOwner()).thenReturn(new RegisteredUser(ID1));
-
-        when(frepo.get(ID2)).thenReturn(mock);
-        when(repo.save(any())).thenAnswer(reflectWithId(0, ID1));
+        when(frepo.get(ID2)).thenReturn(null);
 
         try {
             dut = service.create(obj);
         } catch (ApplicationException ex) {
-            assertEquals("Wrong http status code", ex.getStatus(), 404);
-            assertEquals("Wrong error code", ex.getCode(), ErrorMessageCode.NOT_FOUND);
+            assertEquals("Wrong http status code", ex.getStatus(), 400);
+            assertEquals("Wrong error code", ex.getCode(), ErrorMessageCode.BAD_RESOURCE);
             throw ex;
         } finally {
             verify(frepo, times(1)).get(ID2);
+            verify(frepo, times(0)).update(eq(ID2), any());
+            verify(repo, times(0)).save(any());
         }
     }
 
