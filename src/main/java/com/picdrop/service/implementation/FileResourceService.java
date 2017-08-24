@@ -40,6 +40,9 @@ import javax.ws.rs.PUT;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
 import com.picdrop.io.FileRepository;
+import com.picdrop.model.Share;
+import com.picdrop.model.user.User;
+import com.picdrop.repository.AwareRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,6 +59,7 @@ public class FileResourceService {
     Logger log = LogManager.getLogger(this.getClass());
 
     Repository<String, FileResource> repo;
+    AwareRepository<String, Share, User> srepo;
 
     FileRepository<String> fileRepo;
     List<Processor<FileResource>> processors;
@@ -74,13 +78,15 @@ public class FileResourceService {
     @Inject
     public FileResourceService(
             Repository<String, FileResource> repo,
+            AwareRepository<String, Share, User> srepo,
             @Named("repository.file.main") FileRepository<String> fileRepo,
             @Named("processors") List<Processor<FileResource>> processors) {
         this.repo = repo;
+        this.srepo = srepo;
 
         this.fileRepo = fileRepo;
         this.processors = processors;
-        log.trace("created with ({},{},{})", repo, fileRepo, processors);
+        log.trace("created with ({},{},{},{})", repo, srepo, fileRepo, processors);
     }
 
     protected List<FileItem> parseRequest(HttpServletRequest request) throws FileUploadException {
@@ -144,6 +150,13 @@ public class FileResourceService {
     protected void processDelete(FileResource e) throws ApplicationException {
         log.entry(e);
         boolean res = false;
+
+        for (String sid : e.getShareIds()) {
+            if (!this.srepo.delete(sid)) {
+                // TODO roleback?
+                // 500
+            }
+        }
 
         // Pre process
         try {

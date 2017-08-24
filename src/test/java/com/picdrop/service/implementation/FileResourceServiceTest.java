@@ -5,9 +5,6 @@
  */
 package com.picdrop.service.implementation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.picdrop.exception.ApplicationException;
@@ -46,9 +43,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartFile;
 import com.picdrop.io.FileRepository;
+import com.picdrop.model.Share;
+import com.picdrop.model.user.User;
+import com.picdrop.repository.AwareRepository;
 
 /**
  *
@@ -61,6 +59,8 @@ public class FileResourceServiceTest {
 
     @Mock
     Repository<String, FileResource> repo;
+    @Mock
+    AwareRepository<String, Share, User> srepo;
     @Mock
     FileWriter writer;
     @Mock
@@ -91,7 +91,10 @@ public class FileResourceServiceTest {
 
         Injector inj = Guice.createInjector(new ApplicationModuleMock(),
                 new AuthorizationModuleMock(ctx),
-                new RepositoryModuleMockNoDB(repo),
+                RepositoryModuleMockNoDB.builder()
+                        .resRepo(repo)
+                        .shareRepo(srepo)
+                        .build(),
                 new FileHandlingModuleMock(writer, reader, fr),
                 new RequestScopeModule());
 
@@ -133,6 +136,7 @@ public class FileResourceServiceTest {
     public void deleteTestValid() throws IOException, ApplicationException {
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
+        file.addShareId(ID2);
         ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
                 .to(ImageDescriptor.class);
         desc.addThumbnailUri("test", "test");
@@ -142,10 +146,12 @@ public class FileResourceServiceTest {
         when(repo.delete(ID1)).thenReturn(true);
         when(repo.get(ID1)).thenReturn(file);
         when(fr.delete(ID1)).thenReturn(true);
+        when(srepo.delete(ID2)).thenReturn(true);
 
         service.delete(ID1);
 
         verify(repo, times(1)).delete(ID1);
+        verify(srepo,times(1)).delete(ID2);
         verify(fr, times(1)).delete(ID1);
 
         // verify(fp, times(2)).delete("test") // Thumbnails
@@ -186,6 +192,34 @@ public class FileResourceServiceTest {
             throw ex;
         } finally {
             verify(repo, times(1)).delete(ID1);
+            verify(fr, times(0)).delete(ID1);
+        }
+    }
+    
+    @Ignore
+    @Test(expected = ApplicationException.class)
+    public void deleteTestErrorOnShareRepoDeletion() throws IOException, ApplicationException {
+        FileResource file = new FileResource(ID1);
+        file.setFileId(ID1);
+        file.addShareId(ID2);
+        ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
+                .to(ImageDescriptor.class);
+        desc.addThumbnailUri("test", "test");
+
+        file.setDescriptor(desc);
+
+        when(srepo.delete(ID2)).thenReturn(false);
+        when(repo.get(ID1)).thenReturn(file);
+
+        try {
+            service.delete(ID1);
+        } catch (ApplicationException ex) {
+            assertEquals("Wrong http status code", ex.getStatus(), 500);
+            assertEquals("Wrong error code", ex.getCode(), ErrorMessageCode.ERROR_DELETE);
+            throw ex;
+        } finally {
+            verify(srepo, times(1)).delete(ID2);
+            verify(repo, times(0)).delete(ID1);
             verify(fr, times(0)).delete(ID1);
         }
     }
