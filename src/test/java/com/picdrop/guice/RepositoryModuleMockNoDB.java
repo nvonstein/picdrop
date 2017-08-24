@@ -25,6 +25,7 @@ public class RepositoryModuleMockNoDB extends RepositoryModule {
 
     protected Repository<String, FileResource> resRepo;
     protected Repository<String, Collection> cRepo;
+    protected Repository<String, Collection.CollectionItem> ciRepo;
     protected AwareRepository<String, Share, User> shareRepo;
 
     private RepositoryModuleMockNoDB() {
@@ -72,6 +73,16 @@ public class RepositoryModuleMockNoDB extends RepositoryModule {
         }
     }
 
+    @Override
+    protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
+        if (this.ciRepo != null) {
+            binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
+            }).toInstance(this.ciRepo);
+        } else {
+            super.bindCollectionItemRepo(binder, ds);
+        }
+    }
+
     public static RepositoryModuleBuilder builder() {
         return new RepositoryModuleBuilder();
     }
@@ -80,6 +91,7 @@ public class RepositoryModuleMockNoDB extends RepositoryModule {
 
         protected Repository<String, FileResource> resRepo;
         protected Repository<String, Collection> cRepo;
+        protected Repository<String, Collection.CollectionItem> ciRepo;
         protected AwareRepository<String, Share, User> shareRepo;
 
         private RepositoryModuleBuilder() {
@@ -92,6 +104,7 @@ public class RepositoryModuleMockNoDB extends RepositoryModule {
             module.resRepo = this.resRepo;
             module.shareRepo = this.shareRepo;
             module.cRepo = this.cRepo;
+            module.ciRepo = this.ciRepo;
 
             return module;
         }
@@ -108,6 +121,11 @@ public class RepositoryModuleMockNoDB extends RepositoryModule {
 
         public RepositoryModuleBuilder shareRepo(AwareRepository<String, Share, User> repo) {
             this.shareRepo = repo;
+            return this;
+        }
+
+        public RepositoryModuleBuilder ciRepo(Repository<String, Collection.CollectionItem> repo) {
+            this.ciRepo = repo;
             return this;
         }
     }
