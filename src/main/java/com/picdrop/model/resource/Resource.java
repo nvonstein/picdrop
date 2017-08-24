@@ -7,6 +7,9 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
 import com.picdrop.model.user.RegisteredUser;
@@ -22,14 +25,23 @@ import org.mongodb.morphia.annotations.Reference;
  *
  * @author i330120
  */
-public abstract class Resource extends Identifiable implements Mergeable<Resource>{
-    
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "_type"
+)
+@JsonSubTypes({
+    @Type(value = FileResource.class, name = "file"),
+    @Type(value = Collection.class, name = "collection")
+})
+public abstract class Resource extends Identifiable implements Mergeable<Resource> {
+
     protected long created;
     protected String name;
-    
+
     @Reference
     protected RegisteredUser owner;
-    
+
     protected List<String> shareIds = new ArrayList<>();
 
     public Resource() {
@@ -80,13 +92,13 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     public List<String> getShareIds() {
         return shareIds;
     }
-    
+
     @JsonIgnore
     public Resource addShareId(String id) {
         this.shareIds.add(id);
         return this;
     }
-    
+
     @JsonIgnore
     public Resource deleteShareId(String id) {
         this.shareIds.remove(id);
@@ -97,7 +109,7 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     public void setShareIds(List<String> shareIds) {
         this.shareIds = shareIds;
     }
-    
+
     @Override
     public Resource merge(Resource update) throws IOException {
         if (update == null) {
@@ -113,9 +125,10 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     public boolean isCollection() {
         return false;
     }
-    
+
+    @JsonIgnore
     public boolean isFile() {
         return false;
     }
-    
+
 }
