@@ -19,7 +19,8 @@ public enum ErrorMessageCode {
     BAD_PHASH("ec00006","Bad request: No password provided."),
     BAD_EMAIL("ec00007","Bad request: No or invalid email provided."),
     BAD_OPERATION("ec00008","Bad request: This operation is not possible on this entity type"),
-    BAD_NAME("ec00009","Bad request: Name has not a valid format or is too long");
+    BAD_NAME("ec00009","Bad request: Name has not a valid format or is too long"), 
+    BAD_RESOURCE("ec000010","Bad request: Resource is not set or invalid");
 
     private String code;
     private String defaultMessage;
