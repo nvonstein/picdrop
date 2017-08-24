@@ -55,6 +55,8 @@ public class RepositoryModuleMockNoDB extends RepositoryModule {
         if (this.shareRepo != null) {
             binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
             }).toInstance(this.shareRepo);
+            binder.bind(new TypeLiteral<Repository<String, Share>>() {
+            }).toInstance(this.shareRepo);
         } else {
             super.bindShareRepo(binder, ds);
         }
