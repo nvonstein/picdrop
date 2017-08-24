@@ -5,6 +5,7 @@
  */
 package com.picdrop.service.implementation;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.picdrop.exception.ApplicationException;
@@ -13,10 +14,13 @@ import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.Collection.Rating;
+import com.picdrop.model.resource.FileResource;
+import com.picdrop.model.resource.Resource;
 import com.picdrop.model.user.NameOnlyUserReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
+import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
 import com.picdrop.service.CrudService;
@@ -47,13 +51,22 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
 
     Logger log = LogManager.getLogger(this.getClass());
 
+    Repository<String, Collection> crepo;
+    Repository<String, FileResource> frepo;
+
     @Inject
     Provider<RequestContext> contextProv;
 
     @Inject
-    public ShareService(AwareRepository<String, Share, User> repo) {
+    public ShareService(AwareRepository<String, Share, User> repo,
+            Repository<String, Collection> crepo,
+            Repository<String, FileResource> frepo) {
         super(repo);
-        log.trace("created with ({})", repo);
+
+        this.crepo = crepo;
+        this.frepo = frepo;
+
+        log.trace("created with ({},{},{})", repo, crepo, frepo);
     }
 
     private boolean verifyName(NameOnlyUserReference entity) throws ApplicationException {
@@ -235,14 +248,58 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     @Override
     public Share create(Share entity) throws ApplicationException {
         log.entry(entity);
+
         entity.setCreated(DateTime.now().getMillis());
         entity.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
-        // TODO dispatch Resource type and verify ID/load from repo
-        Share s = super.create(entity);
-        entity.getResource().addShareId(s.getId());
-        // TODO store Resource
-        log.traceExit(s);
-        return s;
+
+        Resource r = entity.getResource();
+        if ((r == null) || Strings.isNullOrEmpty(r.getId())) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_RESOURCE)
+                    .devMessage("Resource was null");
+        }
+
+        if (r.isCollection()) {
+            Collection c = crepo.get(r.getId());
+            if (c == null) {
+                throw new ApplicationException()
+                        .status(400)
+                        .code(ErrorMessageCode.BAD_RESOURCE)
+                        .devMessage(String.format("Collection with id '%s' not found", r.getId()));
+            }
+            entity.setResource(c);
+            Share s = super.create(entity);
+
+            c.addShareId(s.getId());
+            crepo.update(c.getId(), c);
+
+            log.traceExit(s);
+            return s;
+        }
+
+        if (r.isFile()) {
+            FileResource f = frepo.get(r.getId());
+            if (f == null) {
+                throw new ApplicationException()
+                        .status(400)
+                        .code(ErrorMessageCode.BAD_RESOURCE)
+                        .devMessage(String.format("FileResource with id '%s' not found", r.getId()));
+            }
+            entity.setResource(f);
+            Share s = super.create(entity);
+
+            f.addShareId(s.getId());
+            frepo.update(f.getId(), f);
+
+            log.traceExit(s);
+            return s;
+        }
+
+        throw new ApplicationException()
+                .status(400)
+                .code(ErrorMessageCode.BAD_RESOURCE)
+                .devMessage("Unable to dispatch resource type");
     }
 
 }
