@@ -38,7 +38,7 @@ import org.apache.logging.log4j.Logger;
 public class AuthenticationFilter implements ContainerRequestFilter { // TODO abstraction for making injectable
 
     Logger log = LogManager.getLogger(this.getClass());
-    
+
     @Inject
     @Named("token")
     Authenticator<User> authenticator;
@@ -46,28 +46,34 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
     HttpServletRequest request;
     @Inject
     com.google.inject.Provider<RequestContext> context;
-    
+
+    protected ResourceMethodInvoker getMethodInvoker(ContainerRequestContext crc) {
+        ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) crc.getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
+        return methodInvoker;
+    }
+
     @Override
     public void filter(ContainerRequestContext crc) throws IOException {
         log.traceEntry();
         try {
-            ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) crc.getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
+            ResourceMethodInvoker methodInvoker = getMethodInvoker(crc);
+
             if (methodInvoker == null) {
                 log.error("Error on authentication, unable to resolve method invoker entity.");
                 crc.abortWith(Response.serverError().build());
                 return;
             }
-            
+
             Method method = methodInvoker.getMethod();
             Class<?> clazz = methodInvoker.getResourceClass();
-            
+
             Authenticated classAnnotation = clazz.getAnnotation(Authenticated.class);
             Authenticated methodAnnotation = method.getAnnotation(Authenticated.class);
-            
+
             if ((classAnnotation == null) && (methodAnnotation == null)) {
                 return;
             }
-            
+
             User user = authenticator.authenticate(request);
             if (user == null) {
                 log.debug("Unable to authenticate a user.");
@@ -76,7 +82,7 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
             }
             Role roleAnnotation = user.getClass().getAnnotation(Role.class);
             RoleType[] roles = (roleAnnotation == null) ? new RoleType[]{} : roleAnnotation.roles();
-            
+
             if (classAnnotation != null) {
                 if (!RoleType.resolve(roles, classAnnotation.include(), classAnnotation.exclusive())
                         || ((classAnnotation.exclude().length != 0) && RoleType.resolve(roles, classAnnotation.exclude(), false))) {
@@ -93,7 +99,7 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
                     return;
                 }
             }
-            
+
             context.get().setPrincipal(user);
         } catch (Exception e) {
             log.error("Error on authentication.", e);
@@ -102,5 +108,5 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
         }
         log.traceExit();
     }
-    
+
 }
