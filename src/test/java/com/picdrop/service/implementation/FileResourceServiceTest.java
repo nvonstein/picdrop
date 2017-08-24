@@ -45,8 +45,10 @@ import org.mockito.stubbing.Answer;
 import org.springframework.mock.web.MockMultipartFile;
 import com.picdrop.io.FileRepository;
 import com.picdrop.model.Share;
+import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
+import java.util.Arrays;
 
 /**
  *
@@ -61,6 +63,10 @@ public class FileResourceServiceTest {
     Repository<String, FileResource> repo;
     @Mock
     AwareRepository<String, Share, User> srepo;
+    @Mock
+    Repository<String, Collection.CollectionItem> cirepo;
+    @Mock
+    Repository<String, Collection> crepo;
     @Mock
     FileWriter writer;
     @Mock
@@ -94,6 +100,8 @@ public class FileResourceServiceTest {
                 RepositoryModuleMockNoDB.builder()
                         .resRepo(repo)
                         .shareRepo(srepo)
+                        .ciRepo(cirepo)
+                        .cRepo(crepo)
                         .build(),
                 new FileHandlingModuleMock(writer, reader, fr),
                 new RequestScopeModule());
@@ -143,16 +151,21 @@ public class FileResourceServiceTest {
 
         file.setDescriptor(desc);
 
-        when(repo.delete(ID1)).thenReturn(true);
         when(repo.get(ID1)).thenReturn(file);
+        when(cirepo.queryNamed("collection.withResourceId", any()))
+                .thenReturn(Arrays.asList(new Collection.CollectionItem(ID2)));
+
+        when(repo.delete(ID1)).thenReturn(true);
         when(fr.delete(ID1)).thenReturn(true);
         when(srepo.delete(ID2)).thenReturn(true);
 
         service.delete(ID1);
 
-        verify(repo, times(1)).delete(ID1);
-        verify(srepo,times(1)).delete(ID2);
-        verify(fr, times(1)).delete(ID1);
+        verify(repo, times(1)).delete(ID1); // FileResource
+        verify(srepo, times(1)).delete(ID2); // Active Shares
+        verify(crepo, times(1)).update(eq(ID1), any()); // Update Collection with item
+        verify(cirepo, times(1)).delete(ID2); // Collection item for this resource
+        verify(fr, times(1)).delete(ID1); // File
 
         // verify(fp, times(2)).delete("test") // Thumbnails
     }
@@ -195,7 +208,7 @@ public class FileResourceServiceTest {
             verify(fr, times(0)).delete(ID1);
         }
     }
-    
+
     @Test(expected = ApplicationException.class)
     public void deleteTestErrorOnShareRepoDeletion() throws IOException, ApplicationException {
         FileResource file = new FileResource(ID1);
