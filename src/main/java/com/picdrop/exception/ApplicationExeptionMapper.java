@@ -46,7 +46,7 @@ public class ApplicationExeptionMapper implements ExceptionMapper<ApplicationExc
                     .status(exception.getStatus())
                     .entity(
                             mapper.writeValueAsString(
-                                    exception.toErrorMessage(false))
+                                    exception.toErrorMessage(false)) // TODO app mode
                     ).build();
         } catch (JsonProcessingException ex) {
             log.debug("Error while processing error message to JSON.", ex);

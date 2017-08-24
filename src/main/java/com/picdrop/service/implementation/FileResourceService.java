@@ -150,6 +150,8 @@ public class FileResourceService {
     protected void processDelete(FileResource e) throws ApplicationException {
         log.entry(e);
         boolean res = false;
+        
+        // TODO delete citems referring this res
 
         for (String sid : e.getShareIds()) {
             if (!this.srepo.delete(sid)) {
@@ -344,7 +346,6 @@ public class FileResourceService {
         FileResource r = getResource(id);
         if (r != null) {
             processDelete(r);
-            // TODO delete open shares
         } else {
             throw new ApplicationException()
                     .status(404)
