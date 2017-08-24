@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
 @Produces("application/json")
 public class CollectionService extends CrudService<String, Collection, Repository<String, Collection>> {
 
-    Repository<String, Collection.CollectionItem> cRepo;
+    Repository<String, Collection.CollectionItem> ciRepo;
     Repository<String, FileResource> fRepo;
     
     @Inject
@@ -49,10 +49,10 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @Inject
     public CollectionService(Repository<String, Collection> repo,
-            Repository<String, Collection.CollectionItem> cRepo,
+            Repository<String, Collection.CollectionItem> ciRepo,
             Repository<String, FileResource> fRepo) {
         super(repo);
-        this.cRepo = cRepo;
+        this.ciRepo = ciRepo;
         this.fRepo = fRepo;
     }
 
@@ -67,7 +67,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @GET
     @Path("/{id}")
     @Override
-    @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
+    @Authenticated(include = {RoleType.REGISTERED})
     public Collection get(@PathParam("id") String id) throws ApplicationException {
         return super.get(id);
     }
@@ -104,7 +104,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @GET
     @Path("/{id}/elements")
-    @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
+    @Authenticated(include = {RoleType.REGISTERED})
     public List<Collection.CollectionItem> listElements(@PathParam("id") String id) throws ApplicationException {
         Collection c = get(id);
         if (c == null) {
@@ -115,14 +115,14 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @GET
     @Path("/{id}/elements/{eid}")
-    @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
+    @Authenticated(include = {RoleType.REGISTERED})
     public Collection.CollectionItem getElement(@PathParam("id") String id, @PathParam("eid") String eid) throws ApplicationException {
         Collection c = get(id);
         if (c == null) {
             return null; // 404
         }
 
-        Collection.CollectionItem ce = cRepo.get(eid);
+        Collection.CollectionItem ce = ciRepo.get(eid);
 
         return (c.getResources().contains(ce))
                 ? ce
@@ -137,12 +137,12 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         if (c == null) {
             return; // 404
         }
-        Collection.CollectionItem ce = cRepo.get(eid);
+        Collection.CollectionItem ce = ciRepo.get(eid);
 
         if (c.getResources().contains(ce)) {
             c.getResources().remove(ce);
             repo.update(id, c);
-            cRepo.delete(eid);
+            ciRepo.delete(eid);
         } else {
             // 404
         }
@@ -170,7 +170,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         Collection.CollectionItem ce = new Collection.CollectionItem();
         ce.setResource(fr);
 
-        ce = cRepo.save(ce);
+        ce = ciRepo.save(ce);
         if (ce == null) {
             return null; // 500
         }
