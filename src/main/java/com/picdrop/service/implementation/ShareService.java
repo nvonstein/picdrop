@@ -20,7 +20,9 @@ import com.picdrop.repository.AwareRepository;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
 import com.picdrop.service.CrudService;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -171,8 +173,15 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-        // TODO merge
-        return log.traceExit(super.update(id, entity));
+        try {
+            s = s.merge(entity);
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .status(500)
+                    .code(ErrorMessageCode.ERROR_OBJ_MERGE)
+                    .devMessage(ex.getMessage());
+        }
+        return log.traceExit(super.update(id, s));
     }
 
     @GET
