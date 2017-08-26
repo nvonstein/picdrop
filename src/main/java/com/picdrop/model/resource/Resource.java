@@ -48,6 +48,7 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     @Embedded
     protected RegisteredUserReference owner;
 
+    @Embedded
     protected List<ShareReference> shares = new ArrayList<>();
 
     public Resource() {
@@ -110,25 +111,25 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     }
 
     @JsonIgnore
-    public Resource addShareId(ShareReference id) {
-        this.shares.add(id);
+    public Resource addShare(ShareReference share) {
+        this.shares.add(share);
         return this;
     }
 
     @JsonIgnore
-    public Resource addShareId(Share share) {
+    public Resource addShare(Share share) {
         this.shares.add(share.refer());
         return this;
     }
 
     @JsonIgnore
-    public Resource deleteShareId(ShareReference id) {
-        this.shares.remove(id);
+    public Resource deleteShare(ShareReference share) {
+        this.shares.remove(share);
         return this;
     }
 
     @JsonIgnore
-    public Resource deleteShareId(Share share) {
+    public Resource deleteShare(Share share) {
         this.shares.remove(share.refer());
         return this;
     }

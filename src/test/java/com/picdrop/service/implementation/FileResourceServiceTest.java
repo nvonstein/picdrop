@@ -145,7 +145,7 @@ public class FileResourceServiceTest {
     public void deleteTestValid() throws IOException, ApplicationException {
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
-        file.addShareId(new ShareReference(ID2));
+        file.addShare(new ShareReference(ID2));
         
         ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
                 .to(ImageDescriptor.class);
@@ -219,7 +219,7 @@ public class FileResourceServiceTest {
     public void deleteTestErrorOnShareRepoDeletion() throws IOException, ApplicationException {
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
-        file.addShareId(new ShareReference(ID2));
+        file.addShare(new ShareReference(ID2));
         ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
                 .to(ImageDescriptor.class);
         desc.addThumbnailUri("test", "test");

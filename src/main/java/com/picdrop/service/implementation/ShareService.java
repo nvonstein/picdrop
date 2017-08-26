@@ -291,7 +291,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         
         Share s = super.create(entity);
 
-        r = r.addShareId(s);
+        r = r.addShare(s);
 
         if (r.isCollection()) {
             this.crepo.update(r.getId(), (Collection) r);
