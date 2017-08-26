@@ -8,7 +8,13 @@ package com.picdrop.model.resource;
 import com.picdrop.model.user.NameOnlyUserReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.inject.Inject;
+import com.picdrop.exception.ApplicationException;
+import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.Identifiable;
+import com.picdrop.model.Referable;
+import com.picdrop.model.Resolvable;
+import com.picdrop.repository.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -16,6 +22,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.Reference;
 
 /**
@@ -25,8 +32,8 @@ import org.mongodb.morphia.annotations.Reference;
 @Entity("collections")
 public class Collection extends Resource {
 
-    @Reference
-    protected List<CollectionItem> items;
+    @Embedded
+    protected List<CollectionItemReference> items;
 
     public Collection() {
         super();
@@ -41,32 +48,55 @@ public class Collection extends Resource {
     }
 
     @JsonProperty
-    public List<CollectionItem> getResources() {
+    public List<CollectionItemReference> getItems() {
         return items;
     }
 
     @JsonIgnore
-    public void setResources(List<CollectionItem> resources) {
-        this.items = resources;
+    public void setItems(List<CollectionItemReference> items) {
+        this.items = items;
     }
 
     @JsonIgnore
-    public Collection addResource(CollectionItem resource) {
-        this.items.add(resource);
+    public Collection addItem(CollectionItemReference item) {
+        this.items.add(item);
         return this;
     }
 
     @JsonIgnore
-    public Collection removeResource(CollectionItem resource) {
-        this.items.remove(resource);
+    public Collection removeItem(CollectionItemReference item) {
+        this.items.remove(item);
         return this;
+    }
+
+    @JsonIgnore
+    public Collection addItem(CollectionItem item) {
+        this.items.add(item.refer());
+        return this;
+    }
+
+    @JsonIgnore
+    public Collection removeItem(CollectionItem item) {
+        this.items.remove(item.refer());
+        return this;
+    }
+
+    @JsonIgnore
+    @Override
+    public CollectionReference refer() {
+        return new CollectionReference(this.getId());
+    }
+
+    @Override
+    public boolean isCollection() {
+        return true;
     }
 
     @Entity("citems")
-    public static class CollectionItem extends Identifiable {
+    public static class CollectionItem extends Identifiable implements Referable<CollectionItemReference> {
 
-        @Reference
-        FileResource resource;
+        @Embedded
+        FileResourceReference resource;
         @Embedded
         List<Comment> comments = new ArrayList<>();
         @Embedded
@@ -86,13 +116,23 @@ public class Collection extends Resource {
         }
 
         @JsonProperty
-        public FileResource getResource() {
+        public FileResourceReference getResource() {
             return resource;
         }
 
         @JsonProperty
-        public void setResource(FileResource resource) {
+        public void setResource(FileResourceReference resource) {
             this.resource = resource;
+        }
+
+        @JsonIgnore
+        public FileResource getResourceResolved() throws ApplicationException {
+            return resource.resolve(false);
+        }
+
+        @JsonIgnore
+        public void setResource(FileResource resource) {
+            this.resource = resource.refer();
         }
 
         @JsonProperty
@@ -124,18 +164,69 @@ public class Collection extends Resource {
         public void setComments(List<Comment> comments) {
             this.comments = comments;
         }
-        
+
         @JsonIgnore
         public CollectionItem addRating(Rating r) {
             this.ratings.add(r);
             return this;
         }
-        
+
         @JsonIgnore
         public CollectionItem addComment(Comment c) {
             this.comments.add(c);
             return this;
         }
+
+        @Override
+        public CollectionItemReference refer() {
+            return new CollectionItemReference(this.getId());
+        }
+    }
+
+    public static class CollectionItemReference extends Identifiable implements Resolvable<CollectionItem> {
+
+        @Inject
+        protected static Repository<String, CollectionItem> repo;
+
+        @NotSaved
+        protected CollectionItem ci;
+
+        @NotSaved
+        protected FileResourceReference resource;
+
+        public CollectionItemReference(String _id) {
+            super(_id);
+        }
+
+        public CollectionItemReference(ObjectId _id) {
+            super(_id);
+        }
+
+        @Override
+        @JsonIgnore
+        public CollectionItem resolve(boolean deep) throws ApplicationException {
+            if (this.ci == null) {
+                this.ci = repo.get(this.getId());
+                if (this.ci == null) {
+                    throw new ApplicationException()
+                            .status(404)
+                            .code(ErrorMessageCode.NOT_FOUND)
+                            .devMessage(String.format("Object with id '%s' not found", this.getId()));
+                }
+            }
+            return ci;
+        }
+
+        @JsonIgnore
+        public FileResourceReference getResource() {
+            return resource;
+        }
+
+        @JsonProperty
+        public void setResource(FileResourceReference resource) {
+            this.resource = resource;
+        }
+
     }
 
     public static class Rating extends NameOnlyUserReference {
@@ -158,7 +249,6 @@ public class Collection extends Resource {
 
         String comment = "";
         long created;
-        
 
         public Comment() {
             this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -174,7 +264,6 @@ public class Collection extends Resource {
             this.comment = comment;
         }
 
-
         @JsonProperty
         public long getCreated() {
             return created;
@@ -183,11 +272,7 @@ public class Collection extends Resource {
         @JsonIgnore
         public void setCreated(long created) {
             this.created = created;
-        } 
+        }
     }
 
-    @Override
-    public boolean isCollection() {
-        return true;}
-    
 }

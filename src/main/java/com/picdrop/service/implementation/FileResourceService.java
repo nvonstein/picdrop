@@ -41,6 +41,7 @@ import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
 import com.picdrop.io.FileRepository;
 import com.picdrop.model.Share;
+import com.picdrop.model.ShareReference;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import org.apache.logging.log4j.LogManager;
@@ -150,14 +151,11 @@ public class FileResourceService {
     protected void processDelete(FileResource e) throws ApplicationException {
         log.entry(e);
         boolean res = false;
-        
-        // TODO delete citems referring this res
 
-        for (String sid : e.getShareIds()) {
-            if (!this.srepo.delete(sid)) {
-                // TODO roleback?
-                // 500
-            }
+        // TODO delete citems referring this res
+        
+        for (ShareReference sref : e.getShares()) {
+            this.srepo.delete(sref.getId());
         }
 
         // Pre process

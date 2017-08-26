@@ -120,4 +120,9 @@ public class RegisteredUser extends User {
         return this;
     }
 
+    @Override
+    public RegisteredUserReference refer() {
+       return new RegisteredUserReference(this);
+    }
+
 }

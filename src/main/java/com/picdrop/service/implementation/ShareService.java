@@ -114,14 +114,15 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         } else {
             verifyName(entity);
         }
-        Collection c = (Collection) s.getResource();
-        for (Collection.CollectionItem item : c.getResources()) {
-            if (item.getId().equals(eid)) {
-                item.addRating(entity);
+        Collection c = (Collection) s.getResource().resolve(false);
+        for (Collection.CollectionItemReference ciref : c.getItems()) {
+            if (ciref.getId().equals(eid)) {
+                Collection.CollectionItem ci = ciref.resolve(false);
+                ci.addRating(entity);
 
-                item = cirepo.update(item.getId(), item);
-                log.traceExit(item);
-                return item;
+                ci = cirepo.update(ci.getId(), ci);
+                log.traceExit(ci);
+                return ci;
             }
         }
         throw new ApplicationException()
@@ -164,14 +165,15 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
             verifyName(entity);
         }
         entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
-        Collection c = (Collection) s.getResource();
-        for (Collection.CollectionItem item : c.getResources()) {
-            if (item.getId().equals(eid)) {
-                item.addComment(entity);
+        Collection c = (Collection) s.getResource().resolve(false);
+        for (Collection.CollectionItemReference ciref : c.getItems()) {
+            if (ciref.getId().equals(eid)) {
+                Collection.CollectionItem ci = ciref.resolve(false);
+                ci.addComment(entity);
 
-                item = this.cirepo.update(item.getId(), item);
-                log.traceExit(item);
-                return item;
+                ci = this.cirepo.update(ci.getId(), ci);
+                log.traceExit(ci);
+                return ci;
             }
         }
         throw new ApplicationException()
@@ -191,7 +193,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
-        
+
         Share s = super.get(id);
         if (s == null) {
             throw new ApplicationException()
@@ -270,47 +272,28 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         entity.setCreated(DateTime.now().getMillis());
         entity.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
 
-        Resource r = entity.getResource();
-        if ((r == null) || Strings.isNullOrEmpty(r.getId())) {
+        if (entity.getResource() == null) {
             throw new ApplicationException()
                     .status(400)
                     .code(ErrorMessageCode.BAD_RESOURCE)
                     .devMessage("Resource was null");
         }
 
+        Resource r = entity.getResourceResolved();
+        
+        // TODO generate uri
+        
+        Share s = super.create(entity);
+        
+        r = r.addShareId(s);
+        
         if (r.isCollection()) {
-            Collection c = crepo.get(r.getId());
-            if (c == null) {
-                throw new ApplicationException()
-                        .status(400)
-                        .code(ErrorMessageCode.BAD_RESOURCE)
-                        .devMessage(String.format("Collection with id '%s' not found", r.getId()));
-            }
-            entity.setResource(c);
-            Share s = super.create(entity);
-
-            c.addShareId(s.getId());
-            crepo.update(c.getId(), c);
-
-            log.traceExit(s);
+            this.crepo.update(r.getId(), (Collection) r);
             return s;
         }
-
-        if (r.isFile()) {
-            FileResource f = frepo.get(r.getId());
-            if (f == null) {
-                throw new ApplicationException()
-                        .status(400)
-                        .code(ErrorMessageCode.BAD_RESOURCE)
-                        .devMessage(String.format("FileResource with id '%s' not found", r.getId()));
-            }
-            entity.setResource(f);
-            Share s = super.create(entity);
-
-            f.addShareId(s.getId());
-            frepo.update(f.getId(), f);
-
-            log.traceExit(s);
+        
+        if (r.isFileResource()) {
+            this.frepo.update(r.getId(), (FileResource) r);
             return s;
         }
 

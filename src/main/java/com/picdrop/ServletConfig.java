@@ -21,7 +21,7 @@ import org.jboss.resteasy.plugins.guice.ext.RequestScopeModule;
  * @author i330120
  */
 public class ServletConfig extends GuiceResteasyBootstrapServletContextListener {
-
+    
     @Override
     protected List<? extends Module> getModules(ServletContext context) {
         List<Module> l = Arrays.asList(
@@ -32,5 +32,5 @@ public class ServletConfig extends GuiceResteasyBootstrapServletContextListener 
                 new RequestScopeModule());
 
         return l;
-    }
+    }  
 }

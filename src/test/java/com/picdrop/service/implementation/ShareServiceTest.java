@@ -39,7 +39,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import static com.picdrop.helper.TestHelper.*;
+import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
+import com.picdrop.model.resource.FileResourceReference;
+import com.picdrop.model.user.UserReference;
 import java.util.Arrays;
 import java.util.List;
 
@@ -143,13 +146,13 @@ public class ShareServiceTest {
         assertNotNull("DUT is null", dut);
         assertEquals("Id mismatch", ID1, dut.getId());
 
-        User owner = dut.getOwner();
+        UserReference owner = dut.getOwner();
         assertNotNull("Owner is null", owner);
         assertEquals("Id owner mismatch", ID2, owner.getId());
 
-        Resource r = dut.getResource();
+        Resource r = dut.getResource().resolve(false);
         assertNotNull("Resource is null", r);
-        assertTrue("Share id not set on resource", r.getShareIds().contains(ID1));
+        assertTrue("Share id not set on resource", r.getShares().contains(new ShareReference(ID1)));
 
         verify(repo).save(obj);
         verify(frepo, times(1)).get(ID2);
@@ -170,13 +173,13 @@ public class ShareServiceTest {
         assertNotNull("DUT is null", dut);
         assertEquals("Id mismatch", ID1, dut.getId());
 
-        User owner = dut.getOwner();
+        UserReference owner = dut.getOwner();
         assertNotNull("Owner is null", owner);
         assertEquals("Id owner mismatch", ID2, owner.getId());
 
-        Resource r = dut.getResource();
+        Resource r = dut.getResource().resolve(false);
         assertNotNull("Resource is null", r);
-        assertTrue("Share id not set on resource", r.getShareIds().contains(ID1));
+        assertTrue("Share id not set on resource", r.getShares().contains(new ShareReference(ID1)));
 
         verify(repo).save(obj);
         verify(crepo, times(1)).get(ID2);
@@ -187,7 +190,7 @@ public class ShareServiceTest {
     public void createTestInvalidOwner() throws Exception {
         Share dut;
         Share obj = new Share();
-        obj.setResource(new FileResource(ID2));
+        obj.setResource(new FileResourceReference(ID2));
 
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID2));
 

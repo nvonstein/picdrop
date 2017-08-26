@@ -45,6 +45,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.mock.web.MockMultipartFile;
 import com.picdrop.io.FileRepository;
 import com.picdrop.model.Share;
+import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
@@ -144,7 +145,7 @@ public class FileResourceServiceTest {
     public void deleteTestValid() throws IOException, ApplicationException {
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
-        file.addShareId(ID2);
+        file.addShareId(new ShareReference(ID2));
         ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
                 .to(ImageDescriptor.class);
         desc.addThumbnailUri("test", "test");
@@ -213,7 +214,7 @@ public class FileResourceServiceTest {
     public void deleteTestErrorOnShareRepoDeletion() throws IOException, ApplicationException {
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
-        file.addShareId(ID2);
+        file.addShareId(new ShareReference(ID2));
         ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
                 .to(ImageDescriptor.class);
         desc.addThumbnailUri("test", "test");

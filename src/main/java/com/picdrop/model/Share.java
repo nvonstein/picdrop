@@ -8,33 +8,36 @@ package com.picdrop.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.ResourceReference;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.RegisteredUserReference;
 import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
-import org.mongodb.morphia.annotations.Reference;
 
 /**
  *
  * @author i330120
  */
 @Entity("shares")
-public class Share extends Identifiable implements Mergeable<Share> {
+public class Share extends Identifiable implements Mergeable<Share>, Referable<ShareReference> {
 
     protected long created;
 
     @Indexed
     protected String uri;
 
-    @Reference
-    protected Resource resource;
+    @Embedded
+    protected ResourceReference resource;
 
-    @Reference
-    protected RegisteredUser owner;
+    @Embedded
+    protected RegisteredUserReference owner;
 
     protected boolean allowComment = false;
     protected boolean allowRating = false;
@@ -74,23 +77,43 @@ public class Share extends Identifiable implements Mergeable<Share> {
     }
 
     @JsonProperty
-    public Resource getResource() {
+    public ResourceReference getResource() {
         return resource;
     }
 
     @JsonProperty
-    public void setResource(Resource resource) {
+    public void setResource(ResourceReference resource) {
         this.resource = resource;
     }
 
+    @JsonIgnore
+    public Resource getResourceResolved() throws ApplicationException {
+        return resource.resolve(false);
+    }
+
+    @JsonIgnore
+    public void setResource(Resource resource) {
+        this.resource = resource.refer();
+    }
+
     @JsonProperty
-    public RegisteredUser getOwner() {
+    public RegisteredUserReference getOwner() {
         return owner;
     }
 
     @JsonIgnore
-    public void setOwner(RegisteredUser owner) {
+    public void setOwner(RegisteredUserReference owner) {
         this.owner = owner;
+    }
+
+    @JsonIgnore
+    public RegisteredUser getOwnerResolved() throws ApplicationException {
+        return owner.resolve(false);
+    }
+
+    @JsonIgnore
+    public void setOwner(RegisteredUser owner) {
+        this.owner = owner.refer();
     }
 
     @JsonProperty
@@ -125,6 +148,11 @@ public class Share extends Identifiable implements Mergeable<Share> {
             this.uri = update.uri;
         }
         return this;
+    }
+
+    @Override
+    public ShareReference refer() {
+        return new ShareReference(this.getId());
     }
 
 }

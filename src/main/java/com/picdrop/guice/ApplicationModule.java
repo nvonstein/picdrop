@@ -12,7 +12,6 @@ import com.google.inject.name.Names;
 import com.picdrop.helper.EnvHelper;
 import com.picdrop.service.implementation.AuthorizationService;
 import com.picdrop.service.implementation.CollectionService;
-import com.picdrop.service.implementation.GroupService;
 import com.picdrop.service.implementation.RegisteredUserService;
 import com.picdrop.service.implementation.FileResourceService;
 import com.picdrop.service.implementation.ShareService;
@@ -47,7 +46,6 @@ public class ApplicationModule implements Module {
     
     protected void bindServices(Binder binder) {
         binder.bind(UserService.class).in(Singleton.class);
-        binder.bind(GroupService.class).in(Singleton.class);
         binder.bind(FileResourceService.class).in(Singleton.class);
         binder.bind(RegisteredUserService.class).in(Singleton.class);
         binder.bind(AuthorizationService.class).in(Singleton.class);

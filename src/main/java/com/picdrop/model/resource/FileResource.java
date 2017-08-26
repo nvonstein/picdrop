@@ -7,7 +7,6 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Strings;
 import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -116,9 +115,13 @@ public class FileResource extends Resource {
     }
 
     @Override
-    public boolean isFile() {
+    public boolean isFileResource() {
         return true;
     }
-    
+
+    @Override
+    public FileResourceReference refer() {
+        return new FileResourceReference(this.getId());
+    }
     
 }

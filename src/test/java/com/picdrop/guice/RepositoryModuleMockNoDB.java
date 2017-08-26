@@ -9,6 +9,7 @@ import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.Collection;
+import com.picdrop.model.resource.CollectionReference;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
+import com.picdrop.model.Referable;
 import com.picdrop.security.authentication.Role;
 import com.picdrop.security.authentication.RoleType;
 import java.io.IOException;
@@ -28,7 +29,7 @@ import org.mongodb.morphia.annotations.Entity;
 //@JsonTypeName(value = "user")
 @Entity("users")
 @Role(roles = RoleType.USER)
-public class User extends Identifiable implements Mergeable<User>{
+public abstract class User extends Identifiable implements Mergeable<User>, Referable<UserReference>{
 
     protected String name;
     protected long created;

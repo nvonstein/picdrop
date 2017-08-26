@@ -10,16 +10,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
+import com.picdrop.model.Referable;
+import com.picdrop.model.Share;
+import com.picdrop.model.ShareReference;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.RegisteredUserReference;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.mongodb.morphia.annotations.Reference;
+import org.mongodb.morphia.annotations.Embedded;
 
 /**
  *
@@ -31,18 +36,19 @@ import org.mongodb.morphia.annotations.Reference;
         property = "_type"
 )
 @JsonSubTypes({
-    @Type(value = FileResource.class, name = "file"),
+    @Type(value = FileResource.class, name = "file")
+    ,
     @Type(value = Collection.class, name = "collection")
 })
-public abstract class Resource extends Identifiable implements Mergeable<Resource> {
+public abstract class Resource extends Identifiable implements Mergeable<Resource>, Referable<ResourceReference> {
 
     protected long created;
     protected String name;
 
-    @Reference
-    protected RegisteredUser owner;
+    @Embedded
+    protected RegisteredUserReference owner;
 
-    protected List<String> shareIds = new ArrayList<>();
+    protected List<ShareReference> shares = new ArrayList<>();
 
     public Resource() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -79,35 +85,57 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     }
 
     @JsonProperty
-    public RegisteredUser getOwner() {
+    public RegisteredUserReference getOwner() {
         return owner;
     }
 
     @JsonIgnore
-    public void setOwner(RegisteredUser owner) {
+    public void setOwner(RegisteredUserReference owner) {
         this.owner = owner;
     }
 
+    @JsonIgnore
+    public RegisteredUser getOwnerResolved() throws ApplicationException {
+        return owner.resolve(false);
+    }
+
+    @JsonIgnore
+    public void setOwner(RegisteredUser owner) {
+        this.owner = owner.refer();
+    }
+
     @JsonProperty
-    public List<String> getShareIds() {
-        return shareIds;
+    public List<ShareReference> getShares() {
+        return shares;
     }
 
     @JsonIgnore
-    public Resource addShareId(String id) {
-        this.shareIds.add(id);
+    public Resource addShareId(ShareReference id) {
+        this.shares.add(id);
         return this;
     }
 
     @JsonIgnore
-    public Resource deleteShareId(String id) {
-        this.shareIds.remove(id);
+    public Resource addShareId(Share share) {
+        this.shares.add(share.refer());
         return this;
     }
 
     @JsonIgnore
-    public void setShareIds(List<String> shareIds) {
-        this.shareIds = shareIds;
+    public Resource deleteShareId(ShareReference id) {
+        this.shares.remove(id);
+        return this;
+    }
+
+    @JsonIgnore
+    public Resource deleteShareId(Share share) {
+        this.shares.remove(share.refer());
+        return this;
+    }
+
+    @JsonIgnore
+    public void setShares(List<ShareReference> shares) {
+        this.shares = shares;
     }
 
     @Override
@@ -127,7 +155,7 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     }
 
     @JsonIgnore
-    public boolean isFile() {
+    public boolean isFileResource() {
         return false;
     }
 

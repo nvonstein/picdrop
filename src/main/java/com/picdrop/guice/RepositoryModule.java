@@ -13,9 +13,13 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Group;
 import com.picdrop.model.Share;
+import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
+import com.picdrop.model.resource.CollectionReference;
 import com.picdrop.model.resource.FileResource;
+import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.mongo.NamedQueries;
@@ -59,6 +63,9 @@ public class RepositoryModule implements Module {
         bindCollectionItemRepo(binder, ds);
         // Share repo
         bindShareRepo(binder, ds);
+
+        // Static bindings
+        bindStaticRepoReferences(binder, ds);
     }
 
     protected Datastore bindDatastore(Binder binder) {
@@ -107,5 +114,13 @@ public class RepositoryModule implements Module {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
         }).toInstance(repo);
+    }
+
+    protected void bindStaticRepoReferences(Binder binder, Datastore ds) {
+        binder.requestStaticInjection(CollectionReference.class);
+        binder.requestStaticInjection(FileResourceReference.class);
+        binder.requestStaticInjection(ShareReference.class);
+        binder.requestStaticInjection(RegisteredUserReference.class);
+        binder.requestStaticInjection(Collection.CollectionItemReference.class);
     }
 }

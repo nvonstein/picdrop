@@ -12,8 +12,10 @@ import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
+import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
+import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Authenticated;
@@ -108,12 +110,12 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id);
         Collection c = this.get(id);
         
-        for (String sid : c.getShareIds()) {
-            sRepo.delete(sid);
+        for (ShareReference sref : c.getShares()) {
+            sRepo.delete(sref.getId());
         }
         
-        for (Collection.CollectionItem ci : c.getResources()) {
-            ciRepo.delete(ci.getId());
+        for (Collection.CollectionItemReference ciref : c.getItems()) {
+            ciRepo.delete(ciref.getId());
         }
         
         repo.delete(id);
@@ -144,10 +146,10 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
 
         // Optionally create CollectionItems
-        if ((entity.getResources() != null) && !entity.getResources().isEmpty()) {
+        if ((entity.getItems() != null) && !entity.getItems().isEmpty()) {
 
             // Validity check of CollectionItem (to reject invalid requests faster)
-            for (Collection.CollectionItem ci : entity.getResources()) {
+            for (Collection.CollectionItemReference ci : entity.getItems()) {
                 if ((ci.getResource() == null) || Strings.isNullOrEmpty(ci.getResource().getId())) {
                     throw new ApplicationException()
                             .status(400)
@@ -156,22 +158,26 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                 }
             }
             
-            List<Collection.CollectionItem> items = new ArrayList<>();
+            List<Collection.CollectionItemReference> items = new ArrayList<>();
             // Existence check of Resource
-            for (Collection.CollectionItem ci : entity.getResources()) {
-                FileResource fr = fRepo.get(ci.getResource().getId());
-                if (fr == null) {
-                    throw new ApplicationException()
-                            .status(400)
+            for (Collection.CollectionItemReference ciref : entity.getItems()) {
+                FileResource fr;
+                try {
+                    fr = ciref.getResource().resolve(false);
+                } catch (ApplicationException ex) {
+                    ex = ex.status(400)
                             .code(ErrorMessageCode.BAD_CITEM_NOT_FOUND)
-                            .devMessage(String.format("Collection item's resource not found for id '%s'", ci.getResource().getId()));
+                            .devMessage(String.format("Collection item's resource not found for id '%s'", ciref.getResource().getId()));
+                    throw ex;
                 }
+                
+                Collection.CollectionItem ci = new Collection.CollectionItem();
                 ci.setResource(fr);
-                items.add(ciRepo.save(ci));
+                items.add(ciRepo.save(ci).refer());
             }
 
             // Set item list on Collection entity
-            entity.setResources(items);
+            entity.setItems(items);
         }
         
         if (Strings.isNullOrEmpty(entity.getName())) {
@@ -189,7 +195,13 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Authenticated(include = {RoleType.REGISTERED})
     public List<Collection.CollectionItem> listElements(@PathParam("id") String id) throws ApplicationException {
         Collection c = this.get(id);
-        return c.getResources();
+        
+        List<Collection.CollectionItem> ret = new ArrayList<>();
+        for (Collection.CollectionItemReference ciref : c.getItems()) {
+            ret.add(ciref.resolve(false));
+        }
+        
+        return ret;
     }
     
     @GET
@@ -199,9 +211,9 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id, eid);
         Collection c = this.get(id);
         
-        for (Collection.CollectionItem ci : c.getResources()) {
-            if (ci.getId().equals(eid)) {
-                return log.traceExit(ci);
+        for (Collection.CollectionItemReference ciref : c.getItems()) {
+            if (ciref.getId().equals(eid)) {
+                return log.traceExit(ciref.resolve(false));
             }
         }
         
@@ -218,10 +230,10 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id, eid);
         Collection c = this.get(id);
         
-        for (Collection.CollectionItem ci : c.getResources()) {
-            if (ci.getId().equals(eid)) {
-                ciRepo.delete(ci.getId());
-                c = c.removeResource(ci);
+        for (Collection.CollectionItemReference ciref : c.getItems()) {
+            if (ciref.getId().equals(eid)) {
+                ciRepo.delete(ciref.getId());
+                c = c.removeItem(ciref);
                 
                 repo.update(c.getId(), c);
                 log.traceExit();
@@ -242,15 +254,15 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id, entity);
         Collection c = this.get(id);
         
-        FileResource fr = entity.getResource();
-        if ((fr == null) || Strings.isNullOrEmpty(fr.getId())) {
+        FileResourceReference frref = entity.getResource();
+        if ((frref == null) || Strings.isNullOrEmpty(frref.getId())) {
             throw new ApplicationException()
                     .status(400)
                     .code(ErrorMessageCode.BAD_CITEM)
                     .devMessage("Collection item's resource was empty or null");
         }
         
-        fr = fRepo.get(fr.getId());
+        FileResource fr = fRepo.get(frref.getId());
         if (fr == null) {
             throw new ApplicationException()
                     .status(400)
@@ -261,8 +273,8 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         entity.setResource(fr);
         entity = ciRepo.save(entity);
         
-        c = c.addResource(entity);
-        
+        c = c.addItem(entity);
+
         // TODO validate update?
         repo.update(c.getId(), c);
         
