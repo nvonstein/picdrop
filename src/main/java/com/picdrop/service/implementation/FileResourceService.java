@@ -42,8 +42,10 @@ import com.picdrop.security.authentication.RoleType;
 import com.picdrop.io.FileRepository;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
+import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
+import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,48 +58,54 @@ import org.apache.logging.log4j.Logger;
 @Produces("application/json")
 @Authenticated(include = {RoleType.REGISTERED})
 public class FileResourceService {
-
+    
     Logger log = LogManager.getLogger(this.getClass());
-
+    
     Repository<String, FileResource> repo;
     AwareRepository<String, Share, User> srepo;
-
+    Repository<String, Collection.CollectionItem> cirepo;
+    Repository<String, Collection> crepo;
+    
     FileRepository<String> fileRepo;
     List<Processor<FileResource>> processors;
-
+    
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
-
+    
     @Inject
     ServletFileUpload upload;
-
+    
     @Inject
     Provider<RequestContext> contextProv;
-
+    
     @Inject
     InputStreamProviderFactory instProvFac;
-
+    
     @Inject
     public FileResourceService(
             Repository<String, FileResource> repo,
             AwareRepository<String, Share, User> srepo,
+            Repository<String, Collection.CollectionItem> cirepo,
+            Repository<String, Collection> crepo,
             @Named("repository.file.main") FileRepository<String> fileRepo,
             @Named("processors") List<Processor<FileResource>> processors) {
         this.repo = repo;
         this.srepo = srepo;
-
+        this.cirepo = cirepo;
+        this.crepo = crepo;
+        
         this.fileRepo = fileRepo;
         this.processors = processors;
-        log.trace("created with ({},{},{},{})", repo, srepo, fileRepo, processors);
+        log.trace("created with ({},{},{},{},{},{})", repo, srepo, cirepo, crepo, fileRepo, processors);
     }
-
+    
     protected List<FileItem> parseRequest(HttpServletRequest request) throws FileUploadException {
         List<FileItem> files = null;
-
+        
         files = upload.parseRequest(request);
-
+        
         return files;
     }
-
+    
     protected FileResource processCreateUpdate(FileResource e, FileItem file) throws ApplicationException {
         log.entry(e);
         FileResource loce = e;
@@ -143,20 +151,37 @@ public class FileResourceService {
                     .code(ErrorMessageCode.ERROR_UPLOAD)
                     .devMessage("Error while post-store phase: " + ex.getMessage());
         }
-
+        
         log.traceExit(loce);
         return loce;
     }
-
+    
     protected void processDelete(FileResource e) throws ApplicationException {
         log.entry(e);
         boolean res = false;
 
-        // TODO delete citems referring this res
-        
+        // Delete citems referring this res
+        List<Collection.CollectionItem> cis;
+        try {
+            cis = this.cirepo.queryNamed("citems.byResourceId", e.getId());
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500)
+                    .devMessage("Error while querying citems: " + ex.getMessage());
+        }
+        for (Collection.CollectionItem ci : cis) {
+            this.cirepo.delete(ci.getId());
+            Collection c = ci.getParentCollection().resolve(false);
+            c.removeItem(ci);
+            this.crepo.update(c.getId(), c);
+        }
+
+        // Deleting Shares referring this res
         for (ShareReference sref : e.getShares()) {
             this.srepo.delete(sref.getId());
         }
+        e.setShares(new ArrayList<>());
 
         // Pre process
         try {
@@ -212,7 +237,7 @@ public class FileResourceService {
         }
         log.traceExit();
     }
-
+    
     @GET
     @Path("/{id}")
     public FileResource getResource(@PathParam("id") String id) throws ApplicationException {
@@ -227,14 +252,14 @@ public class FileResourceService {
         log.traceExit(fr);
         return fr;
     }
-
+    
     @GET
     @Path("/")
     public List<FileResource> listResource() {
         log.traceEntry();
         return log.traceExit(this.repo.list());
     }
-
+    
     @POST
     @Path("/")
     @Consumes("multipart/form-data")
@@ -242,7 +267,7 @@ public class FileResourceService {
         log.traceEntry();
         List<FileResource> res = new ArrayList<>();
         List<FileItem> files;
-
+        
         try {
             files = parseRequest(request);
         } catch (FileUploadException ex) {
@@ -251,24 +276,24 @@ public class FileResourceService {
                     .devMessage(ex.getMessage())
                     .code(ErrorMessageCode.BAD_UPLOAD);
         }
-
+        
         for (FileItem file : files) {
             if (!file.isFormField()) {
                 FileResource r = new FileResource();
                 r.setName(file.getName()); // TODO get extension
                 r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
-
+                
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
                 r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
-
+                
                 res.add(processCreateUpdate(r, file));
             }
         }
         log.traceExit(res);
         return res;
     }
-
+    
     @PUT
     @Path("/{id}")
     public FileResource update(
@@ -280,7 +305,7 @@ public class FileResourceService {
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
-
+        
         FileResource r = getResource(id);
         if (r == null) {
             throw new ApplicationException()
@@ -288,7 +313,7 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-
+        
         try {
             r = r.merge(entity);
         } catch (IOException ex) {
@@ -299,7 +324,7 @@ public class FileResourceService {
         }
         return log.traceExit(repo.update(id, r));
     }
-
+    
     @PUT
     @Path("/{id}")
     @Consumes("multipart/form-data")
@@ -313,7 +338,7 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-
+        
         try {
             files = parseRequest(request);
         } catch (FileUploadException ex) {
@@ -322,21 +347,21 @@ public class FileResourceService {
                     .devMessage(ex.getMessage())
                     .code(ErrorMessageCode.BAD_UPLOAD);
         }
-
+        
         for (FileItem file : files) {
             if (!file.isFormField()) {
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
                 r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
-
+                
                 r = processCreateUpdate(r, file);
             }
         }
-
+        
         log.traceExit(r);
         return r;
     }
-
+    
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") String id) throws ApplicationException {

@@ -146,16 +146,21 @@ public class FileResourceServiceTest {
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
         file.addShareId(new ShareReference(ID2));
+        
         ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
                 .to(ImageDescriptor.class);
         desc.addThumbnailUri("test", "test");
-
         file.setDescriptor(desc);
+        
+        Collection c = new Collection(ID2);
+        Collection.CollectionItem ci = new Collection.CollectionItem(ID2);
+        c.addItem(ci);
+        ci.setParentCollection(c);
 
         when(repo.get(ID1)).thenReturn(file);
-        when(cirepo.queryNamed("collection.withResourceId", any()))
-                .thenReturn(Arrays.asList(new Collection.CollectionItem(ID2)));
-
+        when(cirepo.queryNamed(eq("citems.byResourceId"), any()))
+                .thenReturn(Arrays.asList(ci));
+        when(crepo.get(ID2)).thenReturn(c);
         when(repo.delete(ID1)).thenReturn(true);
         when(fr.delete(ID1)).thenReturn(true);
         when(srepo.delete(ID2)).thenReturn(true);
@@ -164,7 +169,7 @@ public class FileResourceServiceTest {
 
         verify(repo, times(1)).delete(ID1); // FileResource
         verify(srepo, times(1)).delete(ID2); // Active Shares
-        verify(crepo, times(1)).update(eq(ID1), any()); // Update Collection with item
+        verify(crepo, times(1)).update(eq(ID2), any()); // Update Collection with item
         verify(cirepo, times(1)).delete(ID2); // Collection item for this resource
         verify(fr, times(1)).delete(ID1); // File
 

@@ -30,7 +30,7 @@ import org.mongodb.morphia.annotations.NotSaved;
 public class Collection extends Resource {
 
     @Embedded
-    protected List<CollectionItemReference> items;
+    protected List<CollectionItemReference> items = new ArrayList<>();
 
     public Collection() {
         super();
