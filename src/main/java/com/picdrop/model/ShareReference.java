@@ -6,8 +6,6 @@
 package com.picdrop.model;
 
 import com.google.inject.Inject;
-import com.picdrop.exception.ApplicationException;
-import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import org.bson.types.ObjectId;
@@ -34,16 +32,10 @@ public class ShareReference extends Identifiable implements Resolvable<Share> {
     }
 
     @Override
-    public Share resolve(boolean deep) throws ApplicationException {
+    public Share resolve(boolean deep) {
         if (this.s == null) {
             this.s = repo.get(this.getId(), null);
-            if (this.s == null) {
-                throw new ApplicationException()
-                        .status(404)
-                        .code(ErrorMessageCode.NOT_FOUND)
-                        .devMessage(String.format("Object with id '%s' not found", this.getId()));
-            }
-            if (deep) {
+            if (deep && (this.s != null)) {
                 this.s.getOwner().resolve(true);
                 this.s.getResource().resolve(true);
             }

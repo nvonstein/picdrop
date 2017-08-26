@@ -6,7 +6,6 @@
 package com.picdrop.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.picdrop.exception.ApplicationException;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Resolvable;
 import org.bson.types.ObjectId;
@@ -27,6 +26,6 @@ public abstract class UserReference extends Identifiable implements Resolvable<U
 
     @Override
     @JsonIgnore
-    public abstract User resolve(boolean deep) throws ApplicationException;
+    public abstract User resolve(boolean deep);
 
 }

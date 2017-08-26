@@ -9,8 +9,6 @@ import com.picdrop.model.user.NameOnlyUserReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Inject;
-import com.picdrop.exception.ApplicationException;
-import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Referable;
 import com.picdrop.model.Resolvable;
@@ -23,7 +21,6 @@ import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.NotSaved;
-import org.mongodb.morphia.annotations.Reference;
 
 /**
  *
@@ -50,6 +47,13 @@ public class Collection extends Resource {
     @JsonProperty
     public List<CollectionItemReference> getItems() {
         return items;
+    }
+
+    @JsonIgnore
+    public List<CollectionItem> getItems(boolean deep) {
+        List<CollectionItem> ret = new ArrayList<>();
+        this.items.forEach(ciref -> ret.add(ciref.resolve(deep)));
+        return ret;
     }
 
     @JsonIgnore
@@ -126,8 +130,8 @@ public class Collection extends Resource {
         }
 
         @JsonIgnore
-        public FileResource getResourceResolved() throws ApplicationException {
-            return resource.resolve(false);
+        public FileResource getResource(boolean deep) {
+            return resource.resolve(deep);
         }
 
         @JsonIgnore
@@ -204,14 +208,11 @@ public class Collection extends Resource {
 
         @Override
         @JsonIgnore
-        public CollectionItem resolve(boolean deep) throws ApplicationException {
+        public CollectionItem resolve(boolean deep) {
             if (this.ci == null) {
                 this.ci = repo.get(this.getId());
-                if (this.ci == null) {
-                    throw new ApplicationException()
-                            .status(404)
-                            .code(ErrorMessageCode.NOT_FOUND)
-                            .devMessage(String.format("Object with id '%s' not found", this.getId()));
+                if (deep && (this.ci != null)) {
+                    this.ci.getResource().resolve(true);
                 }
             }
             return ci;

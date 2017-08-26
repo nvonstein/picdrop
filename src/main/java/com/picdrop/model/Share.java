@@ -87,8 +87,8 @@ public class Share extends Identifiable implements Mergeable<Share>, Referable<S
     }
 
     @JsonIgnore
-    public Resource getResourceResolved() throws ApplicationException {
-        return resource.resolve(false);
+    public Resource getResource(boolean deep) {
+        return resource.resolve(deep);
     }
 
     @JsonIgnore

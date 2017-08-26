@@ -44,16 +44,16 @@ import org.joda.time.DateTimeZone;
 @Consumes("application/json")
 @Produces("application/json")
 public class CollectionService extends CrudService<String, Collection, Repository<String, Collection>> {
-    
+
     Logger log = LogManager.getLogger(this.getClass());
-    
+
     Repository<String, Collection.CollectionItem> ciRepo;
     Repository<String, FileResource> fRepo;
     Repository<String, Share> sRepo;
-    
+
     @Inject
     Provider<RequestContext> context;
-    
+
     @Inject
     public CollectionService(Repository<String, Collection> repo,
             Repository<String, Collection.CollectionItem> ciRepo,
@@ -63,10 +63,10 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         this.ciRepo = ciRepo;
         this.fRepo = fRepo;
         this.sRepo = sRepo;
-        
+
         log.trace("created with ({},{},{})", ciRepo, fRepo, sRepo);
     }
-    
+
     @PUT
     @Path("/{id}")
     @Override
@@ -84,7 +84,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.traceExit();
         return super.update(id, c);
     }
-    
+
     @GET
     @Path("/{id}")
     @Override
@@ -101,7 +101,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.traceExit(c);
         return c;
     }
-    
+
     @DELETE
     @Path("/{id}")
     @Override
@@ -109,20 +109,20 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     public void delete(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
         Collection c = this.get(id);
-        
+
         for (ShareReference sref : c.getShares()) {
             sRepo.delete(sref.getId());
         }
-        
+
         for (Collection.CollectionItemReference ciref : c.getItems()) {
             ciRepo.delete(ciref.getId());
         }
-        
+
         repo.delete(id);
-        
+
         log.traceExit();
     }
-    
+
     @GET
     @Path("/")
     @Override
@@ -130,7 +130,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     public List<Collection> list() throws ApplicationException {
         return super.list();
     }
-    
+
     @POST
     @Override
     @Authenticated(include = RoleType.REGISTERED)
@@ -141,7 +141,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
-        
+
         entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
         entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
 
@@ -157,20 +157,19 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                             .devMessage("Collection item's resource was null");
                 }
             }
-            
+
             List<Collection.CollectionItemReference> items = new ArrayList<>();
             // Existence check of Resource
             for (Collection.CollectionItemReference ciref : entity.getItems()) {
-                FileResource fr;
-                try {
-                    fr = ciref.getResource().resolve(false);
-                } catch (ApplicationException ex) {
-                    ex = ex.status(400)
+
+                FileResource fr = ciref.getResource().resolve(false);
+                if (fr == null) {
+                    throw new ApplicationException()
+                            .status(400)
                             .code(ErrorMessageCode.BAD_CITEM_NOT_FOUND)
                             .devMessage(String.format("Collection item's resource not found for id '%s'", ciref.getResource().getId()));
-                    throw ex;
                 }
-                
+
                 Collection.CollectionItem ci = new Collection.CollectionItem();
                 ci.setResource(fr);
                 items.add(ciRepo.save(ci).refer());
@@ -179,81 +178,81 @@ public class CollectionService extends CrudService<String, Collection, Repositor
             // Set item list on Collection entity
             entity.setItems(items);
         }
-        
+
         if (Strings.isNullOrEmpty(entity.getName())) {
             entity.setName("Collection");
         }
-        
+
         entity = super.create(entity);
-        
+
         log.traceExit(entity);
         return entity;
     }
-    
+
     @GET
     @Path("/{id}/elements")
     @Authenticated(include = {RoleType.REGISTERED})
     public List<Collection.CollectionItem> listElements(@PathParam("id") String id) throws ApplicationException {
         Collection c = this.get(id);
-        
+
         List<Collection.CollectionItem> ret = new ArrayList<>();
         for (Collection.CollectionItemReference ciref : c.getItems()) {
             ret.add(ciref.resolve(false));
         }
-        
+
         return ret;
     }
-    
+
     @GET
     @Path("/{id}/elements/{eid}")
     @Authenticated(include = {RoleType.REGISTERED})
     public Collection.CollectionItem getElement(@PathParam("id") String id, @PathParam("eid") String eid) throws ApplicationException {
         log.entry(id, eid);
         Collection c = this.get(id);
-        
+
         for (Collection.CollectionItemReference ciref : c.getItems()) {
             if (ciref.getId().equals(eid)) {
                 return log.traceExit(ciref.resolve(false));
             }
         }
-        
+
         throw new ApplicationException()
                 .status(404)
                 .code(ErrorMessageCode.NOT_FOUND)
                 .devMessage(String.format("Object with id '%s' not found", id));
     }
-    
+
     @DELETE
     @Path("/{id}/elements/{eid}")
     @Authenticated(include = RoleType.REGISTERED)
     public void deleteElement(@PathParam("id") String id, @PathParam("eid") String eid) throws ApplicationException {
         log.entry(id, eid);
         Collection c = this.get(id);
-        
+
         for (Collection.CollectionItemReference ciref : c.getItems()) {
             if (ciref.getId().equals(eid)) {
                 ciRepo.delete(ciref.getId());
                 c = c.removeItem(ciref);
-                
+
                 repo.update(c.getId(), c);
                 log.traceExit();
                 return;
             }
         }
-        
+
         throw new ApplicationException()
                 .status(404)
                 .code(ErrorMessageCode.NOT_FOUND)
                 .devMessage(String.format("Object with id '%s' not found", id));
     }
-    
+
     @POST
     @Path("/{id}/elements")
     @Authenticated(include = RoleType.REGISTERED)
     public Collection.CollectionItem addElement(@PathParam("id") String id, Collection.CollectionItem entity) throws ApplicationException {
         log.entry(id, entity);
         Collection c = this.get(id);
-        
+
         FileResourceReference frref = entity.getResource();
         if ((frref == null) || Strings.isNullOrEmpty(frref.getId())) {
             throw new ApplicationException()
@@ -261,7 +260,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .code(ErrorMessageCode.BAD_CITEM)
                     .devMessage("Collection item's resource was empty or null");
         }
-        
+
         FileResource fr = fRepo.get(frref.getId());
         if (fr == null) {
             throw new ApplicationException()
@@ -269,15 +268,15 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .code(ErrorMessageCode.BAD_CITEM_NOT_FOUND)
                     .devMessage(String.format("Collection item's resource not found for id '%s'", entity.getResource().getId()));
         }
-        
+
         entity.setResource(fr);
         entity = ciRepo.save(entity);
-        
+
         c = c.addItem(entity);
 
         // TODO validate update?
         repo.update(c.getId(), c);
-        
+
         log.traceExit(entity);
         return entity;
     }

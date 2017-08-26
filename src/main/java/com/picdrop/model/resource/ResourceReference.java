@@ -6,7 +6,6 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.picdrop.exception.ApplicationException;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Resolvable;
 import org.bson.types.ObjectId;
@@ -37,6 +36,6 @@ public abstract class ResourceReference extends Identifiable implements Resolvab
 
     @Override
     @JsonIgnore
-    public abstract Resource resolve(boolean deep) throws ApplicationException;
+    public abstract Resource resolve(boolean deep);
 
 }

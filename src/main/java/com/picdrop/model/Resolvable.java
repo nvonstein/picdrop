@@ -5,12 +5,10 @@
  */
 package com.picdrop.model;
 
-import com.picdrop.exception.ApplicationException;
-
 /**
  *
  * @author nvonstein
  */
 public interface Resolvable<T> {
-    public T resolve(boolean deep) throws ApplicationException;
+    public T resolve(boolean deep);
 }

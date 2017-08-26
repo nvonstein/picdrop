@@ -5,10 +5,7 @@
  */
 package com.picdrop.model.resource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.inject.Inject;
-import com.picdrop.exception.ApplicationException;
-import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.repository.Repository;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.NotSaved;
@@ -39,16 +36,10 @@ public class CollectionReference extends ResourceReference {
     }
 
     @Override
-    public Collection resolve(boolean deep) throws ApplicationException {
+    public Collection resolve(boolean deep) {
         if (this.c == null) {
             this.c = repo.get(this.getId());
-            if (this.c == null) {
-                throw new ApplicationException()
-                        .status(404)
-                        .code(ErrorMessageCode.NOT_FOUND)
-                        .devMessage(String.format("Object with id '%s' not found", this.getId()));
-            }
-            if (deep) {
+            if (deep && (this.c != null)) {
                 for (Collection.CollectionItemReference ciref : this.c.getItems()) {
                     ciref.resolve(true);
                 }

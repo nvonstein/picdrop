@@ -6,8 +6,6 @@
 package com.picdrop.model.resource;
 
 import com.google.inject.Inject;
-import com.picdrop.exception.ApplicationException;
-import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.repository.Repository;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.NotSaved;
@@ -38,16 +36,10 @@ public class FileResourceReference extends ResourceReference {
     }
 
     @Override
-    public FileResource resolve(boolean deep) throws ApplicationException {
+    public FileResource resolve(boolean deep) {
         if (this.fr == null) {
             this.fr = repo.get(this.getId());
-            if (this.fr == null) {
-                throw new ApplicationException()
-                        .status(404)
-                        .code(ErrorMessageCode.NOT_FOUND)
-                        .devMessage(String.format("Object with id '%s' not found", this.getId()));
-            }
-            if (deep) {
+            if (deep && (this.fr != null)) {
                 this.fr.getOwner().resolve(true);
             }
         }

@@ -279,19 +279,25 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .devMessage("Resource was null");
         }
 
-        Resource r = entity.getResourceResolved();
-        
+        Resource r = entity.getResource(false);
+        if (r == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_RESOURCE)
+                    .devMessage("Resource not found");
+        }
+
         // TODO generate uri
         
         Share s = super.create(entity);
-        
+
         r = r.addShareId(s);
-        
+
         if (r.isCollection()) {
             this.crepo.update(r.getId(), (Collection) r);
             return s;
         }
-        
+
         if (r.isFileResource()) {
             this.frepo.update(r.getId(), (FileResource) r);
             return s;
