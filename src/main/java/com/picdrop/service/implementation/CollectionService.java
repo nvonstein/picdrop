@@ -144,6 +144,9 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
         entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
         entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
+        if (Strings.isNullOrEmpty(entity.getName())) {
+            entity.setName("Collection");
+        }
 
         // Optionally create CollectionItems
         if ((entity.getItems() != null) && !entity.getItems().isEmpty()) {
@@ -158,8 +161,8 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                 }
             }
 
-            List<Collection.CollectionItemReference> items = new ArrayList<>();
             // Existence check of Resource
+            List<Collection.CollectionItem> items = new ArrayList<>();
             for (Collection.CollectionItemReference ciref : entity.getItems()) {
 
                 FileResource fr = ciref.getResource().resolve(false);
@@ -172,18 +175,20 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
                 Collection.CollectionItem ci = new Collection.CollectionItem();
                 ci.setResource(fr);
-                items.add(ciRepo.save(ci).refer());
+                items.add(ci);
             }
 
-            // Set item list on Collection entity
-            entity.setItems(items);
-        }
+            entity = super.create(entity);
+            for (Collection.CollectionItem ci : items) {
+                ci.setParentCollection(entity);
+                ci = this.ciRepo.save(ci);
+                entity.addItem(ci);
+            }
 
-        if (Strings.isNullOrEmpty(entity.getName())) {
-            entity.setName("Collection");
+            entity = this.repo.update(entity.getId(), entity);
+        } else {
+            entity = super.create(entity);
         }
-
-        entity = super.create(entity);
 
         log.traceExit(entity);
         return entity;

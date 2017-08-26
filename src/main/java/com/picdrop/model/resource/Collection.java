@@ -102,6 +102,8 @@ public class Collection extends Resource {
         @Embedded
         FileResourceReference resource;
         @Embedded
+        CollectionReference parentCollection;
+        @Embedded
         List<Comment> comments = new ArrayList<>();
         @Embedded
         List<Rating> ratings = new ArrayList<>();
@@ -117,6 +119,21 @@ public class Collection extends Resource {
 
         public CollectionItem(ObjectId _id) {
             super(_id);
+        }
+
+        @JsonIgnore
+        public CollectionReference getParentCollection() {
+            return parentCollection;
+        }
+
+        @JsonIgnore
+        public void setParentCollection(CollectionReference parentCollection) {
+            this.parentCollection = parentCollection;
+        }
+
+        @JsonIgnore
+        public void setParentCollection(Collection parentCollection) {
+            this.parentCollection = parentCollection.refer();
         }
 
         @JsonProperty
