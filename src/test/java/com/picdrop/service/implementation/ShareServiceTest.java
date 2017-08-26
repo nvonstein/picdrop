@@ -187,7 +187,7 @@ public class ShareServiceTest {
     }
 
     @Test(expected = ApplicationException.class)
-    public void createTestInvalidOwner() throws Exception {
+    public void createTestInvalidOwnerInvalidResource() throws Exception {
         Share dut;
         Share obj = new Share();
         obj.setResource(new FileResourceReference(ID2));
