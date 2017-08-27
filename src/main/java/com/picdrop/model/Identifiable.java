@@ -5,6 +5,8 @@
  */
 package com.picdrop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
@@ -13,6 +15,7 @@ import org.mongodb.morphia.annotations.Id;
  *
  * @author i330120
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Identifiable {
 
     @Id
@@ -33,6 +36,7 @@ public class Identifiable {
         return (_id != null) ? _id.toHexString() : null;
     }
 
+    @JsonProperty("id")
     public void setId(String _id) {
         this._id = new ObjectId(_id);
     }

@@ -23,6 +23,9 @@ public class ShareReference extends Identifiable implements Resolvable<Share> {
     @NotSaved
     protected Share s;
 
+    public ShareReference() {
+    }
+
     public ShareReference(String _id) {
         super(_id);
     }

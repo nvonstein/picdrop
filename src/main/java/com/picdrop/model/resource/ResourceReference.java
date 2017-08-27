@@ -5,9 +5,7 @@
  */
 package com.picdrop.model.resource;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.picdrop.model.Identifiable;
@@ -21,7 +19,7 @@ import org.bson.types.ObjectId;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "_type"
+        property = "type"
 )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = FileResourceReference.class, name = "file")
@@ -29,6 +27,9 @@ import org.bson.types.ObjectId;
     @JsonSubTypes.Type(value = CollectionReference.class, name = "collection")
 })
 public abstract class ResourceReference extends Identifiable implements Resolvable<Resource> {
+
+    public ResourceReference() {
+    }
 
     public ResourceReference(String _id) {
         super(_id);

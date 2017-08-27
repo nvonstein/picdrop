@@ -22,6 +22,9 @@ public class FileResourceReference extends ResourceReference {
     @NotSaved
     FileResource fr;
 
+    public FileResourceReference() {
+    }
+
     public FileResourceReference(String _id) {
         super(_id);
     }
