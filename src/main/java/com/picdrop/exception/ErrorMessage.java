@@ -5,10 +5,13 @@
  */
 package com.picdrop.exception;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 /**
  *
  * @author nvonstein
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.PROTECTED_AND_PUBLIC)
 public class ErrorMessage {
     protected String code;
     protected String lang;
