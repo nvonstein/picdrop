@@ -16,6 +16,9 @@ import org.bson.types.ObjectId;
  */
 public abstract class UserReference extends Identifiable implements Resolvable<User> {
 
+    UserReference() {
+    }
+
     public UserReference(String _id) {
         super(_id);
     }

@@ -5,6 +5,7 @@
  */
 package com.picdrop.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.inject.Inject;
 import com.picdrop.repository.Repository;
 import org.bson.types.ObjectId;
@@ -21,6 +22,9 @@ public class RegisteredUserReference extends UserReference {
 
     @NotSaved
     protected RegisteredUser user;
+
+    public RegisteredUserReference() {
+    }
 
     public RegisteredUserReference(String _id) {
         super(_id);
