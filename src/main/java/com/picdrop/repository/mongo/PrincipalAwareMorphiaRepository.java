@@ -46,9 +46,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             return null;
         }
 
-        dbObj.put("owner",
-                new DBRef(ds.getCollection(principal.getClass()).getName(), new ObjectId(principal.getId()))
-        );
+        dbObj.put("owner", new BasicDBObject("_id", new ObjectId(principal.getId())));
 
         return dbObj;
     }
