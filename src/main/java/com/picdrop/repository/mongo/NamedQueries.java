@@ -24,7 +24,7 @@ public abstract class NamedQueries {
 
         m.put("registeredUser.byEmail", "{ email: ?0 }");
         m.put("shares.byUri", "{ uri: ?0 }");
-        m.put("citems.byResourceId", "{ resource: { $id: ?0}}");
+        m.put("citems.byResourceId", "{ resource: { _id: ?0}}");
 
         return Collections.unmodifiableMap(m);
     }
