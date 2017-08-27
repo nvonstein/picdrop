@@ -6,9 +6,11 @@
 package com.picdrop.guice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
+import com.picdrop.exception.ApplicationExeptionMapper;
 import com.picdrop.helper.EnvHelper;
 import com.picdrop.service.implementation.AuthorizationService;
 import com.picdrop.service.implementation.CollectionService;
@@ -23,7 +25,7 @@ import javax.inject.Singleton;
  * @author i330120
  */
 public class ApplicationModule implements Module {
-
+    
     @Override
     public void configure(Binder binder) {
         // Services
@@ -34,6 +36,9 @@ public class ApplicationModule implements Module {
 
         // Environment
         bindProperties(binder);
+        
+        // Static ObjectMapper
+        bindStaticObjectMapper(binder);
     }
     
     protected void bindProperties(Binder binder) {
@@ -41,7 +46,14 @@ public class ApplicationModule implements Module {
     }
     
     protected void bindObjectMapper(Binder binder) {
-        binder.bind(ObjectMapper.class).toInstance(new ObjectMapper());
+        ObjectMapper mapper = new ObjectMapper();
+        
+        binder.bind(ObjectMapper.class).toInstance(mapper);
+        binder.bind(ObjectWriter.class).toInstance(mapper.writer());
+    }
+    
+    protected void bindStaticObjectMapper(Binder binder) {
+        binder.requestStaticInjection(ApplicationExeptionMapper.class);
     }
     
     protected void bindServices(Binder binder) {

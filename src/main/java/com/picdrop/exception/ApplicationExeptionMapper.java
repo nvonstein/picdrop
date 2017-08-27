@@ -6,10 +6,9 @@
 package com.picdrop.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import java.util.logging.Level;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -28,7 +27,7 @@ public class ApplicationExeptionMapper implements ExceptionMapper<ApplicationExc
     Logger log = LogManager.getRootLogger();
     
     @Inject
-    ObjectMapper mapper;
+    protected static ObjectWriter writer;
     
     protected void logMessage(ApplicationException e) {       
         if (e.getStatus() >= 500) {
@@ -44,8 +43,7 @@ public class ApplicationExeptionMapper implements ExceptionMapper<ApplicationExc
         try {
             return Response
                     .status(exception.getStatus())
-                    .entity(
-                            mapper.writeValueAsString(
+                    .entity(writer.writeValueAsString(
                                     exception.toErrorMessage(false)) // TODO app mode
                     ).build();
         } catch (JsonProcessingException ex) {
