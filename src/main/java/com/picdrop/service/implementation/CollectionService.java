@@ -21,6 +21,7 @@ import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.RoleType;
 import com.picdrop.service.CrudService;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -80,7 +81,15 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         }
         Collection c = this.get(id);
 
-        // TODO merge
+        try {
+            c = c.merge(entity);
+        } catch (IOException ex) {
+            throw new ApplicationException(ex)
+                    .status(500)
+                    .code(ErrorMessageCode.ERROR_OBJ_MERGE)
+                    .devMessage(ex.getMessage());
+        }
+
         log.traceExit();
         return super.update(id, c);
     }

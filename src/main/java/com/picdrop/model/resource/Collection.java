@@ -13,6 +13,7 @@ import com.picdrop.model.Identifiable;
 import com.picdrop.model.Referable;
 import com.picdrop.model.Resolvable;
 import com.picdrop.repository.Repository;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -94,6 +95,15 @@ public class Collection extends Resource {
     @Override
     public boolean isCollection() {
         return true;
+    }
+
+    @Override
+    public Collection merge(Resource update) throws IOException {
+        if (update == null) {
+            return this;
+        }
+        super.merge(update);
+        return this;
     }
 
     @Entity("citems")
@@ -254,10 +264,12 @@ public class Collection extends Resource {
         public Rating() {
         }
 
+        @JsonProperty
         public int getRate() {
             return rate;
         }
 
+        @JsonProperty
         public void setRate(int rate) {
             this.rate = (rate < 0) ? 0 : rate % 6;
         }
