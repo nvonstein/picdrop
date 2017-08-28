@@ -32,6 +32,7 @@ import com.picdrop.security.token.cipher.TokenCipherImpl;
 import com.picdrop.security.token.signer.TokenSigner;
 import com.picdrop.security.token.signer.TokenSignerImpl;
 import com.picdrop.service.filter.AuthenticationFilter;
+import com.picdrop.service.filter.ShareRewriteFilter;
 import org.jboss.resteasy.plugins.guice.RequestScoped;
 
 /**
@@ -66,6 +67,7 @@ public class AuthorizationModule implements Module {
 
     protected void bindAuthenticationFilter(Binder binder) {
         binder.bind(AuthenticationFilter.class);
+        binder.bind(ShareRewriteFilter.class);
     }
 
     protected void bindRequestContext(Binder binder) {
