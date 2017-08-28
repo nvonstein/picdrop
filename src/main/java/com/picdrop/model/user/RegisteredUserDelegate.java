@@ -39,7 +39,7 @@ public class RegisteredUserDelegate extends User {
 
     @Override
     public boolean isRegistered() {
-        return u.isRegistered();
+        return false;
     }
 
     @Override
