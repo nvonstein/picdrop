@@ -36,7 +36,7 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
     // group(1) - /shares/{id}
     // group(2) - {id}
     // group(3) - /{identifier}/{id}
-    protected static final String regex = "\\/*(\\/shares\\/([a-zA-Z0-9]*))(\\/[a-zA-Z0-9]*\\/[a-zA-Z0-9]*)";
+    protected static final String regex = "^.*(\\/shares\\/([a-zA-Z0-9]*))(\\/[a-zA-Z0-9]*\\/[a-zA-Z0-9]*)\\/?.*$";
     protected Pattern pattern;
 
     @Inject
