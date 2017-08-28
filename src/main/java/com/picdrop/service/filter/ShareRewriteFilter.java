@@ -8,15 +8,12 @@ package com.picdrop.service.filter;
 import com.google.inject.Inject;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
-import com.picdrop.model.resource.Resource;
 import com.picdrop.model.resource.ResourceReference;
 import com.picdrop.model.user.RegisteredUserDelegate;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
-import com.picdrop.repository.Repository;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -79,6 +76,8 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
             if (s.isAllowRating()) {
                 delegate.addPermission(String.format("/collections/%s/*/rate", r.getId()));
             }
+            delegate.addPermission(String.format("%s/*/read", r.toResourceString()));
+            
             rctx.setPrincipal(delegate);
 
             // Rewrite route
