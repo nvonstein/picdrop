@@ -31,6 +31,7 @@ public class ApplicationConfig extends Application {
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(com.picdrop.exception.ApplicationExeptionMapper.class);
         resources.add(com.picdrop.service.filter.AuthenticationFilter.class);
+        resources.add(com.picdrop.service.filter.PermissionAuthenticationFilter.class);
         resources.add(com.picdrop.service.filter.ShareRewriteFilter.class);
         resources.add(com.picdrop.service.implementation.AuthorizationService.class);
         resources.add(com.picdrop.service.implementation.CollectionService.class);

@@ -8,17 +8,20 @@ package com.picdrop.model.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Strings;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
 import com.picdrop.model.Referable;
 import com.picdrop.security.authentication.Role;
 import com.picdrop.security.authentication.RoleType;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.NotSaved;
 
 /**
  *
@@ -29,10 +32,12 @@ import org.mongodb.morphia.annotations.Entity;
 //@JsonTypeName(value = "user")
 @Entity("users")
 @Role(roles = RoleType.USER)
-public abstract class User extends Identifiable implements Mergeable<User>, Referable<UserReference>{
+public abstract class User extends Identifiable implements Mergeable<User>, Referable<UserReference> {
 
     protected String name;
     protected long created;
+    @NotSaved
+    List<String> permissions;
 
     public User() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -72,6 +77,26 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
         return false;
     }
 
+    public List<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
+    }
+
+    public User addPermission(String perm) {
+        if (!Strings.isNullOrEmpty(perm)) {
+           this.permissions.add(perm); 
+        }    
+        return this;
+    }
+
+    public User removePermission(String perm) {
+        this.permissions.remove(perm);
+        return this;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -89,7 +114,7 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
         }
         return true;
     }
-    
+
     @JsonIgnore
     public <T extends User> T to(Class<T> type) {
         if (type == null) {
