@@ -21,7 +21,7 @@ import java.io.IOException;
  *
  * @author i330120
  */
-@Entity("registeredusers")
+@Entity("users")
 @Role(roles = {RoleType.REGISTERED, RoleType.USER})
 public class RegisteredUser extends User {
 
