@@ -8,7 +8,6 @@ package com.picdrop.service.filter;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.picdrop.model.RequestContext;
-import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.security.authentication.authenticator.Authenticator;
 import java.io.IOException;
@@ -87,7 +86,7 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
                 }
                 rctx.setPrincipal(user);
             }
-            
+
             Role roleAnnotation = user.getClass().getAnnotation(Role.class);
             RoleType[] roles = (roleAnnotation == null) ? new RoleType[]{} : roleAnnotation.roles();
 
@@ -114,5 +113,5 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
         }
         log.traceExit();
     }
-
+    
 }
