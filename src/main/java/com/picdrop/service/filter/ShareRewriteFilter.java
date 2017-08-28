@@ -16,6 +16,7 @@ import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -68,9 +69,17 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
                 requestContext.abortWith(Response.status(Response.Status.NOT_FOUND).build());
                 return;
             }
-            
+
             RequestContext rctx = context.get();
-            rctx.setPrincipal(new RegisteredUserDelegate(s.getOwner(false)));
+            RegisteredUserDelegate delegate = new RegisteredUserDelegate(s.getOwner(false));
+            
+            if (s.isAllowComment()) {
+                delegate.addPermission(String.format("/collections/%s/*/comment", r.getId()));
+            }
+            if (s.isAllowRating()) {
+                delegate.addPermission(String.format("/collections/%s/*/rate", r.getId()));
+            }
+            rctx.setPrincipal(delegate);
 
             // Rewrite route
             path = path.replace(mtch.group(1), "");
