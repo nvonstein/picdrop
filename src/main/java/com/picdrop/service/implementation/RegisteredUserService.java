@@ -23,11 +23,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.Permission;
-import com.picdrop.security.authentication.RoleType;
 import java.io.IOException;
-import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

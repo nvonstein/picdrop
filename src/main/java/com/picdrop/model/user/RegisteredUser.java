@@ -13,8 +13,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
-import com.picdrop.security.authentication.Role;
-import com.picdrop.security.authentication.RoleType;
 import java.io.IOException;
 
 /**
@@ -22,7 +20,6 @@ import java.io.IOException;
  * @author i330120
  */
 @Entity("registeredusers")
-@Role(roles = {RoleType.REGISTERED, RoleType.USER})
 public class RegisteredUser extends User {
 
     protected String lastname;

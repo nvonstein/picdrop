@@ -12,9 +12,8 @@ import com.google.common.base.Strings;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
 import com.picdrop.model.Referable;
-import com.picdrop.security.authentication.Role;
-import com.picdrop.security.authentication.RoleType;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
@@ -31,13 +30,12 @@ import org.mongodb.morphia.annotations.NotSaved;
 @JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonTypeName(value = "user")
 @Entity("users")
-@Role(roles = RoleType.USER)
 public abstract class User extends Identifiable implements Mergeable<User>, Referable<UserReference> {
 
     protected String name;
     protected long created;
     @NotSaved
-    List<String> permissions;
+    List<String> permissions = new ArrayList<>();
 
     public User() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();

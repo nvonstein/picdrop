@@ -5,15 +5,10 @@
  */
 package com.picdrop.model.user;
 
-import com.picdrop.model.Share;
-import com.picdrop.security.authentication.Role;
-import com.picdrop.security.authentication.RoleType;
-
 /**
  *
  * @author nvonstein
  */
-@Role(roles = RoleType.SHARE)
 public class RegisteredUserDelegate extends User {
 
     User u;

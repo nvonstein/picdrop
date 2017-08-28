@@ -37,8 +37,6 @@ import com.picdrop.model.resource.ResourceDescriptor;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import javax.ws.rs.PUT;
-import com.picdrop.security.authentication.Authenticated;
-import com.picdrop.security.authentication.RoleType;
 import com.picdrop.io.FileRepository;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
@@ -46,7 +44,6 @@ import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.security.authentication.Permission;
-import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,7 +54,6 @@ import org.apache.logging.log4j.Logger;
 @Path("/app/resources")
 @Consumes("application/json")
 @Produces("application/json")
-@Authenticated(include = {RoleType.REGISTERED})
 public class FileResourceService {
     
     Logger log = LogManager.getLogger(this.getClass());

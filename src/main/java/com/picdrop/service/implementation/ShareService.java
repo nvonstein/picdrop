@@ -5,7 +5,6 @@
  */
 package com.picdrop.service.implementation;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.picdrop.exception.ApplicationException;
@@ -21,13 +20,10 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
-import com.picdrop.security.authentication.Authenticated;
 import com.picdrop.security.authentication.Permission;
-import com.picdrop.security.authentication.RoleType;
 import com.picdrop.service.CrudService;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
