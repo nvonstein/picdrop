@@ -16,6 +16,7 @@ import java.util.List;
  */
 public enum RoleType {
     USER("user"),
+    SHARE("share"),
     REGISTERED("registered");
 
     private RoleType(String name) {
