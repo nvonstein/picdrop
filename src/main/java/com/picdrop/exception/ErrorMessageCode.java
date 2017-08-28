@@ -23,7 +23,8 @@ public enum ErrorMessageCode {
     BAD_RESOURCE("ec000010","Bad request: Resource is not set or invalid."), 
     BAD_REQUEST_BODY("ec000011","Bad request: No request body."), 
     BAD_CITEM("ec000012","Bad request: Collection item is not set or invalid."), 
-    BAD_CITEM_NOT_FOUND("ec000013","Bad request: Collection item's resource could not be resolved given id.");
+    BAD_CITEM_NOT_FOUND("ec000013","Bad request: Collection item's resource could not be resolved given id."),
+    BAD_COMMENT("ec000014","Bad request: Invalid comment or unable to find/resolve a name.");
 
     private String code;
     private String defaultMessage;

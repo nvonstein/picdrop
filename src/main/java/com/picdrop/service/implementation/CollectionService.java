@@ -16,7 +16,9 @@ import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.FileResourceReference;
+import com.picdrop.model.user.NameOnlyUserReference;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Permission;
 import com.picdrop.service.CrudService;
@@ -65,6 +67,15 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         this.sRepo = sRepo;
 
         log.trace("created with ({},{},{})", ciRepo, fRepo, sRepo);
+    }
+
+    private boolean verifyName(NameOnlyUserReference entity) throws ApplicationException {
+        if ((entity != null) && (entity.getName().length() > 100)) {
+            throw new ApplicationException()
+                    .status(404)
+                    .code(ErrorMessageCode.BAD_NAME);
+        }
+        return true;
     }
 
     @PUT
@@ -293,4 +304,40 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.traceExit(entity);
         return entity;
     }
+
+    @POST
+    @Path("/{id}/elements/{eid}/comments")
+    public Collection.CollectionItem comment(@PathParam("id") String id,
+            @PathParam("eid") String eid,
+            Collection.Comment entity) throws ApplicationException {
+        log.entry(id, eid, entity);
+        Collection.CollectionItem ci = this.getElement(id, eid);
+
+        if (Strings.isNullOrEmpty(entity.getName())) {
+            User user = this.context.get().getPrincipal();
+
+            if (user.isRegistered()) {
+                entity.setUser(user);
+            } else {
+                String name = user.getFullName();
+
+                if (Strings.isNullOrEmpty(name)) {
+                    throw new ApplicationException()
+                            .status(400)
+                            .code(ErrorMessageCode.BAD_COMMENT)
+                            .devMessage("Unable to resolve a name");
+                }
+                entity.setName(name);
+            }
+        } else {
+            verifyName(entity);
+        }
+
+        ci.addComment(entity);
+
+        ci = this.ciRepo.update(ci.getId(), ci);
+        log.traceExit(ci);
+        return ci;
+    }
+
 }
