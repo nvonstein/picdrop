@@ -18,8 +18,7 @@ import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
-import com.picdrop.security.authentication.Authenticated;
-import com.picdrop.security.authentication.RoleType;
+import com.picdrop.security.authentication.Permission;
 import com.picdrop.service.CrudService;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @PUT
     @Path("/{id}")
     @Override
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     public Collection update(@PathParam("id") String id, Collection entity) throws ApplicationException {
         log.entry(id);
         if (entity == null) {
@@ -97,7 +96,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @GET
     @Path("/{id}")
     @Override
-    @Authenticated(include = {RoleType.REGISTERED})
+    @Permission("read")
     public Collection get(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
         Collection c = super.get(id);
@@ -114,7 +113,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @DELETE
     @Path("/{id}")
     @Override
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     public void delete(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
         Collection c = this.get(id);
@@ -135,14 +134,14 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @GET
     @Path("/")
     @Override
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("read")
     public List<Collection> list() throws ApplicationException {
         return super.list();
     }
 
     @POST
     @Override
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     public Collection create(Collection entity) throws ApplicationException {
         log.entry(entity);
         if (entity == null) {
@@ -205,7 +204,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @GET
     @Path("/{id}/elements")
-    @Authenticated(include = {RoleType.REGISTERED})
+    @Permission("read")
     public List<Collection.CollectionItem> listElements(@PathParam("id") String id) throws ApplicationException {
         Collection c = this.get(id);
 
@@ -219,7 +218,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @GET
     @Path("/{id}/elements/{eid}")
-    @Authenticated(include = {RoleType.REGISTERED})
+    @Permission("read")
     public Collection.CollectionItem getElement(@PathParam("id") String id, @PathParam("eid") String eid) throws ApplicationException {
         log.entry(id, eid);
         Collection c = this.get(id);
@@ -238,7 +237,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @DELETE
     @Path("/{id}/elements/{eid}")
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     public void deleteElement(@PathParam("id") String id, @PathParam("eid") String eid) throws ApplicationException {
         log.entry(id, eid);
         Collection c = this.get(id);
@@ -262,7 +261,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
     @POST
     @Path("/{id}/elements")
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     public Collection.CollectionItem addElement(@PathParam("id") String id, Collection.CollectionItem entity) throws ApplicationException {
         log.entry(id, entity);
         Collection c = this.get(id);
