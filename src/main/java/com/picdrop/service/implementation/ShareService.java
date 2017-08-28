@@ -22,6 +22,7 @@ import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Authenticated;
+import com.picdrop.security.authentication.Permission;
 import com.picdrop.security.authentication.RoleType;
 import com.picdrop.service.CrudService;
 import java.io.IOException;
@@ -184,7 +185,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
 
     @PUT
     @Path("/{id}")
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     @Override
     public Share update(@PathParam("id") String id, Share entity) throws ApplicationException {
         log.entry(id, entity);
@@ -230,7 +231,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
 
     @DELETE
     @Path("/{id}")
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     @Override
     public void delete(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
@@ -261,7 +262,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     }
 
     @POST
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     @Override
     public Share create(Share entity) throws ApplicationException {
         log.entry(entity);
