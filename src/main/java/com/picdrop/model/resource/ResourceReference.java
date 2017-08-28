@@ -53,4 +53,5 @@ public abstract class ResourceReference extends Identifiable implements Resolvab
     @JsonIgnore
     public abstract Resource resolve(boolean deep);
 
+    public abstract String toResourceString();
 }

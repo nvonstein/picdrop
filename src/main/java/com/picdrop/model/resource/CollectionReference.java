@@ -49,4 +49,8 @@ public class CollectionReference extends ResourceReference {
         return c;
     }
 
+    @Override
+    public String toResourceString() {
+        return String.format("/collections/%s", this.getId());
+    }
 }

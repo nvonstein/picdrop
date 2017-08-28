@@ -48,5 +48,10 @@ public class FileResourceReference extends ResourceReference {
         }
         return this.fr;
     }
+    
+    @Override
+    public String toResourceString() {
+        return String.format("/resources/%s", this.getId());
+    }
 
 }
