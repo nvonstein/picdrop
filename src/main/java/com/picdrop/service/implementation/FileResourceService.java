@@ -45,6 +45,7 @@ import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
+import com.picdrop.security.authentication.Permission;
 import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -240,6 +241,7 @@ public class FileResourceService {
     
     @GET
     @Path("/{id}")
+    @Permission("read")
     public FileResource getResource(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
         FileResource fr = this.repo.get(id);
@@ -255,6 +257,7 @@ public class FileResourceService {
     
     @GET
     @Path("/")
+    @Permission("read")
     public List<FileResource> listResource() {
         log.traceEntry();
         return log.traceExit(this.repo.list());
@@ -262,6 +265,7 @@ public class FileResourceService {
     
     @POST
     @Path("/")
+    @Permission("write")
     @Consumes("multipart/form-data")
     public List<FileResource> create(@Context HttpServletRequest request) throws ApplicationException {
         log.traceEntry();
@@ -296,6 +300,7 @@ public class FileResourceService {
     
     @PUT
     @Path("/{id}")
+    @Permission("write")
     public FileResource update(
             @PathParam("id") String id,
             FileResource entity) throws ApplicationException {
@@ -327,6 +332,7 @@ public class FileResourceService {
     
     @PUT
     @Path("/{id}")
+    @Permission("write")
     @Consumes("multipart/form-data")
     public FileResource updateFile(@PathParam("id") String id, @Context HttpServletRequest request) throws ApplicationException {
         log.entry(id);
@@ -363,6 +369,7 @@ public class FileResourceService {
     }
     
     @DELETE
+    @Permission("write")
     @Path("/{id}")
     public void delete(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
