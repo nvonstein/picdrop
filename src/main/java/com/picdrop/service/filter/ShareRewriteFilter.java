@@ -10,7 +10,7 @@ import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.Resource;
 import com.picdrop.model.resource.ResourceReference;
-import com.picdrop.model.user.SharePrincipalDelegator;
+import com.picdrop.model.user.RegisteredUserDelegate;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
@@ -70,7 +70,7 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
             }
             
             RequestContext rctx = context.get();
-            rctx.setPrincipal(new SharePrincipalDelegator(s.getOwner(false)));
+            rctx.setPrincipal(new RegisteredUserDelegate(s.getOwner(false)));
 
             // Rewrite route
             path = path.replace(mtch.group(1), "");

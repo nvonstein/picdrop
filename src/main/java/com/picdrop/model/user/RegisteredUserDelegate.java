@@ -14,11 +14,11 @@ import com.picdrop.security.authentication.RoleType;
  * @author nvonstein
  */
 @Role(roles = RoleType.SHARE)
-public class SharePrincipalDelegator extends User {
+public class RegisteredUserDelegate extends User {
 
     User u;
 
-    public SharePrincipalDelegator(User u) {
+    public RegisteredUserDelegate(User u) {
         this.u = u;
     }
 
