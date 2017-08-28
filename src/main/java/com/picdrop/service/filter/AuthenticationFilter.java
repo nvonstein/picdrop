@@ -74,12 +74,20 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
                 return;
             }
 
-            User user = authenticator.authenticate(request);
-            if (user == null) {
-                log.debug("Unable to authenticate a user.");
-                crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
-                return;
+            RequestContext rctx = this.context.get();
+            User user;
+            if (rctx.hasPrincipal()) {
+                user = rctx.getPrincipal();
+            } else {
+                user = authenticator.authenticate(request);
+                if (user == null) {
+                    log.debug("Unable to authenticate a user.");
+                    crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+                    return;
+                }
+                rctx.setPrincipal(user);
             }
+            
             Role roleAnnotation = user.getClass().getAnnotation(Role.class);
             RoleType[] roles = (roleAnnotation == null) ? new RoleType[]{} : roleAnnotation.roles();
 
@@ -99,8 +107,6 @@ public class AuthenticationFilter implements ContainerRequestFilter { // TODO ab
                     return;
                 }
             }
-
-            context.get().setPrincipal(user);
         } catch (Exception e) {
             log.error("Error on authentication.", e);
             crc.abortWith(Response.serverError().build());
