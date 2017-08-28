@@ -254,7 +254,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     }
 
     @GET
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("read")
     @Override
     public List<Share> list() throws ApplicationException {
         log.traceEntry();
