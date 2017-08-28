@@ -5,7 +5,6 @@
  */
 package com.picdrop.security.authentication;
 
-import com.picdrop.security.authentication.PermissionResolver;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
