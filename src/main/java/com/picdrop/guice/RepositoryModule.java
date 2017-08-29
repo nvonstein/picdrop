@@ -11,7 +11,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.picdrop.model.Group;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
@@ -26,8 +25,6 @@ import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
-import com.picdrop.repository.mongo.implementation.TypedGroupRepository;
-import com.picdrop.repository.mongo.implementation.TypedUserRepository;
 import java.util.Map;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
@@ -42,14 +39,6 @@ public class RepositoryModule implements Module {
     public void configure(Binder binder) {
         binder.bind(new TypeLiteral<Map<String, String>>() {
         }).annotatedWith(Names.named("queries")).toInstance(NamedQueries.getQueries());
-
-        // <OLD ---------
-        binder.bind(new TypeLiteral<Repository<String, User>>() {
-        }).annotatedWith(Names.named("users")).to(TypedUserRepository.class);
-
-        binder.bind(new TypeLiteral<Repository<String, Group>>() {
-        }).annotatedWith(Names.named("groups")).to(TypedGroupRepository.class);
-        // OLD> ---------
 
         Datastore ds = bindDatastore(binder);
 
