@@ -69,67 +69,6 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         log.trace("created with ({},{},{},{})", repo, crepo, cirepo, frepo);
     }
 
-    private boolean verifyName(NameOnlyUserReference entity) throws ApplicationException {
-        if ((entity != null) && (entity.getName().length() > 100)) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.BAD_NAME);
-        }
-        return true;
-    }
-
-    @POST
-    @Path("/{id}/collections/{cid}/elements/{eid}/ratings")
-    public Collection.CollectionItem rate(@PathParam("id") String id,
-            @PathParam("cid") String cid,
-            @PathParam("eid") String eid,
-            Rating entity) throws ApplicationException {
-        log.entry(id, cid, eid, entity);
-        Share s = this.get(id);
-        if (s.getResource() == null) {
-            log.warn("Active share ({}) requested without existing resource attached. Possibly some cleanup is missing.", id);
-            this.repo.delete(id, null);
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", id));
-        }
-        if (!s.getResource().getId().equals(cid)) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", cid));
-        }
-        if (!s.getResource().isCollection()) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.BAD_OPERATION);
-        }
-        RequestContext ctx = contextProv.get();
-        if (ctx.hasPrincipal() && ctx.getPrincipal().isRegistered()) {
-            entity.setUser(ctx.getPrincipal());
-        } else {
-            verifyName(entity);
-        }
-        Collection c = (Collection) s.getResource().resolve(false);
-        for (Collection.CollectionItemReference ciref : c.getItems()) {
-            if (ciref.getId().equals(eid)) {
-                Collection.CollectionItem ci = ciref.resolve(false);
-                ci.addRating(entity);
-
-                ci = cirepo.update(ci.getId(), ci);
-                log.traceExit(ci);
-                return ci;
-            }
-        }
-        throw new ApplicationException()
-                .status(404)
-                .code(ErrorMessageCode.NOT_FOUND)
-                .devMessage(String.format("Object with id '%s' not found", eid));
-    }
-
-    
-
     @PUT
     @Path("/{id}")
     @Permission("write")
