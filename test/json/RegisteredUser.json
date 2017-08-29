@@ -1,0 +1,17 @@
+{
+  "name": "John",
+  "created": 1504015570385,
+  "lastname": "Doe",
+  "email": "John@Doe.com",
+  "lastlogin": 1504019895584,
+  "id": "59a574d287f87f34dc30e2f9",  
+  "permissions": [
+  	"foo"
+  ], 
+  "registered": false,
+  "phash": "foo",
+  "refer": {
+  	"id": "59a574d287f87f34dc30e2f9"
+  },
+  "fullName":"foo" 
+}

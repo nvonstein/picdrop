@@ -7,7 +7,9 @@ package com.picdrop.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Strings;
+import com.picdrop.json.Views;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -44,12 +46,12 @@ public class RegisteredUser extends User {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public String getLastname() {
         return lastname;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
@@ -59,38 +61,37 @@ public class RegisteredUser extends User {
         return true;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public String getPhash() {
         return phash;
     }
 
-    @JsonProperty()
+    @JsonView(value = Views.Public.class)
     public void setPhash(String phash) {
         this.phash = phash;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public String getEmail() {
         return email;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public void setEmail(String email) {
         this.email = email;
     }
 
-    @JsonIgnore
     @Override
     public String getFullName() {
         return this.name + " " + this.lastname;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public long getLastlogin() {
         return lastlogin;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setLastlogin(long lastlogin) {
         this.lastlogin = lastlogin;
     }

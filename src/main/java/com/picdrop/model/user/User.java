@@ -8,7 +8,9 @@ package com.picdrop.model.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Strings;
+import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
 import com.picdrop.model.Referable;
@@ -51,38 +53,47 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
+    @JsonView(value = Views.Public.class)
     public String getName() {
         return name;
     }
 
+    @JsonView(value = Views.Public.class)
     public void setName(String name) {
         this.name = name;
     }
 
+    @JsonView(value = Views.Ignore.class)
     public String getFullName() {
         return getName();
     }
 
+    @JsonView(value = Views.Public.class)
     public long getCreated() {
         return created;
     }
 
+    @JsonView(value = Views.Ignore.class)
     public void setCreated(long created) {
         this.created = created;
     }
 
+    @JsonView(value = Views.Ignore.class)
     public boolean isRegistered() {
         return false;
     }
 
+    @JsonView(value = Views.Detailed.class)
     public List<String> getPermissions() {
         return permissions;
     }
 
+    @JsonView(value = Views.Ignore.class)
     public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
     }
 
+    @JsonIgnore
     public User addPermission(String perm) {
         if (!Strings.isNullOrEmpty(perm)) {
            this.permissions.add(perm); 
@@ -90,6 +101,7 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
         return this;
     }
 
+    @JsonIgnore
     public User removePermission(String perm) {
         this.permissions.remove(perm);
         return this;

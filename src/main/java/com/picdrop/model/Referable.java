@@ -5,10 +5,13 @@
  */
 package com.picdrop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  *
  * @author nvonstein
  */
 public interface Referable<T> {
+    @JsonIgnore
     public T refer();
 }

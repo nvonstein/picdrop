@@ -5,9 +5,10 @@
  */
 package com.picdrop.model.resource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Resolvable;
 import org.bson.types.ObjectId;
@@ -39,19 +40,19 @@ public abstract class ResourceReference extends Identifiable implements Resolvab
         super(_id);
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public boolean isCollection() {
         return false;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public boolean isFileResource() {
         return false;
     }
 
     @Override
-    @JsonIgnore
     public abstract Resource resolve(boolean deep);
 
+    @JsonView(value = Views.Ignore.class)
     public abstract String toResourceString();
 }

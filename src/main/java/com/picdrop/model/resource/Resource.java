@@ -10,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.picdrop.exception.ApplicationException;
+import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
 import com.picdrop.model.Referable;
@@ -30,16 +32,6 @@ import org.mongodb.morphia.annotations.Embedded;
  *
  * @author i330120
  */
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "_type"
-)
-@JsonSubTypes({
-    @Type(value = FileResource.class, name = "file")
-    ,
-    @Type(value = Collection.class, name = "collection")
-})
 public abstract class Resource extends Identifiable implements Mergeable<Resource>, Referable<ResourceReference> {
 
     protected long created;
@@ -65,39 +57,39 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public long getCreated() {
         return created;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setCreated(long created) {
         this.created = created;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public String getName() {
         return name;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Public.class)
     public void setName(String name) {
         this.name = name;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public RegisteredUserReference getOwner() {
         return owner;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setOwner(RegisteredUserReference owner) {
         this.owner = owner;
     }
 
     @JsonIgnore
-    public RegisteredUser getOwnerResolved() throws ApplicationException {
-        return owner.resolve(false);
+    public RegisteredUser getOwner(boolean deep) {
+        return owner.resolve(deep);
     }
 
     @JsonIgnore
@@ -105,7 +97,7 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         this.owner = owner.refer();
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Detailed.class)
     public List<ShareReference> getShares() {
         return shares;
     }
@@ -134,7 +126,7 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         return this;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setShares(List<ShareReference> shares) {
         this.shares = shares;
     }
@@ -150,16 +142,17 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         return this;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public boolean isCollection() {
         return false;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public boolean isFileResource() {
         return false;
     }
     
+    @JsonView(value = Views.Ignore.class)
     public abstract String toResourceString();
 
 }
