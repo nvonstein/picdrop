@@ -5,6 +5,8 @@
  */
 package com.picdrop.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
 import java.io.IOException;
 
 /**
@@ -12,5 +14,6 @@ import java.io.IOException;
  * @author nvonstein
  */
 public interface Mergeable<T> {
+    @JsonView(value = Views.Internal.class)
     public T merge(T update) throws IOException;   
 }

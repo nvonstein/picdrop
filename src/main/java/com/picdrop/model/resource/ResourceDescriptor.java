@@ -6,6 +6,8 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
 import com.picdrop.model.FileType;
 import com.picdrop.model.Mergeable;
 import java.io.IOException;
@@ -25,7 +27,7 @@ public class ResourceDescriptor implements Mergeable<ResourceDescriptor>{
         this.type = type;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public <T extends ResourceDescriptor> T to(Class<T> type) throws IOException {
         if (type == null) {
             throw new IllegalArgumentException("type is null");
@@ -36,10 +38,12 @@ public class ResourceDescriptor implements Mergeable<ResourceDescriptor>{
         return type.cast(this);
     }
 
+    @JsonView(value = Views.Public.class)
     public FileType getType() {
         return type;
     }
 
+    @JsonView(value = Views.Ignore.class)
     public void setType(FileType type) {
         this.type = type;
     }
@@ -53,17 +57,17 @@ public class ResourceDescriptor implements Mergeable<ResourceDescriptor>{
         return new ResourceDescriptor(FileType.UNKNOWN);
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public boolean isImage() {
         return FileType.IMAGE_WILDTYPE.isCovering(this.type);
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public boolean isUnknown() {
         return FileType.UNKNOWN.isCovering(this.type);
     }
     
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public boolean isGlobalWildtype() {
         return this.type.isCovering(FileType.WILDTYPE);
     }

@@ -5,10 +5,9 @@
  */
 package com.picdrop.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Strings;
-import com.picdrop.exception.ApplicationException;
+import com.picdrop.json.Views;
 import com.picdrop.model.resource.Resource;
 import com.picdrop.model.resource.ResourceReference;
 import com.picdrop.model.user.RegisteredUser;
@@ -56,82 +55,82 @@ public class Share extends Identifiable implements Mergeable<Share>, Referable<S
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public long getCreated() {
         return created;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public void setCreated(long created) {
         this.created = created;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public String getUri() {
         return uri;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Public.class)
     public void setUri(String uri) {
         this.uri = uri;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public ResourceReference getResource() {
         return resource;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public void setResource(ResourceReference resource) {
         this.resource = resource;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public Resource getResource(boolean deep) {
         return resource.resolve(deep);
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public void setResource(Resource resource) {
         this.resource = resource.refer();
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public RegisteredUserReference getOwner() {
         return owner;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setOwner(RegisteredUserReference owner) {
         this.owner = owner;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public RegisteredUser getOwner(boolean deep) {
         return owner.resolve(deep);
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setOwner(RegisteredUser owner) {
         this.owner = owner.refer();
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public boolean isAllowComment() {
         return allowComment;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public void setAllowComment(boolean allowComment) {
         this.allowComment = allowComment;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public boolean isAllowRating() {
         return allowRating;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public void setAllowRating(boolean allowRating) {
         this.allowRating = allowRating;
     }

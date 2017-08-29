@@ -7,6 +7,8 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
 import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -53,44 +55,44 @@ public class FileResource extends Resource {
         }
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     @Deprecated
     public String getFileUri() {
         return fileUri;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     @Deprecated
     public void setFileUri(String fileUri) {
         this.fileUri = fileUri;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public String getExtension() {
         return extension;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public void setExtension(String extension) {
         this.extension = extension;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public ResourceDescriptor getDescriptor() {
         return descriptor;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setDescriptor(ResourceDescriptor descriptor) {
         this.descriptor = descriptor;
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public String getFileId() {
         return fileId;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setFileId(String fileId) {
         this.fileId = fileId;
     }

@@ -7,6 +7,8 @@ package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
 import com.picdrop.model.FileType;
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,28 +34,32 @@ public class ImageDescriptor extends ResourceDescriptor {
         super(ft);
     }
 
+    @JsonView(value = Views.Public.class)
     public Map<String, String> getThumbnailUris() {
         return thumbnailUris;
     }
 
+    @JsonView(value = Views.Ignore.class)
     public void setThumbnailUris(Map<String, String> thumbnailUris) {
         this.thumbnailUris = thumbnailUris;
     }
 
+    @JsonView(value = Views.Public.class)
     public String getOrientation() {
         return orientation;
     }
 
+    @JsonView(value = Views.Ignore.class)
     public void setOrientation(String orientation) {
         this.orientation = orientation;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public String getThumbnailUri(String key) {
         return this.thumbnailUris.get(key);
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public void addThumbnailUri(String key, String value) {
         this.thumbnailUris.put(key, value);
     }

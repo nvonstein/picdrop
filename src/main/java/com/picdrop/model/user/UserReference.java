@@ -28,7 +28,6 @@ public abstract class UserReference extends Identifiable implements Resolvable<U
     }
 
     @Override
-    @JsonIgnore
     public abstract User resolve(boolean deep);
 
 }

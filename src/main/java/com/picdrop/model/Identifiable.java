@@ -7,6 +7,8 @@ package com.picdrop.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
 import java.util.Objects;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
@@ -32,11 +34,13 @@ public class Identifiable {
         this._id = _id;
     }
 
+    @JsonView(value = Views.Public.class)
     public String getId() {
         return (_id != null) ? _id.toHexString() : null;
     }
 
     @JsonProperty("id")
+    @JsonView(value = Views.Public.class)
     public void setId(String _id) {
         this._id = new ObjectId(_id);
     }

@@ -6,9 +6,9 @@
 package com.picdrop.model.resource;
 
 import com.picdrop.model.user.NameOnlyUserReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.inject.Inject;
+import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Referable;
 import com.picdrop.model.Resolvable;
@@ -45,48 +45,47 @@ public class Collection extends Resource {
         super(_id);
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public List<CollectionItemReference> getItems() {
         return items;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public List<CollectionItem> getItems(boolean deep) {
         List<CollectionItem> ret = new ArrayList<>();
         this.items.forEach(ciref -> ret.add(ciref.resolve(deep)));
         return ret;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setItems(List<CollectionItemReference> items) {
         this.items = items;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public Collection addItem(CollectionItemReference item) {
         this.items.add(item);
         return this;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public Collection removeItem(CollectionItemReference item) {
         this.items.remove(item);
         return this;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public Collection addItem(CollectionItem item) {
         this.items.add(item.refer());
         return this;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public Collection removeItem(CollectionItem item) {
         this.items.remove(item.refer());
         return this;
     }
 
-    @JsonIgnore
     @Override
     public CollectionReference refer() {
         return new CollectionReference(this.getId());
@@ -136,78 +135,78 @@ public class Collection extends Resource {
             super(_id);
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Detailed.class)
         public CollectionReference getParentCollection() {
             return parentCollection;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Internal.class)
         public void setParentCollection(CollectionReference parentCollection) {
             this.parentCollection = parentCollection;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Internal.class)
         public void setParentCollection(Collection parentCollection) {
             this.parentCollection = parentCollection.refer();
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public FileResourceReference getResource() {
             return resource;
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public void setResource(FileResourceReference resource) {
             this.resource = resource;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Internal.class)
         public FileResource getResource(boolean deep) {
             return resource.resolve(deep);
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Internal.class)
         public void setResource(FileResource resource) {
             this.resource = resource.refer();
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public List<Rating> getRatings() {
             return ratings;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Ignore.class)
         public void setRatings(List<Rating> ratings) {
             this.ratings = ratings;
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public List<NameOnlyUserReference> getBlockings() {
             return blockings;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Ignore.class)
         public void setBlockings(List<NameOnlyUserReference> blockings) {
             this.blockings = blockings;
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public List<Comment> getComments() {
             return comments;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Ignore.class)
         public void setComments(List<Comment> comments) {
             this.comments = comments;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Internal.class)
         public CollectionItem addRating(Rating r) {
             this.ratings.add(r);
             return this;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Internal.class)
         public CollectionItem addComment(Comment c) {
             this.comments.add(c);
             return this;
@@ -239,7 +238,6 @@ public class Collection extends Resource {
         }
 
         @Override
-        @JsonIgnore
         public CollectionItem resolve(boolean deep) {
             if (this.ci == null) {
                 this.ci = repo.get(this.getId());
@@ -250,12 +248,12 @@ public class Collection extends Resource {
             return ci;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Internal.class)
         public FileResourceReference getResource() {
             return resource;
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public void setResource(FileResourceReference resource) {
             this.resource = resource;
         }
@@ -269,12 +267,12 @@ public class Collection extends Resource {
         public Rating() {
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public int getRate() {
             return rate;
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public void setRate(int rate) {
             this.rate = (rate < 0) ? 0 : rate % 6;
         }
@@ -289,22 +287,22 @@ public class Collection extends Resource {
             this.created = DateTime.now(DateTimeZone.UTC).getMillis();
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public String getComment() {
             return comment;
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public void setComment(String comment) {
             this.comment = comment;
         }
 
-        @JsonProperty
+        @JsonView(value = Views.Public.class)
         public long getCreated() {
             return created;
         }
 
-        @JsonIgnore
+        @JsonView(value = Views.Ignore.class)
         public void setCreated(long created) {
             this.created = created;
         }

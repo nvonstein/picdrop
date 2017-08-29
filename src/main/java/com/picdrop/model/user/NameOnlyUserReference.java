@@ -7,9 +7,9 @@ package com.picdrop.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.picdrop.model.user.User;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
 import java.util.Objects;
-import org.mongodb.morphia.annotations.Reference;
 
 /**
  *
@@ -23,28 +23,28 @@ public class NameOnlyUserReference {
     public NameOnlyUserReference() {
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Detailed.class)
     public String getUser() {
         return user;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setUser(String userId) {
         this.user = userId;
     }
     
-    @JsonIgnore
+    @JsonView(value = Views.Internal.class)
     public void setUser(User user) {
         this.user = user.getId();
         this.name = user.getFullName();
     }
 
-    @JsonProperty
+    @JsonView(value = Views.Public.class)
     public String getName() {
         return name;
     }
 
-    @JsonIgnore
+    @JsonView(value = Views.Ignore.class)
     public void setName(String name) {
         this.name = name;
     }

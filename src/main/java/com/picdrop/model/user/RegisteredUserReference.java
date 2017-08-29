@@ -5,7 +5,6 @@
  */
 package com.picdrop.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.inject.Inject;
 import com.picdrop.repository.Repository;
 import org.bson.types.ObjectId;

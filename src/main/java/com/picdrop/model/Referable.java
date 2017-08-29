@@ -5,10 +5,14 @@
  */
 package com.picdrop.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.picdrop.json.Views;
+
 /**
  *
  * @author nvonstein
  */
 public interface Referable<T> {
+    @JsonView(value = Views.Internal.class)
     public T refer();
 }
