@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="debug">
     <Appenders>
-        <File name="file.log.main" fileName="${catalina.home}/logs/picdrop.main.out" append="false">
+        <File name="file.log.main" fileName="${sys:catalina.base}/logs/picdrop.main.out" append="false">
             <PatternLayout>
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %C - %msg%n</pattern>
             </PatternLayout>
         </File>
-        <File name="file.log.trace" fileName="${catalina.home}/logs/picdrop.trace.out" append="false">
+        <File name="file.log.trace" fileName="${sys:catalina.base}/logs/picdrop.trace.out" append="false">
             <PatternLayout>
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %C - %msg%n</pattern>
             </PatternLayout>
@@ -15,7 +15,7 @@
     <Loggers>
         <Logger name="com.picdrop" level="trace" additivity="false">
             <appender-ref ref="file.log.main" level="debug"/>
-            <appender-ref ref="file.log.trace" level="trace"/>
+            <!--<appender-ref ref="file.log.trace" level="trace"/>-->
         </Logger>
     </Loggers>
 </Configuration>
