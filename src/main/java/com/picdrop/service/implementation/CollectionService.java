@@ -306,6 +306,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     }
 
     @POST
+    @Permission("comment")
     @Path("/{id}/elements/{eid}/comments")
     public Collection.CollectionItem comment(@PathParam("id") String id,
             @PathParam("eid") String eid,
@@ -342,6 +343,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     
     
     @POST
+    @Permission("rate")
     @Path("/{id}/elements/{eid}/ratings")
     public Collection.CollectionItem rate(@PathParam("id") String id,
             @PathParam("eid") String eid,
