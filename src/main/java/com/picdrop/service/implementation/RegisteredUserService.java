@@ -23,10 +23,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import com.picdrop.security.authentication.Authenticated;
-import com.picdrop.security.authentication.RoleType;
+import com.picdrop.security.authentication.Permission;
 import java.io.IOException;
-import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -92,7 +90,7 @@ public class RegisteredUserService {
 
     @GET
     @Path("/me")
-    @Authenticated(include = {RoleType.REGISTERED, RoleType.USER})
+    @Permission("read")
     public User getMe() {
         log.traceEntry();
         return log.traceExit(contextProv.get().getPrincipal());
@@ -100,7 +98,7 @@ public class RegisteredUserService {
 
     @DELETE
     @Path("/me")
-    @Authenticated(include = {RoleType.REGISTERED})
+    @Permission("write")
     public void deleteMe() {
         log.traceEntry();
         User me = contextProv.get().getPrincipal();
@@ -112,7 +110,7 @@ public class RegisteredUserService {
 
     @PUT
     @Path("/me")
-    @Authenticated(include = {RoleType.REGISTERED})
+    @Permission("write")
     public RegisteredUser updateMe(RegisteredUser entity) throws ApplicationException {
         log.entry(entity);
         RegisteredUser me = contextProv.get().getPrincipal().to(RegisteredUser.class);

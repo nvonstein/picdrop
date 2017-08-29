@@ -106,6 +106,11 @@ public class Collection extends Resource {
         return this;
     }
 
+    @Override
+    public String toResourceString() {
+        return String.format("/collections/%s", this.getId());
+    }
+
     @Entity("citems")
     public static class CollectionItem extends Identifiable implements Referable<CollectionItemReference> {
 

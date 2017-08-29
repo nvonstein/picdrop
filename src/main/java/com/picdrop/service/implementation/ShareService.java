@@ -5,7 +5,6 @@
  */
 package com.picdrop.service.implementation;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.picdrop.exception.ApplicationException;
@@ -21,12 +20,10 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
-import com.picdrop.security.authentication.Authenticated;
-import com.picdrop.security.authentication.RoleType;
+import com.picdrop.security.authentication.Permission;
 import com.picdrop.service.CrudService;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -72,119 +69,9 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         log.trace("created with ({},{},{},{})", repo, crepo, cirepo, frepo);
     }
 
-    private boolean verifyName(NameOnlyUserReference entity) throws ApplicationException {
-        if ((entity != null) && (entity.getName().length() > 100)) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.BAD_NAME);
-        }
-        return true;
-    }
-
-    @POST
-    @Path("/{id}/collections/{cid}/elements/{eid}/ratings")
-    public Collection.CollectionItem rate(@PathParam("id") String id,
-            @PathParam("cid") String cid,
-            @PathParam("eid") String eid,
-            Rating entity) throws ApplicationException {
-        log.entry(id, cid, eid, entity);
-        Share s = this.get(id);
-        if (s.getResource() == null) {
-            log.warn("Active share ({}) requested without existing resource attached. Possibly some cleanup is missing.", id);
-            this.repo.delete(id, null);
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", id));
-        }
-        if (!s.getResource().getId().equals(cid)) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", cid));
-        }
-        if (!s.getResource().isCollection()) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.BAD_OPERATION);
-        }
-        RequestContext ctx = contextProv.get();
-        if (ctx.hasPrincipal() && ctx.getPrincipal().isRegistered()) {
-            entity.setUser(ctx.getPrincipal());
-        } else {
-            verifyName(entity);
-        }
-        Collection c = (Collection) s.getResource().resolve(false);
-        for (Collection.CollectionItemReference ciref : c.getItems()) {
-            if (ciref.getId().equals(eid)) {
-                Collection.CollectionItem ci = ciref.resolve(false);
-                ci.addRating(entity);
-
-                ci = cirepo.update(ci.getId(), ci);
-                log.traceExit(ci);
-                return ci;
-            }
-        }
-        throw new ApplicationException()
-                .status(404)
-                .code(ErrorMessageCode.NOT_FOUND)
-                .devMessage(String.format("Object with id '%s' not found", eid));
-    }
-
-    @POST
-    @Path("/{id}/collections/{cid}/elements/{eid}/comments")
-    public Collection.CollectionItem comment(@PathParam("id") String id,
-            @PathParam("cid") String cid,
-            @PathParam("eid") String eid,
-            Collection.Comment entity) throws ApplicationException {
-        log.entry(id, cid, eid, entity);
-        Share s = this.get(id);
-        if (s.getResource() == null) {
-            log.warn("Active share ({}) requested without existing resource attached. Possibly some cleanup is missing.", id);
-            this.repo.delete(id, null);
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", id));
-        }
-        if (!s.getResource().getId().equals(cid)) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", cid));
-        }
-        if (!s.getResource().isCollection()) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.BAD_OPERATION);
-        }
-        RequestContext ctx = contextProv.get();
-        if (ctx.hasPrincipal() && ctx.getPrincipal().isRegistered()) {
-            entity.setUser(ctx.getPrincipal());
-        } else {
-            verifyName(entity);
-        }
-        entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
-        Collection c = (Collection) s.getResource().resolve(false);
-        for (Collection.CollectionItemReference ciref : c.getItems()) {
-            if (ciref.getId().equals(eid)) {
-                Collection.CollectionItem ci = ciref.resolve(false);
-                ci.addComment(entity);
-
-                ci = this.cirepo.update(ci.getId(), ci);
-                log.traceExit(ci);
-                return ci;
-            }
-        }
-        throw new ApplicationException()
-                .status(404)
-                .code(ErrorMessageCode.NOT_FOUND)
-                .devMessage(String.format("Object with id '%s' not found", eid));
-    }
-
     @PUT
     @Path("/{id}")
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     @Override
     public Share update(@PathParam("id") String id, Share entity) throws ApplicationException {
         log.entry(id, entity);
@@ -230,7 +117,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
 
     @DELETE
     @Path("/{id}")
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     @Override
     public void delete(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
@@ -253,7 +140,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     }
 
     @GET
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("read")
     @Override
     public List<Share> list() throws ApplicationException {
         log.traceEntry();
@@ -261,7 +148,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     }
 
     @POST
-    @Authenticated(include = RoleType.REGISTERED)
+    @Permission("write")
     @Override
     public Share create(Share entity) throws ApplicationException {
         log.entry(entity);

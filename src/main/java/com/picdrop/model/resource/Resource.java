@@ -159,5 +159,7 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
     public boolean isFileResource() {
         return false;
     }
+    
+    public abstract String toResourceString();
 
 }

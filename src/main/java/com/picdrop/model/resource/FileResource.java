@@ -123,5 +123,10 @@ public class FileResource extends Resource {
     public FileResourceReference refer() {
         return new FileResourceReference(this.getId());
     }
+
+    @Override
+    public String toResourceString() {
+        return String.format("/resources/%s", this.getId());
+    }
     
 }

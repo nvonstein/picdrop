@@ -107,8 +107,8 @@ public class Share extends Identifiable implements Mergeable<Share>, Referable<S
     }
 
     @JsonIgnore
-    public RegisteredUser getOwnerResolved() throws ApplicationException {
-        return owner.resolve(false);
+    public RegisteredUser getOwner(boolean deep) {
+        return owner.resolve(deep);
     }
 
     @JsonIgnore

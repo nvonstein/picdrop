@@ -9,14 +9,15 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import javax.ws.rs.NameBinding;
 
 /**
  *
- * @author i330120
+ * @author nvonstein
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface Role {
-    
-    RoleType[] roles() default {};
+@Target({ElementType.METHOD, ElementType.TYPE})
+@NameBinding
+public @interface Permission {
+    public String value() default "";
 }
