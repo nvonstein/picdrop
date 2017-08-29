@@ -32,16 +32,6 @@ import org.mongodb.morphia.annotations.Embedded;
  *
  * @author i330120
  */
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "_type"
-)
-@JsonSubTypes({
-    @Type(value = FileResource.class, name = "file")
-    ,
-    @Type(value = Collection.class, name = "collection")
-})
 public abstract class Resource extends Identifiable implements Mergeable<Resource>, Referable<ResourceReference> {
 
     protected long created;
