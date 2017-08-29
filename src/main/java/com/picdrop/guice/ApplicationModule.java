@@ -5,6 +5,7 @@
  */
 package com.picdrop.guice;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Binder;
@@ -12,6 +13,8 @@ import com.google.inject.Module;
 import com.google.inject.name.Names;
 import com.picdrop.exception.ApplicationExeptionMapper;
 import com.picdrop.helper.EnvHelper;
+import com.picdrop.json.JacksonConfigProvider;
+import com.picdrop.json.Views;
 import com.picdrop.service.implementation.AuthorizationService;
 import com.picdrop.service.implementation.CollectionService;
 import com.picdrop.service.implementation.RegisteredUserService;
@@ -45,7 +48,7 @@ public class ApplicationModule implements Module {
     }
     
     protected void bindObjectMapper(Binder binder) {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JacksonConfigProvider.createMapper();
         
         binder.bind(ObjectMapper.class).toInstance(mapper);
         binder.bind(ObjectWriter.class).toInstance(mapper.writer());
