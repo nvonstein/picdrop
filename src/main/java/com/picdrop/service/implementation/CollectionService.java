@@ -339,5 +339,41 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.traceExit(ci);
         return ci;
     }
+    
+    
+    @POST
+    @Path("/{id}/elements/{eid}/ratings")
+    public Collection.CollectionItem rate(@PathParam("id") String id,
+            @PathParam("eid") String eid,
+            Collection.Rating entity) throws ApplicationException {
+        log.entry(id, eid, entity);
+        Collection.CollectionItem ci = this.getElement(id, eid);
+
+        if (Strings.isNullOrEmpty(entity.getName())) {
+            User user = this.context.get().getPrincipal();
+
+            if (user.isRegistered()) {
+                entity.setUser(user);
+            } else {
+                String name = user.getFullName();
+
+                if (Strings.isNullOrEmpty(name)) {
+                    throw new ApplicationException()
+                            .status(400)
+                            .code(ErrorMessageCode.BAD_COMMENT)
+                            .devMessage("Unable to resolve a name");
+                }
+                entity.setName(name);
+            }
+        } else {
+            verifyName(entity);
+        }
+
+        ci.addRating(entity);
+
+        ci = this.ciRepo.update(ci.getId(), ci);
+        log.traceExit(ci);
+        return ci;
+    }
 
 }
