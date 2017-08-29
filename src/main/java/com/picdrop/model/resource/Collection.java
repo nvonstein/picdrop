@@ -230,6 +230,9 @@ public class Collection extends Resource {
         @NotSaved
         protected FileResourceReference resource;
 
+        public CollectionItemReference() {
+        }
+        
         public CollectionItemReference(String _id) {
             super(_id);
         }

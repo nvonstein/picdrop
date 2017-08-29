@@ -22,6 +22,9 @@ public class CollectionReference extends ResourceReference {
     @NotSaved
     protected Collection c;
 
+    public CollectionReference() {
+    }
+
     public CollectionReference(String _id) {
         super(_id);
     }
