@@ -6,7 +6,6 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.picdrop.json.Views;
 import java.io.IOException;
@@ -45,7 +44,6 @@ public class FileResource extends Resource {
         super(_id);
     }
 
-    @JsonIgnore
     @Override
     public void setName(String name) {
         this.name = name;

@@ -87,12 +87,12 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         this.owner = owner;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public RegisteredUser getOwner(boolean deep) {
         return owner.resolve(deep);
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public void setOwner(RegisteredUser owner) {
         this.owner = owner.refer();
     }
@@ -102,25 +102,25 @@ public abstract class Resource extends Identifiable implements Mergeable<Resourc
         return shares;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Resource addShare(ShareReference share) {
         this.shares.add(share);
         return this;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Resource addShare(Share share) {
         this.shares.add(share.refer());
         return this;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Resource deleteShare(ShareReference share) {
         this.shares.remove(share);
         return this;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Resource deleteShare(Share share) {
         this.shares.remove(share.refer());
         return this;

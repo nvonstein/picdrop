@@ -27,7 +27,7 @@ public class ResourceDescriptor implements Mergeable<ResourceDescriptor>{
         this.type = type;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public <T extends ResourceDescriptor> T to(Class<T> type) throws IOException {
         if (type == null) {
             throw new IllegalArgumentException("type is null");

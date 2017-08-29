@@ -54,12 +54,12 @@ public class ImageDescriptor extends ResourceDescriptor {
         this.orientation = orientation;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public String getThumbnailUri(String key) {
         return this.thumbnailUris.get(key);
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public void addThumbnailUri(String key, String value) {
         this.thumbnailUris.put(key, value);
     }

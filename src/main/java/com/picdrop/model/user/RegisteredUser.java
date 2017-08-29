@@ -96,7 +96,7 @@ public class RegisteredUser extends User {
         this.lastlogin = lastlogin;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public void setLastLogin() {
         this.lastlogin = DateTime.now(DateTimeZone.UTC).getMillis();
     }

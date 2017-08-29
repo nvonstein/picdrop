@@ -5,6 +5,7 @@
  */
 package com.picdrop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Strings;
 import com.picdrop.json.Views;
@@ -85,12 +86,12 @@ public class Share extends Identifiable implements Mergeable<Share>, Referable<S
         this.resource = resource;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Resource getResource(boolean deep) {
         return resource.resolve(deep);
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public void setResource(Resource resource) {
         this.resource = resource.refer();
     }
@@ -105,12 +106,12 @@ public class Share extends Identifiable implements Mergeable<Share>, Referable<S
         this.owner = owner;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public RegisteredUser getOwner(boolean deep) {
         return owner.resolve(deep);
     }
 
-    @JsonView(value = Views.Ignore.class)
+    @JsonIgnore
     public void setOwner(RegisteredUser owner) {
         this.owner = owner.refer();
     }

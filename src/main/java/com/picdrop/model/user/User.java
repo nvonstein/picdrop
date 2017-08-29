@@ -93,7 +93,7 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
         this.permissions = permissions;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public User addPermission(String perm) {
         if (!Strings.isNullOrEmpty(perm)) {
            this.permissions.add(perm); 
@@ -101,7 +101,7 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
         return this;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public User removePermission(String perm) {
         this.permissions.remove(perm);
         return this;
@@ -125,7 +125,7 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
         return true;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public <T extends User> T to(Class<T> type) {
         if (type == null) {
             throw new IllegalArgumentException("type is null");

@@ -33,7 +33,7 @@ public class NameOnlyUserReference {
         this.user = userId;
     }
     
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public void setUser(User user) {
         this.user = user.getId();
         this.name = user.getFullName();

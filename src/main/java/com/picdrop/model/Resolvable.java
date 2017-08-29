@@ -5,14 +5,13 @@
  */
 package com.picdrop.model;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.picdrop.json.Views;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  *
  * @author nvonstein
  */
 public interface Resolvable<T> {
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public T resolve(boolean deep);
 }

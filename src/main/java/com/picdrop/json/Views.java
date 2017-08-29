@@ -19,7 +19,4 @@ public abstract class Views {
 
     public static abstract class Ignore extends Detailed {
     };
-
-    public static final class Internal extends Ignore {
-    };
 }

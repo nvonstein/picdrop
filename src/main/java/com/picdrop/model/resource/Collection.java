@@ -5,6 +5,7 @@
  */
 package com.picdrop.model.resource;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.picdrop.model.user.NameOnlyUserReference;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.inject.Inject;
@@ -50,7 +51,7 @@ public class Collection extends Resource {
         return items;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public List<CollectionItem> getItems(boolean deep) {
         List<CollectionItem> ret = new ArrayList<>();
         this.items.forEach(ciref -> ret.add(ciref.resolve(deep)));
@@ -62,25 +63,25 @@ public class Collection extends Resource {
         this.items = items;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Collection addItem(CollectionItemReference item) {
         this.items.add(item);
         return this;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Collection removeItem(CollectionItemReference item) {
         this.items.remove(item);
         return this;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Collection addItem(CollectionItem item) {
         this.items.add(item.refer());
         return this;
     }
 
-    @JsonView(value = Views.Internal.class)
+    @JsonIgnore
     public Collection removeItem(CollectionItem item) {
         this.items.remove(item.refer());
         return this;
@@ -140,12 +141,12 @@ public class Collection extends Resource {
             return parentCollection;
         }
 
-        @JsonView(value = Views.Internal.class)
+        @JsonView(value = Views.Ignore.class)
         public void setParentCollection(CollectionReference parentCollection) {
             this.parentCollection = parentCollection;
         }
 
-        @JsonView(value = Views.Internal.class)
+        @JsonIgnore
         public void setParentCollection(Collection parentCollection) {
             this.parentCollection = parentCollection.refer();
         }
@@ -160,12 +161,12 @@ public class Collection extends Resource {
             this.resource = resource;
         }
 
-        @JsonView(value = Views.Internal.class)
+        @JsonIgnore
         public FileResource getResource(boolean deep) {
             return resource.resolve(deep);
         }
 
-        @JsonView(value = Views.Internal.class)
+        @JsonIgnore
         public void setResource(FileResource resource) {
             this.resource = resource.refer();
         }
@@ -200,13 +201,13 @@ public class Collection extends Resource {
             this.comments = comments;
         }
 
-        @JsonView(value = Views.Internal.class)
+        @JsonIgnore
         public CollectionItem addRating(Rating r) {
             this.ratings.add(r);
             return this;
         }
 
-        @JsonView(value = Views.Internal.class)
+        @JsonIgnore
         public CollectionItem addComment(Comment c) {
             this.comments.add(c);
             return this;
@@ -248,7 +249,7 @@ public class Collection extends Resource {
             return ci;
         }
 
-        @JsonView(value = Views.Internal.class)
+        @JsonIgnore
         public FileResourceReference getResource() {
             return resource;
         }
