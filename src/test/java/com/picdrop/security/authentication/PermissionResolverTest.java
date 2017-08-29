@@ -82,4 +82,20 @@ public class PermissionResolverTest {
         
         assertFalse(solver.resolve(req, ac));
     }
+    
+    @Test
+    public void wildcardTestValidMatchEmpty() {
+        String req = "/level1/*/level2/read";
+        String ac = "/level1/*/level2/*/read";
+        
+        assertTrue(solver.resolve(req, ac));
+    }
+    
+    @Test
+    public void wildcardTestValidMatch() {
+        String req = "/level1/*/level2/*/read";
+        String ac = "/level1/*/level2/*/read";
+        
+        assertTrue(solver.resolve(req, ac));
+    }
 }

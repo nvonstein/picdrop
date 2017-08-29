@@ -17,6 +17,10 @@ public class PermissionResolver {
         return "*".equals(in);
     }
 
+    private boolean isNextWildtype(String[] array, int i) {
+        return (i < array.length - 1) && isWildtype(array[i + 1]);
+    }
+
     private boolean hasNextNonTerminal(String[] array, int i) {
         return i < (array.length - 2);
     }
@@ -42,7 +46,7 @@ public class PermissionResolver {
             if (Strings.isNullOrEmpty(acArray[j])) {
                 j++;
             }
-            if (isNextTerminal(reqArray, i) && !isNextTerminal(acArray, j)) {
+            if (isNextTerminal(reqArray, i) && !isNextTerminal(acArray, j) && !isNextWildtype(acArray, j)) {
                 return false;
             }
             if (!match(reqArray[i], acArray[j])) {
