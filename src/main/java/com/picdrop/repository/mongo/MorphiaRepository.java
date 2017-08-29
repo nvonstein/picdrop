@@ -6,6 +6,7 @@
 package com.picdrop.repository.mongo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.mongodb.BasicDBObject;
@@ -29,7 +30,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
 
     Datastore ds;
     Class<T> entityType;
-    
+
     Map<String, String> namedQueries;
     ObjectMapper mapper;
 
@@ -48,6 +49,10 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         this.mapper = mapper;
     }
 
+    protected boolean isValidIdentifier(String in) {
+        return !Strings.isNullOrEmpty(in) && (in.length() == 24);
+    }
+
     @Override
     public T save(T entity) {
         Key<T> k = ds.save(entity);
@@ -56,17 +61,26 @@ public class MorphiaRepository<T> implements Repository<String, T> {
 
     @Override
     public T get(String id) {
+        if (!isValidIdentifier(id)) {
+            return null;
+        }
         return ds.get(entityType, new ObjectId(id));
     }
 
     @Override
     public boolean delete(String id) {
+        if (!isValidIdentifier(id)) {
+            return false;
+        }
         WriteResult wr = ds.delete(entityType, new ObjectId(id));
         return wr.getN() > 0;
     }
 
     @Override
     public T update(String id, T entity) {
+        if (!isValidIdentifier(id)) {
+            return null;
+        }
         Query<T> q = ds.createQuery(entityType).field("_id").equal(new ObjectId(id));
         ds.updateFirst(q, entity, false);
         return get(id);
@@ -90,7 +104,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
                 i++;
             }
         }
-        
+
         return BasicDBObject.parse(rawquery);
     }
 

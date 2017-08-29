@@ -5,6 +5,7 @@
  */
 package com.picdrop.repository.mongo;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mongodb.BasicDBObject;
@@ -45,6 +46,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         if ((principal == null)) {
             return null;
         }
+        if (!isValidIdentifier(principal.getId())) {
+            return null;
+        }
 
         dbObj.put("owner", new BasicDBObject("_id", new ObjectId(principal.getId())));
 
@@ -53,6 +57,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public T update(String id, T entity) {
+        if (!isValidIdentifier(id)) {
+            return null;
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj);
@@ -69,6 +76,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public boolean delete(String id) {
+        if (!isValidIdentifier(id)) {
+            return false;
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj);
@@ -84,6 +94,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public T get(String id) {
+        if (!isValidIdentifier(id)) {
+            return null;
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj);
@@ -135,6 +148,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         if (context == null) {
             return super.get(id);
         }
+        if (!isValidIdentifier(id)) {
+            return null;
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj, context);
@@ -153,6 +169,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         if (context == null) {
             return super.delete(id);
         }
+        if (!isValidIdentifier(id)) {
+            return false;
+        }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 
         dbObj = addPrincipalClause(dbObj, context);
@@ -170,6 +189,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
     public T update(String id, T entity, User context) {
         if (context == null) {
             return super.update(id, entity);
+        }
+        if (!isValidIdentifier(id)) {
+            return null;
         }
         DBObject dbObj = new BasicDBObject("_id", new ObjectId(id));
 

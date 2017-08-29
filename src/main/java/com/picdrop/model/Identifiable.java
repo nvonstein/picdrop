@@ -27,7 +27,11 @@ public class Identifiable {
     }
 
     public Identifiable(String _id) {
-        this._id = new ObjectId(_id);
+        try {
+            this._id = new ObjectId(_id);
+        } catch (Exception e) {
+            this._id = null;
+        }
     }
 
     public Identifiable(ObjectId _id) {
