@@ -13,6 +13,7 @@ import com.picdrop.helper.HttpHelper;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
+import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
 import java.text.ParseException;
@@ -28,17 +29,16 @@ public class TokenAuthenticator implements Authenticator<User> {
 
     String authCookieName;
     WebTokenFactory tfactory;
-    Repository<String, RegisteredUser> userRepo;
+    ClaimSetFactory<User> csFac;
 
     @Inject
     public TokenAuthenticator(
-            Repository<String, RegisteredUser> userRepo,
             @Named("service.session.cookie.name") String authCookieName,
-             WebTokenFactory tfactory
-    ) {
+            WebTokenFactory tfactory,
+            ClaimSetFactory<User> csFactory) {
         this.authCookieName = authCookieName;
         this.tfactory = tfactory;
-        this.userRepo = userRepo;
+        this.csFac = csFactory;
     }
 
     @Override
@@ -59,17 +59,8 @@ public class TokenAuthenticator implements Authenticator<User> {
 
         try {
             JWTClaimsSet claims = tfactory.parseToken(rawtoken);
-            if (claims.getExpirationTime().before(DateTime.now().toDate())) { // expired
-                // TODO Log
-                return null;
-            }
 
-            String sub = claims.getSubject();
-            if (Strings.isNullOrEmpty(sub)) {
-                // TODO log
-                return null;
-            }
-            return userRepo.get(sub);
+            return this.csFac.verify(claims);
         } catch (IOException | ParseException ex) {
             // Log
             return null;

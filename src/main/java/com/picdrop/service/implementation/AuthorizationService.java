@@ -14,6 +14,7 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.authenticator.Authenticator;
+import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
 import javax.inject.Inject;
@@ -39,29 +40,27 @@ public class AuthorizationService {
     WebTokenFactory tokenFactory;
 
     Authenticator<RegisteredUser> authenticator;
+    
+    ClaimSetFactory<User> authCsFact;
 
     @com.google.inject.Inject
     Provider<RequestContext> contextProv;
 
-    final int configJwtExpiry;
-    final String configJwtIssuer;
     final boolean cookieEnabled;
 
     @Inject
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
-            @Named("authenticator.basic") Authenticator<RegisteredUser> authenticator,
-            CookieProviderFactory cookieProvFactory,
+                        CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
-            @Named("service.session.jwt.exp") int jwtExpiry,
-            @Named("service.session.jwt.iss") String jwtIssuer,
+            @Named("authenticator.basic") Authenticator<RegisteredUser> authenticator,
+            @Named("claimset.factory.auth") ClaimSetFactory<User> authCsFact,
             @Named("service.session.cookie.enabled") boolean cookieEnabled) {
         this.userRepo = userRepo;
         this.cookieProvFactory = cookieProvFactory;
         this.tokenFactory = tokenFactory;
+        this.authCsFact = authCsFact;
         this.authenticator = authenticator;
-        this.configJwtExpiry = jwtExpiry;
-        this.configJwtIssuer = jwtIssuer;
         this.cookieEnabled = cookieEnabled;
     }
 
@@ -73,13 +72,7 @@ public class AuthorizationService {
             return Response.noContent().status(Status.FORBIDDEN).build();
         }
 
-        // generate JWT with logged in id and build cookie
-        DateTime now = DateTime.now();
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .audience("picdrop")
-                .issueTime(now.toDate())
-                .expirationTime(now.plusMinutes(configJwtExpiry).toDate())
-                .issuer(configJwtIssuer)
+        JWTClaimsSet claims = this.authCsFact.builder()
                 .subject(user.getId())
                 .build();
 
