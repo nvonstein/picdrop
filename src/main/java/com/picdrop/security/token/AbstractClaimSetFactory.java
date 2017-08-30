@@ -19,32 +19,31 @@ import org.joda.time.DateTimeZone;
  * @author nvonstein
  */
 public abstract class AbstractClaimSetFactory<T> implements ClaimSetFactory<T> {
-    
+
     Logger log = LogManager.getLogger(this.getClass());
-    
+
     protected int configJwtExpiry;
     protected String configJwtIssuer;
     protected String configJwtAudience;
-    
-    @Inject
+
     public AbstractClaimSetFactory(
-            @Named("service.session.jwt.exp") int jwtExpiry,
-            @Named("service.session.jwt.iss") String jwtIssuer,
-            @Named("service.session.jwt.aud") String jwtAudience) {
+            int jwtExpiry,
+            String jwtIssuer,
+            String jwtAudience) {
         this.configJwtExpiry = jwtExpiry;
         this.configJwtIssuer = jwtIssuer;
         this.configJwtAudience = jwtAudience;
     }
-    
+
     public AbstractClaimSetFactory() {
         this(60, "", "");
     }
-    
+
     @Override
     public JWTClaimsSet generate() {
         return this.builder().build();
     }
-    
+
     @Override
     public JWTClaimsSet.Builder builder() {
         DateTime now = DateTime.now(DateTimeZone.UTC);
@@ -54,7 +53,7 @@ public abstract class AbstractClaimSetFactory<T> implements ClaimSetFactory<T> {
                 .expirationTime(now.plusMinutes(configJwtExpiry).toDate())
                 .issuer(configJwtIssuer);
     }
-    
+
     protected boolean verifyGeneralClaims(JWTClaimsSet claims) {
         if (claims == null) {
             log.debug("No claims provided");
@@ -69,14 +68,18 @@ public abstract class AbstractClaimSetFactory<T> implements ClaimSetFactory<T> {
                 || !claims.getAudience().contains(configJwtAudience)) {
             log.debug("Wrong audience");
             return false;
-        }       
+        }
         if (Strings.isNullOrEmpty(claims.getIssuer())
                 || claims.getIssuer().equals(this.configJwtIssuer)) {
             log.debug("Illegal issuer");
             return false;
         }
-        
+        if (Strings.isNullOrEmpty(claims.getJWTID())) {
+            log.debug("No JWT ID set");
+            return false;
+        }
+
         return true;
     }
-    
+
 }
