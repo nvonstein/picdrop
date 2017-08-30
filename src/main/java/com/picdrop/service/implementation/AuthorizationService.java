@@ -10,6 +10,7 @@ import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.picdrop.guice.factory.CookieProviderFactory;
 import com.picdrop.model.RequestContext;
+import com.picdrop.model.TokenSet;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  *
@@ -35,33 +37,42 @@ import org.joda.time.DateTime;
 public class AuthorizationService {
 
     Repository<String, RegisteredUser> userRepo;
+    Repository<String, TokenSet> tsRepo;
 
     CookieProviderFactory cookieProvFactory;
     WebTokenFactory tokenFactory;
 
     Authenticator<RegisteredUser> authenticator;
-    
+
     ClaimSetFactory<User> authCsFact;
+    ClaimSetFactory<User> refreshCsFact;
 
     @com.google.inject.Inject
     Provider<RequestContext> contextProv;
 
     final boolean cookieEnabled;
+    final int tsExpiry;
 
     @Inject
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
-                        CookieProviderFactory cookieProvFactory,
+            Repository<String, TokenSet> tsRepo,
+            CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
             @Named("authenticator.basic") Authenticator<RegisteredUser> authenticator,
             @Named("claimset.factory.auth") ClaimSetFactory<User> authCsFact,
-            @Named("service.session.cookie.enabled") boolean cookieEnabled) {
+            @Named("claimset.factory.refresh") ClaimSetFactory<User> refreshCsFact,
+            @Named("service.session.cookie.enabled") boolean cookieEnabled,
+            @Named("service.session.jwt.refresh.exp") int tsExpiry) {
+        this.tsRepo = tsRepo;
         this.userRepo = userRepo;
         this.cookieProvFactory = cookieProvFactory;
         this.tokenFactory = tokenFactory;
         this.authCsFact = authCsFact;
+        this.refreshCsFact = refreshCsFact;
         this.authenticator = authenticator;
         this.cookieEnabled = cookieEnabled;
+        this.tsExpiry = tsExpiry;
     }
 
     @POST
@@ -72,14 +83,29 @@ public class AuthorizationService {
             return Response.noContent().status(Status.FORBIDDEN).build();
         }
 
-        JWTClaimsSet claims = this.authCsFact.builder()
+        JWTClaimsSet authClaims = this.authCsFact.builder()
+                .subject(user.getId())
+                .build();
+        
+        JWTClaimsSet refreshClaims = this.refreshCsFact.builder()
                 .subject(user.getId())
                 .build();
 
+        TokenSet ts = new TokenSet();
+        ts.setAuthJti(authClaims.getJWTID());
+        ts.setRefreshJti(refreshClaims.getJWTID());
+        ts.setOwner(user);
+        ts.setExpireAt(DateTime.now(DateTimeZone.UTC)
+                .plusMinutes(tsExpiry)
+                .toDate());
+
+        ts = this.tsRepo.save(ts);
+
         try {
-            String token = tokenFactory.getToken(claims);
+            String token = tokenFactory.getToken(authClaims);
 
             user.setLastLogin();
+            user.addToken(ts);
             userRepo.update(user.getId(), user);
 
             NewCookie c = cookieProvFactory.getSessionCookieProvider(token).get();
