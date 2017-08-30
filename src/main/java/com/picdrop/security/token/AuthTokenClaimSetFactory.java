@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import java.text.ParseException;
@@ -17,12 +18,12 @@ import java.text.ParseException;
  *
  * @author nvonstein
  */
-public abstract class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
+public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
 
-    protected Repository<String, User> repo;
+    protected Repository<String, RegisteredUser> repo;
 
     @Inject
-    public AuthTokenClaimSetFactory(Repository<String, User> repo,
+    public AuthTokenClaimSetFactory(Repository<String, RegisteredUser> repo,
             @Named("service.session.jwt.exp") int jwtExpiry,
             @Named("service.session.jwt.iss") String jwtIssuer,
             @Named("service.session.jwt.aud") String jwtAudience) {
@@ -31,7 +32,7 @@ public abstract class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<U
         this.repo = repo;
     }
 
-    public AuthTokenClaimSetFactory(Repository<String, User> repo) {
+    public AuthTokenClaimSetFactory(Repository<String, RegisteredUser> repo) {
         this(repo, 60, "", "");
     }
 
