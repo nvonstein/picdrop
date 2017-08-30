@@ -76,9 +76,12 @@ public class AuthorizationModule implements Module {
 
     protected void bindAuthenticators(Binder binder) {
         binder.bind(new TypeLiteral<Authenticator<RegisteredUser>>() {
-        }).annotatedWith(Names.named("basic")).to(BasicAuthenticator.class);
+        }).annotatedWith(Names.named("authenticator.basic")).to(BasicAuthenticator.class);
+
+//        binder.bind(new TypeLiteral<Authenticator<User>>() {
+//        }).annotatedWith(Names.named("token")).to(TokenAuthenticator.class);
         binder.bind(new TypeLiteral<Authenticator<User>>() {
-        }).annotatedWith(Names.named("token")).to(TokenAuthenticator.class);
+        });
     }
 
     protected void bindWebTokenFactory(Binder binder) {

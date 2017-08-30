@@ -50,7 +50,7 @@ public class AuthorizationService {
     @Inject
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
-            @Named("basic") Authenticator<RegisteredUser> authenticator,
+            @Named("authenticator.basic") Authenticator<RegisteredUser> authenticator,
             CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
             @Named("service.session.jwt.exp") int jwtExpiry,

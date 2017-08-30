@@ -42,7 +42,7 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
     Logger log = LogManager.getLogger(this.getClass());
 
     @Inject
-    @Named("token")
+    @Named("authenticator.token.auth")
     Authenticator<User> authenticator;
     @Context
     HttpServletRequest request;
