@@ -6,22 +6,25 @@
 package com.picdrop.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Strings;
 import com.picdrop.json.Views;
+import com.picdrop.model.TokenSet;
+import com.picdrop.model.TokenSetReference;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.mongodb.morphia.annotations.Embedded;
 
 /**
  *
  * @author i330120
  */
-
 @Entity("users")
 public class RegisteredUser extends User {
 
@@ -31,6 +34,9 @@ public class RegisteredUser extends User {
     protected String email;
 
     protected long lastlogin;
+
+    @Embedded
+    protected List<TokenSetReference> tokens = new ArrayList<>();
 
     public RegisteredUser() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -101,6 +107,47 @@ public class RegisteredUser extends User {
         this.lastlogin = DateTime.now(DateTimeZone.UTC).getMillis();
     }
 
+    @JsonView(value = Views.Ignore.class)
+    public List<TokenSetReference> getTokens() {
+        return tokens;
+    }
+
+    @JsonIgnore
+    public List<TokenSet> getTokens(boolean deep) {
+        List<TokenSet> ret = new ArrayList<>();
+        this.tokens.stream()
+                .map(tsref -> tsref.resolve(deep))
+                .forEach(ts -> ret.add(ts));
+        return ret;
+    }
+
+    @JsonView(value = Views.Ignore.class)
+    public void setTokens(List<TokenSetReference> tokens) {
+        this.tokens = tokens;
+    }
+
+    @JsonIgnore
+    public RegisteredUser removeToken(TokenSet ts) {
+        return this.removeToken(ts.refer());
+    }
+
+    @JsonIgnore
+    public RegisteredUser removeToken(TokenSetReference ts) {
+        this.tokens.remove(ts);
+        return this;
+    }
+
+    @JsonIgnore
+    public RegisteredUser addToken(TokenSetReference ts) {
+        this.tokens.add(ts);
+        return this;
+    }
+
+    @JsonIgnore
+    public RegisteredUser addToken(TokenSet ts) {
+        return this.addToken(ts.refer());
+    }
+
     @Override
     public RegisteredUser merge(User update) throws IOException {
         super.merge(update);
@@ -121,7 +168,7 @@ public class RegisteredUser extends User {
 
     @Override
     public RegisteredUserReference refer() {
-       return new RegisteredUserReference(this);
+        return new RegisteredUserReference(this);
     }
 
 }
