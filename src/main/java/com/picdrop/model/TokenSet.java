@@ -5,7 +5,10 @@
  */
 package com.picdrop.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.picdrop.json.Views;
 import com.picdrop.model.user.RegisteredUser;
@@ -79,7 +82,7 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
     public void setCreated() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
-    
+
     @JsonView(value = Views.Detailed.class)
     public RegisteredUserReference getOwner() {
         return owner;
@@ -105,4 +108,40 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
         return new TokenSetReference(this._id);
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class JsonWrapper {
+        @JsonView(Views.Public.class)
+        protected String auth;
+        @JsonView(Views.Public.class)
+        protected String refresh;
+        @JsonView(Views.Public.class)
+        protected String nonce;
+
+        public String getAuth() {
+            return auth;
+        }
+
+        public String getRefresh() {
+            return refresh;
+        }
+
+        public String getNonce() {
+            return nonce;
+        }
+        
+        public JsonWrapper auth(String in) {
+            this.auth = in;
+            return this;
+        }
+        
+        public JsonWrapper refresh(String in) {
+            this.refresh = in;
+            return this;
+        }
+        
+        public JsonWrapper nonce(String in) {
+            this.nonce = in;
+            return this;
+        }
+    }
 }
