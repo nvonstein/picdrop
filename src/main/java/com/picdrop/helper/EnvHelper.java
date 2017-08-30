@@ -26,7 +26,9 @@ public abstract class EnvHelper {
         p.put("service.session.cookie.maxage", "900");
         p.put("service.session.cookie.http", "true");
         p.put("service.session.cookie.secure", "false");
-        p.put("service.session.jwt.exp", "900");
+        
+        p.put("service.session.jwt.auth.exp", "60"); // 1 Hour
+        p.put("service.session.jwt.refresh.exp", "43200");    // 30 Days
         p.put("service.session.jwt.iss", "picdrop");
         p.put("service.session.jwt.aud", "picdrop/app");
         
