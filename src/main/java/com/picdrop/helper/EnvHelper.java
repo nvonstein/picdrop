@@ -28,6 +28,7 @@ public abstract class EnvHelper {
         p.put("service.session.cookie.secure", "false");
         p.put("service.session.jwt.exp", "900");
         p.put("service.session.jwt.iss", "picdrop");
+        p.put("service.session.jwt.aud", "picdrop/app");
         
         p.put("token.signer.alg", "HS256");
         p.put("token.cipher.alg", "dir");
