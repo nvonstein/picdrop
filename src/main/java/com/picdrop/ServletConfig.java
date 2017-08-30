@@ -21,16 +21,16 @@ import org.jboss.resteasy.plugins.guice.ext.RequestScopeModule;
  * @author i330120
  */
 public class ServletConfig extends GuiceResteasyBootstrapServletContextListener {
-    
+
     @Override
     protected List<? extends Module> getModules(ServletContext context) {
         List<Module> l = Arrays.asList(
-                new ApplicationModule(), 
+                new ApplicationModule(),
                 new AuthorizationModule(),
-                new FileHandlingModule(), 
-                new RepositoryModule(), 
+                new FileHandlingModule(),
+                new RepositoryModule(),
                 new RequestScopeModule());
 
         return l;
-    }  
+    }
 }

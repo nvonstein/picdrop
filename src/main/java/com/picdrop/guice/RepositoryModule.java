@@ -68,7 +68,7 @@ public class RepositoryModule implements Module {
         return ds;
     }
 
-    protected void bindRegisteredUserRepo(Binder binder, Datastore ds) {
+    protected void bindRegisteredUserRepo(Binder binder, Datastore ds) { 
         binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
         }).toInstance(new MorphiaRepository<>(ds, RegisteredUser.class));
     }
