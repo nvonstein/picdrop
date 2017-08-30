@@ -86,6 +86,7 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
                 }
                 user.setPermissions(
                         Arrays.asList(
+                                "*/logout",
                                 "/resources/*/read",
                                 "/resources/*/write",
                                 "/collections/*/read",
