@@ -29,6 +29,7 @@ import com.picdrop.security.authentication.authenticator.BasicAuthenticator;
 import com.picdrop.security.authentication.authenticator.TokenAuthenticator;
 import com.picdrop.security.token.AuthTokenClaimSetFactory;
 import com.picdrop.security.token.ClaimSetFactory;
+import com.picdrop.security.token.RefreshTokenClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import com.picdrop.security.token.WebTokenFactoryImpl;
 import com.picdrop.security.token.cipher.TokenCipher;
@@ -93,8 +94,8 @@ public class AuthorizationModule implements Module {
     protected void bindClaimSetFactories(Binder binder) {
         binder.bind(new TypeLiteral<ClaimSetFactory<User>>() {
         }).annotatedWith(Names.named("claimset.factory.auth")).to(AuthTokenClaimSetFactory.class);
-//        binder.bind(new TypeLiteral<ClaimSetFactory<User>>() {
-//        }).annotatedWith(Names.named("claimset.factory.refresh")).to(AuthTokenClaimSetFactory.class);
+        binder.bind(new TypeLiteral<ClaimSetFactory<User>>() {
+        }).annotatedWith(Names.named("claimset.factory.refresh")).to(RefreshTokenClaimSetFactory.class);
     }
 
     protected void bindWebTokenFactory(Binder binder) {
@@ -128,12 +129,12 @@ public class AuthorizationModule implements Module {
         return new TokenAuthenticator(authCookieName, tfactory, f);
     }
 
-//    @Provides
-//    @Named("authenticator.token.refreh")
-//    TokenAuthenticator provideRefreshTokenAuthenticator(
-//            WebTokenFactory tfactory,
-//            @Named("service.session.cookie.name") String authCookieName,
-//            @Named("claimset.factory.refresh") ClaimSetFactory<User> f) {
-//        return new TokenAuthenticator(authCookieName, tfactory, f);
-//    }
+    @Provides
+    @Named("authenticator.token.refreh")
+    Authenticator<User> provideRefreshTokenAuthenticator(
+            WebTokenFactory tfactory,
+            @Named("service.session.cookie.name") String authCookieName,
+            @Named("claimset.factory.refresh") ClaimSetFactory<User> f) {
+        return new TokenAuthenticator(authCookieName, tfactory, f);
+    }
 }

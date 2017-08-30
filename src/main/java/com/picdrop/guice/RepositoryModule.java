@@ -13,6 +13,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
+import com.picdrop.model.TokenSet;
+import com.picdrop.model.TokenSetReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.CollectionReference;
 import com.picdrop.model.resource.FileResource;
@@ -52,6 +54,8 @@ public class RepositoryModule implements Module {
         bindCollectionItemRepo(binder, ds);
         // Share repo
         bindShareRepo(binder, ds);
+        // TokenSet repo
+        bindTokenSetRepo(binder, ds);
 
         // Static bindings
         bindStaticRepoReferences(binder, ds);
@@ -68,7 +72,7 @@ public class RepositoryModule implements Module {
         return ds;
     }
 
-    protected void bindRegisteredUserRepo(Binder binder, Datastore ds) { 
+    protected void bindRegisteredUserRepo(Binder binder, Datastore ds) {
         binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
         }).toInstance(new MorphiaRepository<>(ds, RegisteredUser.class));
     }
@@ -105,11 +109,17 @@ public class RepositoryModule implements Module {
         }).toInstance(repo);
     }
 
+    protected void bindTokenSetRepo(Binder binder, Datastore ds) {
+        binder.bind(new TypeLiteral<Repository<String, TokenSet>>() {
+        }).toInstance(new MorphiaRepository<>(ds, TokenSet.class));
+    }
+
     protected void bindStaticRepoReferences(Binder binder, Datastore ds) {
         binder.requestStaticInjection(CollectionReference.class);
         binder.requestStaticInjection(FileResourceReference.class);
         binder.requestStaticInjection(ShareReference.class);
         binder.requestStaticInjection(RegisteredUserReference.class);
         binder.requestStaticInjection(Collection.CollectionItemReference.class);
+        binder.requestStaticInjection(TokenSetReference.class);
     }
 }
