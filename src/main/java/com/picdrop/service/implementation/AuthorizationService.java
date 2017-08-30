@@ -5,27 +5,33 @@
  */
 package com.picdrop.service.implementation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.guice.factory.CookieProviderFactory;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.TokenSet;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
+import com.picdrop.security.authentication.Permission;
 import com.picdrop.security.authentication.authenticator.Authenticator;
 import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -47,8 +53,11 @@ public class AuthorizationService {
     ClaimSetFactory<User> authCsFact;
     ClaimSetFactory<User> refreshCsFact;
 
-    @com.google.inject.Inject
+    @Inject
     Provider<RequestContext> contextProv;
+
+    @Inject
+    ObjectMapper mapper;
 
     final boolean cookieEnabled;
     final int tsExpiry;
@@ -77,16 +86,18 @@ public class AuthorizationService {
 
     @POST
     @Path("/login")
-    public Response loginUser(@Context HttpServletRequest request) { // TODO make redirect target injectable
+    public Response loginUser(@Context HttpServletRequest request,
+            @QueryParam("nonce") String nonce) throws ApplicationException { // TODO make redirect target injectable
         RegisteredUser user = authenticator.authenticate(request);
         if (user == null) {
-            return Response.noContent().status(Status.FORBIDDEN).build();
+            throw new ApplicationException()
+                    .status(403);
         }
 
         JWTClaimsSet authClaims = this.authCsFact.builder()
                 .subject(user.getId())
                 .build();
-        
+
         JWTClaimsSet refreshClaims = this.refreshCsFact.builder()
                 .subject(user.getId())
                 .build();
@@ -102,33 +113,48 @@ public class AuthorizationService {
         ts = this.tsRepo.save(ts);
 
         try {
-            String token = tokenFactory.getToken(authClaims);
+            String authToken = tokenFactory.getToken(authClaims);
+            String refreshToken = tokenFactory.getToken(refreshClaims);
 
             user.setLastLogin();
             user.addToken(ts);
             userRepo.update(user.getId(), user);
 
-            NewCookie c = cookieProvFactory.getSessionCookieProvider(token).get();
+            NewCookie c = cookieProvFactory.getSessionCookieProvider(authToken).get();
 
-            return Response.ok(token).cookie(c).build(); // TODO post-redirect-get
+            return Response
+                    .ok(new TokenSet.JsonWrapper()
+                            .auth(authToken)
+                            .refresh(refreshToken)
+                            .nonce(Strings.isNullOrEmpty(nonce) ? null : nonce),
+                            MediaType.APPLICATION_JSON)
+                    .cookie(c)
+                    .build();
         } catch (IOException ex) {
-            // TODO log
-            return Response.serverError().build();
+            throw new ApplicationException()
+                    .status(403);
         }
     }
 
     @POST
     @Path("/logout")
+    @Permission("*/logout")
     public Response logoutUser() { // TODO rework login/logout
         User user = contextProv.get().getPrincipal();
         if (user == null) {
-            return Response.ok().build(); // TODO ???
+            return Response.ok().build();
         }
+        
+        RegisteredUser ru = user.to(RegisteredUser.class);
+        tsRepo.delete(ru.getActiveToken().getId());
+        ru = ru.removeToken(ru.getActiveToken());
+        
+        userRepo.update(ru.getId(), ru);
 
         // generate kill cookie
         NewCookie c = cookieProvFactory.getSessionCookieProvider("").get();
         NewCookie killcookie = new NewCookie(c, c.getComment(), 0, c.isSecure());
 
-        return Response.seeOther(null).cookie(killcookie).build(); // Redirect dahsboard
+        return Response.ok().cookie(killcookie).build();
     }
 }
