@@ -95,6 +95,7 @@ public class RefreshTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
             if (ts == null) {
                 return null;
             }
+            user.setActiveToken(ts);
         } catch (ParseException ex) {
             return null;
         }

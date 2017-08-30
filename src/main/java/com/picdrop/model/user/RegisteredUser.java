@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.NotSaved;
 
 /**
  *
@@ -37,6 +38,8 @@ public class RegisteredUser extends User {
 
     @Embedded
     protected List<TokenSetReference> tokens = new ArrayList<>();
+    @NotSaved
+    protected TokenSet activeToken;
 
     public RegisteredUser() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -111,7 +114,7 @@ public class RegisteredUser extends User {
     public List<TokenSetReference> getTokens() {
         return tokens;
     }
-
+    
     @JsonIgnore
     public List<TokenSet> getTokens(boolean deep) {
         List<TokenSet> ret = new ArrayList<>();
@@ -146,6 +149,16 @@ public class RegisteredUser extends User {
     @JsonIgnore
     public RegisteredUser addToken(TokenSet ts) {
         return this.addToken(ts.refer());
+    }
+
+    @JsonView(value = Views.Detailed.class)
+    public TokenSet getActiveToken() {
+        return activeToken;
+    }
+
+    @JsonIgnore
+    public void setActiveToken(TokenSet activeToken) {
+        this.activeToken = activeToken;
     }
 
     @Override

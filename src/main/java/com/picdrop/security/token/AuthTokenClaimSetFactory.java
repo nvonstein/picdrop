@@ -74,7 +74,7 @@ public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
 
             String jti = claims.getJWTID();
             List<TokenSetReference> tsrefs = user.getTokens();
-            
+
             TokenSet ts = null;
             boolean dirty = false;
             for (int i = 0; i < tsrefs.size(); i++) {
@@ -96,6 +96,8 @@ public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
             if (ts == null) {
                 return null;
             }
+
+            user.setActiveToken(ts);
         } catch (ParseException ex) {
             return null;
         }

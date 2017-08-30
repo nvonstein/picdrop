@@ -42,6 +42,9 @@ public class RegisteredUserReference extends UserReference {
     public RegisteredUser resolve(boolean deep) {
         if (this.user == null) {
             this.user = repo.get(this.getId());
+            if ((this.user != null) && deep) {
+                this.user.getTokens(deep);
+            }
         }
         return this.user;
     }
