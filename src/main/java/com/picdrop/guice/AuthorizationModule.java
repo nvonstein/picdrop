@@ -8,8 +8,10 @@ package com.picdrop.guice;
 import com.picdrop.guice.factory.CookieProviderFactory;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEEncrypter;
@@ -25,6 +27,8 @@ import com.picdrop.model.user.User;
 import com.picdrop.security.authentication.authenticator.Authenticator;
 import com.picdrop.security.authentication.authenticator.BasicAuthenticator;
 import com.picdrop.security.authentication.authenticator.TokenAuthenticator;
+import com.picdrop.security.token.AuthTokenClaimSetFactory;
+import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import com.picdrop.security.token.WebTokenFactoryImpl;
 import com.picdrop.security.token.cipher.TokenCipher;
@@ -50,6 +54,8 @@ public class AuthorizationModule implements Module {
         bindAuthenticationFilter(binder);
 
         bindRequestContext(binder);
+        
+        bindClaimSetFactories(binder);
 
         bindAuthenticators(binder);
 
@@ -80,8 +86,15 @@ public class AuthorizationModule implements Module {
 
 //        binder.bind(new TypeLiteral<Authenticator<User>>() {
 //        }).annotatedWith(Names.named("token")).to(TokenAuthenticator.class);
-        binder.bind(new TypeLiteral<Authenticator<User>>() {
-        });
+//        binder.bind(new TypeLiteral<Authenticator<User>>() {
+//        });
+    }
+
+    protected void bindClaimSetFactories(Binder binder) {
+        binder.bind(new TypeLiteral<ClaimSetFactory<User>>() {
+        }).annotatedWith(Names.named("claimset.factory.auth")).to(AuthTokenClaimSetFactory.class);
+//        binder.bind(new TypeLiteral<ClaimSetFactory<User>>() {
+//        }).annotatedWith(Names.named("claimset.factory.refresh")).to(AuthTokenClaimSetFactory.class);
     }
 
     protected void bindWebTokenFactory(Binder binder) {
@@ -96,4 +109,31 @@ public class AuthorizationModule implements Module {
         binder.bind(JWSSigner.class).toProvider(JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider.class);
         binder.bind(JWSVerifier.class).toProvider(JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider.class);
     }
+
+//    @Provides
+//    @Named("authenticator.token.auth")
+//    TokenAuthenticator provideAuthTokenAuthenticator(
+//            WebTokenFactory tfactory,
+//            @Named("service.session.cookie.name") String authCookieName,
+//            @Named("claimset.factory.auth") ClaimSetFactory<User> f) {
+//        return new TokenAuthenticator(authCookieName, tfactory, f);
+//    }
+    
+    @Provides
+    @Named("authenticator.token.auth")
+    Authenticator<User> provideAuthTokenAuthenticator(
+            WebTokenFactory tfactory,
+            @Named("service.session.cookie.name") String authCookieName,
+            @Named("claimset.factory.auth") ClaimSetFactory<User> f) {
+        return new TokenAuthenticator(authCookieName, tfactory, f);
+    }
+
+//    @Provides
+//    @Named("authenticator.token.refreh")
+//    TokenAuthenticator provideRefreshTokenAuthenticator(
+//            WebTokenFactory tfactory,
+//            @Named("service.session.cookie.name") String authCookieName,
+//            @Named("claimset.factory.refresh") ClaimSetFactory<User> f) {
+//        return new TokenAuthenticator(authCookieName, tfactory, f);
+//    }
 }
