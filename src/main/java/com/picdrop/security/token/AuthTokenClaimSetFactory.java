@@ -31,20 +31,23 @@ public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
 
     protected HashFunction hashf;
     protected Repository<String, RegisteredUser> repo;
+    protected Repository<String, TokenSet> tsrepo;
 
     @Inject
     public AuthTokenClaimSetFactory(Repository<String, RegisteredUser> repo,
+            Repository<String, TokenSet> tsrepo,
             @Named("service.session.jwt.auth.exp") int jwtExpiry,
             @Named("service.session.jwt.iss") String jwtIssuer,
             @Named("service.session.jwt.aud") String jwtAudience) {
         super(jwtExpiry, jwtIssuer, jwtAudience);
 
         this.repo = repo;
+        this.tsrepo = tsrepo;
         this.hashf = Hashing.murmur3_32(new Random().nextInt());
     }
 
-    public AuthTokenClaimSetFactory(Repository<String, RegisteredUser> repo) {
-        this(repo, 60, "", "");
+    public AuthTokenClaimSetFactory(Repository<String, RegisteredUser> repo, Repository<String, TokenSet> tsrepo) {
+        this(repo, tsrepo, 60, "", "");
     }
 
     @Override
@@ -73,32 +76,14 @@ public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
             }
 
             String jti = claims.getJWTID();
-            List<TokenSetReference> tsrefs = user.getTokens();
+            List<TokenSet> tss = tsrepo.queryNamed("tokens.with.authJti.ownedBy", jti, user.getId());
 
-            TokenSet ts = null;
-            boolean dirty = false;
-            for (int i = 0; i < tsrefs.size(); i++) {
-                ts = tsrefs.get(i).resolve(true);
-                if (ts == null) {
-                    user = user.removeToken(tsrefs.get(i));
-                    dirty = true;
-                } else if (ts.getAuthJti().equals(jti)) {
-                    break;
-                } else {
-                    ts = null;
-                }
-            }
-
-            if (dirty) {
-                user = repo.update(user.getId(), user); // Update deleted TokenSet refs
-            }
-
-            if (ts == null) {
+            if (tss.isEmpty()) {
                 return null;
             }
 
-            user.setActiveToken(ts);
-        } catch (ParseException ex) {
+            user.setActiveToken(tss.get(0));
+        } catch (ParseException | IOException ex) {
             return null;
         }
 

@@ -117,7 +117,6 @@ public class AuthorizationService {
             String refreshToken = tokenFactory.getToken(refreshClaims);
 
             user.setLastLogin();
-            user.addToken(ts);
             userRepo.update(user.getId(), user);
 
             NewCookie c = cookieProvFactory.getSessionCookieProvider(authToken).get();
@@ -135,7 +134,7 @@ public class AuthorizationService {
                     .status(403);
         }
     }
-
+    
     @POST
     @Path("/logout")
     @Permission("*/logout")
@@ -147,9 +146,6 @@ public class AuthorizationService {
         
         RegisteredUser ru = user.to(RegisteredUser.class);
         tsRepo.delete(ru.getActiveToken().getId());
-        ru = ru.removeToken(ru.getActiveToken());
-        
-        userRepo.update(ru.getId(), ru);
 
         // generate kill cookie
         NewCookie c = cookieProvFactory.getSessionCookieProvider("").get();

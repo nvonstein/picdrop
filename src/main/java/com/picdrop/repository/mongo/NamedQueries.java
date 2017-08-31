@@ -20,11 +20,14 @@ public abstract class NamedQueries {
 
 //        m.put("getChild", "{ parent: DBRef(?0, ObjectId(?1)) }");
         m.put("getChild", "{ parent: { $ref:?0, $id: ObjectId(?1) } }");
-        m.put("ownedBy", "{ owner: DBRef(?0, ObjectId(?1)) }");
+        m.put("ownedBy", "{ owner: { _id: ObjectId(?0) } }");
 
         m.put("registeredUser.byEmail", "{ email: ?0 }");
         m.put("shares.byUri", "{ uri: ?0 }");
         m.put("citems.byResourceId", "{ resource: { _id: ?0}}");
+
+        m.put("tokens.with.authJti.ownedBy", "{ authJti: ?0, owner: { _id: ObjectId(?1) }}");
+        m.put("tokens.with.refreshJti.ownedBy", "{ refreshJti: ?0, owner: { _id: ObjectId(?1) }}");
 
         return Collections.unmodifiableMap(m);
     }

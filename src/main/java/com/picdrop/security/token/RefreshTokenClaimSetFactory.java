@@ -16,6 +16,7 @@ import com.picdrop.model.TokenSetReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Random;
@@ -30,20 +31,23 @@ public class RefreshTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
 
     protected HashFunction hashf;
     protected Repository<String, RegisteredUser> repo;
+    protected Repository<String, TokenSet> tsrepo;
 
     @Inject
     public RefreshTokenClaimSetFactory(Repository<String, RegisteredUser> repo,
+            Repository<String, TokenSet> tsrepo,
             @Named("service.session.jwt.refresh.exp") int jwtExpiry,
             @Named("service.session.jwt.iss") String jwtIssuer,
             @Named("service.session.jwt.aud") String jwtAudience) {
         super(jwtExpiry, jwtIssuer, jwtAudience);
 
         this.repo = repo;
+        this.tsrepo = tsrepo;
         this.hashf = Hashing.murmur3_32(new Random().nextInt());
     }
 
-    public RefreshTokenClaimSetFactory(Repository<String, RegisteredUser> repo) {
-        this(repo, 60, "", "");
+    public RefreshTokenClaimSetFactory(Repository<String, RegisteredUser> repo,Repository<String, TokenSet> tsrepo) {
+        this(repo,tsrepo, 60, "", "");
     }
 
     @Override
@@ -72,31 +76,14 @@ public class RefreshTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
             }
 
             String jti = claims.getJWTID();
-            List<TokenSetReference> tsrefs = user.getTokens();
-            
-            TokenSet ts = null;
-            boolean dirty = false;
-            for (int i = 0; i < tsrefs.size(); i++) {
-                ts = tsrefs.get(i).resolve(true);
-                if (ts == null) {
-                    user = user.removeToken(tsrefs.get(i));
-                    dirty = true;
-                } else if (ts.getRefreshJti().equals(jti)) {
-                    break;
-                } else {
-                    ts = null;
-                }
-            }
+            List<TokenSet> tss = tsrepo.queryNamed("tokens.with.refreshJti.ownedBy", jti, user.getId());
 
-            if (dirty) {
-                user = repo.update(user.getId(), user); // Update deleted TokenSet refs
-            }
-
-            if (ts == null) {
+            if (tss.isEmpty()) {
                 return null;
             }
-            user.setActiveToken(ts);
-        } catch (ParseException ex) {
+
+            user.setActiveToken(tss.get(0));
+        } catch (ParseException | IOException ex) {
             return null;
         }
 
