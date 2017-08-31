@@ -160,9 +160,11 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
+        
+        RegisteredUser user = context.get().getPrincipal().to(RegisteredUser.class);
 
         entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
-        entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
+        entity.setOwner(user);
         if (Strings.isNullOrEmpty(entity.getName())) {
             entity.setName("Collection");
         }
@@ -194,6 +196,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
                 Collection.CollectionItem ci = new Collection.CollectionItem();
                 ci.setResource(fr);
+                ci.setOwner(user);
                 items.add(ci);
             }
 
@@ -292,8 +295,9 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .code(ErrorMessageCode.BAD_CITEM_NOT_FOUND)
                     .devMessage(String.format("Collection item's resource not found for id '%s'", entity.getResource().getId()));
         }
-
+        
         entity.setResource(fr);
+        entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
         entity = ciRepo.save(entity);
 
         c = c.addItem(entity);
