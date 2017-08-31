@@ -12,8 +12,10 @@ import com.google.inject.name.Named;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.RequestContext;
+import com.picdrop.model.TokenSet;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
+import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.Repository;
 import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
@@ -25,6 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import com.picdrop.security.authentication.Permission;
 import java.io.IOException;
+import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,27 +39,30 @@ import org.apache.logging.log4j.Logger;
 @Consumes("application/json")
 @Produces("application/json")
 public class RegisteredUserService {
-
+    
     Logger log = LogManager.getLogger(this.getClass());
-
+    
     Repository<String, RegisteredUser> repo;
-
+    AdvancedRepository<String, TokenSet> tsrepo;
+    
     @Inject
     Provider<RequestContext> contextProv;
-
+    
     Pattern emailPattern = Pattern.compile("^[^@]+[@][^@]+[.][^@]+$");
-
+    
     @Inject
-    public RegisteredUserService(Repository<String, RegisteredUser> repo) {
+    public RegisteredUserService(Repository<String, RegisteredUser> repo,
+            AdvancedRepository<String, TokenSet> tsrepo) {
         this.repo = repo;
-        log.trace("created with ({})", repo);
+        this.tsrepo = tsrepo;
+        log.trace("created with ({},{})", repo, tsrepo);
     }
-
+    
     @Inject
     public void setEmailPattern(@Named("picdrop.validation.email.regex") String pattern) {
         emailPattern = Pattern.compile(pattern);
     }
-
+    
     @POST
     @Path("/")
     public RegisteredUser create(RegisteredUser entity) throws ApplicationException {
@@ -84,10 +90,10 @@ public class RegisteredUserService {
         if (Strings.isNullOrEmpty(entity.getName())) {
             entity.setName("PicdropUser");
         }
-
+        
         return log.traceExit(repo.save(entity));
     }
-
+    
     @GET
     @Path("/me")
     @Permission("read")
@@ -95,7 +101,7 @@ public class RegisteredUserService {
         log.traceEntry();
         return log.traceExit(contextProv.get().getPrincipal());
     }
-
+    
     @DELETE
     @Path("/me")
     @Permission("write")
@@ -104,10 +110,15 @@ public class RegisteredUserService {
         User me = contextProv.get().getPrincipal();
         if (me != null) {
             repo.delete(me.getId());
+            try {
+                tsrepo.deleteNamed("with.owner", me.getId());
+            } catch (IOException ex) {
+                log.warn("Error during invalidation of existing tokens", ex);
+            }
         }
         log.traceExit();
     }
-
+    
     @PUT
     @Path("/me")
     @Permission("write")
@@ -130,5 +141,5 @@ public class RegisteredUserService {
         }
         return log.traceExit(repo.update(me.getId(), me));
     }
-
+    
 }

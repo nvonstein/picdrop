@@ -22,9 +22,11 @@ import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.model.user.User;
+import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.Repository;
+import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.MorphiaRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
 import java.util.Map;
@@ -67,7 +69,7 @@ public class RepositoryModule implements Module {
         morphia.mapPackage("com.picdrop.model");
         Datastore ds = morphia.createDatastore(client, "test");
         ds.ensureIndexes(true);
-        
+
         binder.bind(MongoDatabase.class).toInstance(client.getDatabase("test"));
         binder.bind(Datastore.class).toInstance(ds);
         return ds;
@@ -111,8 +113,11 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindTokenSetRepo(Binder binder, Datastore ds) {
+        AdvancedRepository<String, TokenSet> repo = new MorphiaAdvancedRepository<>(ds, TokenSet.class);
         binder.bind(new TypeLiteral<Repository<String, TokenSet>>() {
-        }).toInstance(new MorphiaRepository<>(ds, TokenSet.class));
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
+        }).toInstance(repo);
     }
 
     protected void bindStaticRepoReferences(Binder binder, Datastore ds) {
