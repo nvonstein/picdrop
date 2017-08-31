@@ -25,24 +25,24 @@ import org.joda.time.DateTime;
  *
  * @author i330120
  */
-public class TokenAuthenticator implements Authenticator<User> {
+public class TokenAuthenticator implements Authenticator<RegisteredUser> {
 
     String authCookieName;
     WebTokenFactory tfactory;
-    ClaimSetFactory<User> csFac;
+    ClaimSetFactory<RegisteredUser> csFac;
 
     @Inject
     public TokenAuthenticator(
             @Named("service.session.cookie.name") String authCookieName,
             WebTokenFactory tfactory,
-            ClaimSetFactory<User> csFactory) {
+            ClaimSetFactory<RegisteredUser> csFactory) {
         this.authCookieName = authCookieName;
         this.tfactory = tfactory;
         this.csFac = csFactory;
     }
 
     @Override
-    public User authenticate(HttpServletRequest request) {
+    public RegisteredUser authenticate(HttpServletRequest request) {
         String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (Strings.isNullOrEmpty(auth)) {
             auth = HttpHelper.getCookieValue(authCookieName, request.getCookies());

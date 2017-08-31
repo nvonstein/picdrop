@@ -92,9 +92,9 @@ public class AuthorizationModule implements Module {
     }
 
     protected void bindClaimSetFactories(Binder binder) {
-        binder.bind(new TypeLiteral<ClaimSetFactory<User>>() {
+        binder.bind(new TypeLiteral<ClaimSetFactory<RegisteredUser>>() {
         }).annotatedWith(Names.named("claimset.factory.auth")).to(AuthTokenClaimSetFactory.class);
-        binder.bind(new TypeLiteral<ClaimSetFactory<User>>() {
+        binder.bind(new TypeLiteral<ClaimSetFactory<RegisteredUser>>() {
         }).annotatedWith(Names.named("claimset.factory.refresh")).to(RefreshTokenClaimSetFactory.class);
     }
 
@@ -122,19 +122,19 @@ public class AuthorizationModule implements Module {
     
     @Provides
     @Named("authenticator.token.auth")
-    Authenticator<User> provideAuthTokenAuthenticator(
+    Authenticator<RegisteredUser> provideAuthTokenAuthenticator(
             WebTokenFactory tfactory,
             @Named("service.session.cookie.name") String authCookieName,
-            @Named("claimset.factory.auth") ClaimSetFactory<User> f) {
+            @Named("claimset.factory.auth") ClaimSetFactory<RegisteredUser> f) {
         return new TokenAuthenticator(authCookieName, tfactory, f);
     }
 
     @Provides
-    @Named("authenticator.token.refreh")
-    Authenticator<User> provideRefreshTokenAuthenticator(
+    @Named("authenticator.token.refresh")
+    Authenticator<RegisteredUser> provideRefreshTokenAuthenticator(
             WebTokenFactory tfactory,
             @Named("service.session.cookie.name") String authCookieName,
-            @Named("claimset.factory.refresh") ClaimSetFactory<User> f) {
+            @Named("claimset.factory.refresh") ClaimSetFactory<RegisteredUser> f) {
         return new TokenAuthenticator(authCookieName, tfactory, f);
     }
 }

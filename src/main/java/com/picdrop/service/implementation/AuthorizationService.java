@@ -48,10 +48,11 @@ public class AuthorizationService {
     CookieProviderFactory cookieProvFactory;
     WebTokenFactory tokenFactory;
 
-    Authenticator<RegisteredUser> authenticator;
+    Authenticator<RegisteredUser> basicAuthenticator;
+    Authenticator<RegisteredUser> refreshAuthenticator;
 
-    ClaimSetFactory<User> authCsFact;
-    ClaimSetFactory<User> refreshCsFact;
+    ClaimSetFactory<RegisteredUser> authCsFact;
+    ClaimSetFactory<RegisteredUser> refreshCsFact;
 
     @Inject
     Provider<RequestContext> contextProv;
@@ -68,9 +69,10 @@ public class AuthorizationService {
             Repository<String, TokenSet> tsRepo,
             CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
-            @Named("authenticator.basic") Authenticator<RegisteredUser> authenticator,
-            @Named("claimset.factory.auth") ClaimSetFactory<User> authCsFact,
-            @Named("claimset.factory.refresh") ClaimSetFactory<User> refreshCsFact,
+            @Named("authenticator.basic") Authenticator<RegisteredUser> basicAuthenticator,
+            @Named("authenticator.token.refresh") Authenticator<RegisteredUser> refreshAuthenticator,
+            @Named("claimset.factory.auth") ClaimSetFactory<RegisteredUser> authCsFact,
+            @Named("claimset.factory.refresh") ClaimSetFactory<RegisteredUser> refreshCsFact,
             @Named("service.session.cookie.enabled") boolean cookieEnabled,
             @Named("service.session.jwt.refresh.exp") int tsExpiry) {
         this.tsRepo = tsRepo;
@@ -79,7 +81,8 @@ public class AuthorizationService {
         this.tokenFactory = tokenFactory;
         this.authCsFact = authCsFact;
         this.refreshCsFact = refreshCsFact;
-        this.authenticator = authenticator;
+        this.basicAuthenticator = basicAuthenticator;
+        this.refreshAuthenticator = refreshAuthenticator;
         this.cookieEnabled = cookieEnabled;
         this.tsExpiry = tsExpiry;
     }

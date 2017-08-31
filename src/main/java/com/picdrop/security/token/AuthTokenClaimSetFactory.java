@@ -27,7 +27,7 @@ import org.joda.time.DateTimeZone;
  *
  * @author nvonstein
  */
-public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
+public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<RegisteredUser> {
 
     protected HashFunction hashf;
     protected Repository<String, RegisteredUser> repo;
@@ -58,7 +58,7 @@ public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<User> {
     }
 
     @Override
-    public User verify(JWTClaimsSet claims) {
+    public RegisteredUser verify(JWTClaimsSet claims) {
         RegisteredUser user;
         if (verifyGeneralClaims(claims)) {
             return null;
