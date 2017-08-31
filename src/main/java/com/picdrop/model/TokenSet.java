@@ -107,6 +107,13 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
     public TokenSetReference refer() {
         return new TokenSetReference(this._id);
     }
+    
+    @JsonIgnore
+    public JsonWrapper toJsonWrapper() {
+        return new JsonWrapper()
+                .auth(this.authJti)
+                .refresh(this.refreshJti);
+    }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class JsonWrapper {
