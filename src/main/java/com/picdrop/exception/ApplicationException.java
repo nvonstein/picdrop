@@ -13,7 +13,7 @@ import java.io.StringWriter;
  * @author nvonstein
  */
 public class ApplicationException extends Exception {
-    
+
     protected int status;
     protected ErrorMessageCode code;
     protected String lang = "EN";
@@ -73,21 +73,21 @@ public class ApplicationException extends Exception {
     public String getDevMessage() {
         return devMessage;
     }
-    
+
     public ErrorMessage toErrorMessage(boolean debug) {
         ErrorMessage msg = new ErrorMessage();
-        msg.code = code.getCode();
+        msg.code = code != null ? code.getCode() : null;
         msg.lang = lang;
         msg.message = message;
-        
+
         if (debug) {
             msg.devMessage = devMessage;
-            StringWriter sw = new StringWriter();           
+            StringWriter sw = new StringWriter();
             this.printStackTrace(new PrintWriter(sw));
             msg.trace = sw.toString();
         }
-        
+
         return msg;
     }
-       
+
 }
