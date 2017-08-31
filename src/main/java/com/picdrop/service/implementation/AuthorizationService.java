@@ -87,16 +87,9 @@ public class AuthorizationService {
         this.tsExpiry = tsExpiry;
     }
 
-    @POST
-    @Path("/login")
-    public Response loginUser(@Context HttpServletRequest request,
-            @QueryParam("nonce") String nonce) throws ApplicationException { // TODO make redirect target injectable
-        RegisteredUser user = authenticator.authenticate(request);
-        if (user == null) {
-            throw new ApplicationException()
-                    .status(403);
-        }
-
+    protected TokenSet.JsonWrapper generateTokens(
+            RegisteredUser user,
+            String nonce) throws ApplicationException {
         JWTClaimsSet authClaims = this.authCsFact.builder()
                 .subject(user.getId())
                 .build();
@@ -119,25 +112,64 @@ public class AuthorizationService {
             String authToken = tokenFactory.getToken(authClaims);
             String refreshToken = tokenFactory.getToken(refreshClaims);
 
-            user.setLastLogin();
-            userRepo.update(user.getId(), user);
-
-            NewCookie c = cookieProvFactory.getSessionCookieProvider(authToken).get();
-
-            return Response
-                    .ok(new TokenSet.JsonWrapper()
-                            .auth(authToken)
-                            .refresh(refreshToken)
-                            .nonce(Strings.isNullOrEmpty(nonce) ? null : nonce),
-                            MediaType.APPLICATION_JSON)
-                    .cookie(c)
-                    .build();
+            return new TokenSet.JsonWrapper()
+                    .auth(authToken)
+                    .refresh(refreshToken)
+                    .nonce(Strings.isNullOrEmpty(nonce) ? null : nonce);
         } catch (IOException ex) {
-            throw new ApplicationException()
+            throw new ApplicationException(ex)
                     .status(403);
         }
     }
-    
+
+    @POST
+    @Path("/login")
+    public Response loginUser(@Context HttpServletRequest request,
+            @QueryParam("nonce") String nonce) throws ApplicationException { // TODO make redirect target injectable
+        RegisteredUser user = basicAuthenticator.authenticate(request);
+        if (user == null) {
+            throw new ApplicationException()
+                    .status(403);
+        }
+
+        TokenSet.JsonWrapper tokens = generateTokens(user, nonce);
+
+        user.setLastLogin();
+        userRepo.update(user.getId(), user);
+
+        NewCookie c = cookieProvFactory.getSessionCookieProvider(tokens.getAuth()).get();
+
+        return Response
+                .ok(tokens, MediaType.APPLICATION_JSON)
+                .cookie(c)
+                .build();
+    }
+
+    @POST
+    @Path("/refresh")
+    public Response refreshToken(@Context HttpServletRequest request,
+            @QueryParam("nonce") String nonce) throws ApplicationException {
+        RegisteredUser user = refreshAuthenticator.authenticate(request);
+        if (user == null) {
+            throw new ApplicationException()
+                    .status(403);
+        }
+        
+        tsRepo.delete(user.getActiveToken().getId());
+
+        TokenSet.JsonWrapper tokens = generateTokens(user, nonce);
+
+        user.setLastLogin();
+        userRepo.update(user.getId(), user);
+
+        NewCookie c = cookieProvFactory.getSessionCookieProvider(tokens.getAuth()).get();
+
+        return Response
+                .ok(tokens, MediaType.APPLICATION_JSON)
+                .cookie(c)
+                .build();
+    }
+
     @POST
     @Path("/logout")
     @Permission("*/logout")
@@ -146,7 +178,7 @@ public class AuthorizationService {
         if (user == null) {
             return Response.ok().build();
         }
-        
+
         RegisteredUser ru = user.to(RegisteredUser.class);
         tsRepo.delete(ru.getActiveToken().getId());
 
