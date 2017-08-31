@@ -30,8 +30,7 @@ public abstract class EnvHelper {
         p.put("service.cookie.refresh.name", "refresh");
         
         p.put("service.jwt.auth.exp", "60"); // 1 Hour
-//        p.put("service.session.jwt.refresh.exp", "43200");    // 30 Days
-        p.put("service.jwt.refresh.exp", "3");    // 30 Days
+        p.put("service.jwt.refresh.exp", "43200");    // 30 Days
         p.put("service.jwt.iss", "picdrop");
         p.put("service.jwt.aud", "picdrop/app");
         
