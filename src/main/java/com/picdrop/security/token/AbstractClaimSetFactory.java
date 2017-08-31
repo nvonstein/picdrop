@@ -70,7 +70,7 @@ public abstract class AbstractClaimSetFactory<T> implements ClaimSetFactory<T> {
             return false;
         }
         if (Strings.isNullOrEmpty(claims.getIssuer())
-                || claims.getIssuer().equals(this.configJwtIssuer)) {
+                || !claims.getIssuer().equals(this.configJwtIssuer)) {
             log.debug("Illegal issuer");
             return false;
         }

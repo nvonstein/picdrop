@@ -60,7 +60,7 @@ public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<Registered
     @Override
     public RegisteredUser verify(JWTClaimsSet claims) {
         RegisteredUser user;
-        if (verifyGeneralClaims(claims)) {
+        if (!verifyGeneralClaims(claims)) {
             return null;
         }
 
