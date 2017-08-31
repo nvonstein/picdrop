@@ -42,7 +42,7 @@ public class BasicAuthenticator implements Authenticator<RegisteredUser> {
                 return null;
             }
             
-            List<RegisteredUser> users = userRepo.queryNamed("registeredUser.byEmail", userAndPass[0]);
+            List<RegisteredUser> users = userRepo.queryNamed("users.with.email", userAndPass[0]);
             
             if (users.isEmpty()) {
                 return null;

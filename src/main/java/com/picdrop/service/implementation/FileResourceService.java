@@ -160,7 +160,7 @@ public class FileResourceService {
         // Delete citems referring this res
         List<Collection.CollectionItem> cis;
         try {
-            cis = this.cirepo.queryNamed("citems.byResourceId", e.getId());
+            cis = this.cirepo.queryNamed("citems.with.resource", e.getId());
         } catch (IOException ex) {
             throw new ApplicationException(ex)
                     .code(ErrorMessageCode.ERROR_DELETE)

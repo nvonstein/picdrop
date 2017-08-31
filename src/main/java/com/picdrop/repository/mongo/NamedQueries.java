@@ -21,9 +21,9 @@ public abstract class NamedQueries {
 
         m.put("with.owner", "{ owner: { _id: ObjectId(?0) } }");
 
-        m.put("registeredUser.byEmail", "{ email: ?0 }");
-        m.put("shares.byUri", "{ uri: ?0 }");
-        m.put("citems.byResourceId", "{ resource: { _id: ?0}}");
+        m.put("users.with.email", "{ email: ?0 }");
+        m.put("shares.with.uri", "{ uri: ?0 }");
+        m.put("citems.with.resource", "{ resource: { _id: ?0}}");
 
         m.put("tokens.with.authJti.ownedBy", "{ authJti: ?0, owner: { _id: ObjectId(?1) }}");
         m.put("tokens.with.refreshJti.ownedBy", "{ refreshJti: ?0, owner: { _id: ObjectId(?1) }}");
