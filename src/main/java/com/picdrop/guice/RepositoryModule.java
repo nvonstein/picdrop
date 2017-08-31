@@ -66,7 +66,8 @@ public class RepositoryModule implements Module {
         Morphia morphia = new Morphia();
         morphia.mapPackage("com.picdrop.model");
         Datastore ds = morphia.createDatastore(client, "test");
-
+        ds.ensureIndexes(true);
+        
         binder.bind(MongoDatabase.class).toInstance(client.getDatabase("test"));
         binder.bind(Datastore.class).toInstance(ds);
         return ds;
