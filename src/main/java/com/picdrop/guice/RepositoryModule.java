@@ -23,11 +23,13 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AdvancedRepository;
+import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.MorphiaRepository;
+import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
 import java.util.Map;
 import org.mongodb.morphia.Datastore;
@@ -81,20 +83,28 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindResourceRepo(Binder binder, Datastore ds) {
-        PrincipalAwareMorphiaRepository<FileResource> repo = new PrincipalAwareMorphiaRepository<>(ds, FileResource.class);
+        PrincipalAwareMorphiaAdvancedRepository<FileResource> repo = new PrincipalAwareMorphiaAdvancedRepository<>(ds, FileResource.class);
 
         binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, FileResource, User>>() {
         }).toInstance(repo);
+        binder.bind(new TypeLiteral<AdvancedRepository<String, FileResource>>() {
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, FileResource, User>>() {
+        }).toInstance(repo);
     }
 
     protected void bindCollectionsRepo(Binder binder, Datastore ds) {
-        PrincipalAwareMorphiaRepository<Collection> repo = new PrincipalAwareMorphiaRepository<>(ds, Collection.class);
+        PrincipalAwareMorphiaAdvancedRepository<Collection> repo = new PrincipalAwareMorphiaAdvancedRepository<>(ds, Collection.class);
 
         binder.bind(new TypeLiteral<Repository<String, Collection>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, Collection, User>>() {
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AdvancedRepository<String, Collection>>() {
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Collection, User>>() {
         }).toInstance(repo);
     }
 
@@ -104,11 +114,15 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindShareRepo(Binder binder, Datastore ds) {
-        PrincipalAwareMorphiaRepository<Share> repo = new PrincipalAwareMorphiaRepository<>(ds, Share.class);
+        PrincipalAwareMorphiaAdvancedRepository<Share> repo = new PrincipalAwareMorphiaAdvancedRepository<>(ds, Share.class);
 
         binder.bind(new TypeLiteral<Repository<String, Share>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AdvancedRepository<String, Share>>() {
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Share, User>>() {
         }).toInstance(repo);
     }
 
