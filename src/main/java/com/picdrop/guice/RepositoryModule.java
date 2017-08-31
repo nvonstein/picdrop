@@ -109,8 +109,12 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
+        AdvancedRepository<String, Collection.CollectionItem> repo = new MorphiaAdvancedRepository<>(ds, Collection.CollectionItem.class);
+        
         binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
-        }).toInstance(new MorphiaRepository<>(ds, Collection.CollectionItem.class));
+        }).toInstance(repo);
+        binder.bind(new TypeLiteral<AdvancedRepository<String, Collection.CollectionItem>>() {
+        }).toInstance(repo);
     }
 
     protected void bindShareRepo(Binder binder, Datastore ds) {

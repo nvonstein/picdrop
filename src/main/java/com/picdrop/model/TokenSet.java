@@ -5,10 +5,8 @@
  */
 package com.picdrop.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.picdrop.json.Views;
 import com.picdrop.model.user.RegisteredUser;
@@ -17,14 +15,26 @@ import java.util.Date;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.annotations.Indexes;
 
 /**
  *
  * @author nvonstein
  */
 @Entity("tokens")
+@Indexes(
+        {
+            @Index(fields = {
+        @Field("authJti")
+        ,@Field("owner")})
+            ,
+        @Index(fields = {
+        @Field("refreshJti")
+        ,@Field("owner")})})
 public class TokenSet extends Identifiable implements Referable<TokenSetReference> {
 
     protected String authJti;
@@ -107,7 +117,7 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
     public TokenSetReference refer() {
         return new TokenSetReference(this._id);
     }
-    
+
     @JsonIgnore
     public JsonWrapper toJsonWrapper() {
         return new JsonWrapper()
@@ -117,6 +127,7 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class JsonWrapper {
+
         @JsonView(Views.Public.class)
         protected String auth;
         @JsonView(Views.Public.class)
@@ -135,17 +146,17 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
         public String getNonce() {
             return nonce;
         }
-        
+
         public JsonWrapper auth(String in) {
             this.auth = in;
             return this;
         }
-        
+
         public JsonWrapper refresh(String in) {
             this.refresh = in;
             return this;
         }
-        
+
         public JsonWrapper nonce(String in) {
             this.nonce = in;
             return this;
