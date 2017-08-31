@@ -20,17 +20,20 @@ public abstract class EnvHelper {
 
         p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
 
-        p.put("service.session.cookie.enabled", "true");
-        p.put("service.session.cookie.name", "token");
-        p.put("service.session.cookie.domain", "localhost");
-        p.put("service.session.cookie.maxage", "900");
-        p.put("service.session.cookie.http", "true");
-        p.put("service.session.cookie.secure", "false");
+        p.put("service.cookie.enabled", "true");
+        p.put("service.cookie.domain", "localhost");
+        p.put("service.cookie.maxage", "900");
+        p.put("service.cookie.http", "true");
+        p.put("service.cookie.secure", "false");
         
-        p.put("service.session.jwt.auth.exp", "60"); // 1 Hour
-        p.put("service.session.jwt.refresh.exp", "43200");    // 30 Days
-        p.put("service.session.jwt.iss", "picdrop");
-        p.put("service.session.jwt.aud", "picdrop/app");
+        p.put("service.cookie.auth.name", "auth");
+        p.put("service.cookie.refresh.name", "refresh");
+        
+        p.put("service.jwt.auth.exp", "60"); // 1 Hour
+//        p.put("service.session.jwt.refresh.exp", "43200");    // 30 Days
+        p.put("service.jwt.refresh.exp", "3");    // 30 Days
+        p.put("service.jwt.iss", "picdrop");
+        p.put("service.jwt.aud", "picdrop/app");
         
         p.put("token.signer.alg", "HS256");
         p.put("token.cipher.alg", "dir");

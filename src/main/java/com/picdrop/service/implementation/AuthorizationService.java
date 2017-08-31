@@ -61,6 +61,8 @@ public class AuthorizationService {
     ObjectMapper mapper;
 
     final boolean cookieEnabled;
+    final String authCookieName;
+    final String refreshCookieName;
     final int tsExpiry;
 
     @Inject
@@ -73,8 +75,10 @@ public class AuthorizationService {
             @Named("authenticator.token.refresh") Authenticator<RegisteredUser> refreshAuthenticator,
             @Named("claimset.factory.auth") ClaimSetFactory<RegisteredUser> authCsFact,
             @Named("claimset.factory.refresh") ClaimSetFactory<RegisteredUser> refreshCsFact,
-            @Named("service.session.cookie.enabled") boolean cookieEnabled,
-            @Named("service.session.jwt.refresh.exp") int tsExpiry) {
+            @Named("service.cookie.enabled") boolean cookieEnabled,
+            @Named("service.cookie.auth.name") String authCookieName,
+            @Named("service.cookie.refresh.name") String refreshCookieName,
+            @Named("service.jwt.refresh.exp") int tsExpiry) {
         this.tsRepo = tsRepo;
         this.userRepo = userRepo;
         this.cookieProvFactory = cookieProvFactory;
@@ -84,6 +88,8 @@ public class AuthorizationService {
         this.basicAuthenticator = basicAuthenticator;
         this.refreshAuthenticator = refreshAuthenticator;
         this.cookieEnabled = cookieEnabled;
+        this.authCookieName = authCookieName;
+        this.refreshCookieName = refreshCookieName;
         this.tsExpiry = tsExpiry;
     }
 
@@ -137,11 +143,12 @@ public class AuthorizationService {
         user.setLastLogin();
         userRepo.update(user.getId(), user);
 
-        NewCookie c = cookieProvFactory.getSessionCookieProvider(tokens.getAuth()).get();
+        NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
+        NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
 
         return Response
                 .ok(tokens, MediaType.APPLICATION_JSON)
-                .cookie(c)
+                .cookie(authC, refreshC)
                 .build();
     }
 
@@ -154,7 +161,7 @@ public class AuthorizationService {
             throw new ApplicationException()
                     .status(403);
         }
-        
+
         tsRepo.delete(user.getActiveToken().getId());
 
         TokenSet.JsonWrapper tokens = generateTokens(user, nonce);
@@ -162,11 +169,12 @@ public class AuthorizationService {
         user.setLastLogin();
         userRepo.update(user.getId(), user);
 
-        NewCookie c = cookieProvFactory.getSessionCookieProvider(tokens.getAuth()).get();
+        NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
+        NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
 
         return Response
                 .ok(tokens, MediaType.APPLICATION_JSON)
-                .cookie(c)
+                .cookie(authC, refreshC)
                 .build();
     }
 
@@ -183,9 +191,14 @@ public class AuthorizationService {
         tsRepo.delete(ru.getActiveToken().getId());
 
         // generate kill cookie
-        NewCookie c = cookieProvFactory.getSessionCookieProvider("").get();
-        NewCookie killcookie = new NewCookie(c, c.getComment(), 0, c.isSecure());
+        NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, "").get();
+        NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, "").get();
 
-        return Response.ok().cookie(killcookie).build();
+        NewCookie killcookie1 = new NewCookie(authC, authC.getComment(), 0, authC.isSecure());
+        NewCookie killcookie2 = new NewCookie(refreshC, refreshC.getComment(), 0, refreshC.isSecure());
+
+        return Response.ok()
+                .cookie(killcookie1, killcookie2)
+                .build();
     }
 }

@@ -36,9 +36,9 @@ public class AuthTokenClaimSetFactory extends AbstractClaimSetFactory<Registered
     @Inject
     public AuthTokenClaimSetFactory(Repository<String, RegisteredUser> repo,
             Repository<String, TokenSet> tsrepo,
-            @Named("service.session.jwt.auth.exp") int jwtExpiry,
-            @Named("service.session.jwt.iss") String jwtIssuer,
-            @Named("service.session.jwt.aud") String jwtAudience) {
+            @Named("service.jwt.auth.exp") int jwtExpiry,
+            @Named("service.jwt.iss") String jwtIssuer,
+            @Named("service.jwt.aud") String jwtAudience) {
         super(jwtExpiry, jwtIssuer, jwtAudience);
 
         this.repo = repo;

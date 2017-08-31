@@ -26,12 +26,12 @@ public class SessionCookieProvider implements CookieProvider {
 
     @AssistedInject
     public SessionCookieProvider(
-            @Named("service.session.cookie.name") String name,
-            @Named("service.session.cookie.maxage") int ttl,
-            @Named("service.session.cookie.http") boolean http,
-            @Named("service.session.cookie.secure") boolean secure,
-            @Named("service.session.cookie.domain") String domain,
-            @Assisted String value) {
+            @Named("service.cookie.maxage") int ttl,
+            @Named("service.cookie.http") boolean http,
+            @Named("service.cookie.secure") boolean secure,
+            @Named("service.cookie.domain") String domain,
+            @Assisted("name") String name,
+            @Assisted("value") String value) {
         this.name = name;
         this.http = http;
         this.ttl = ttl;

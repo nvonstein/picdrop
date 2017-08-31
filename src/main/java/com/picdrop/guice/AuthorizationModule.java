@@ -67,7 +67,7 @@ public class AuthorizationModule implements Module {
 
     protected void bindSessionCookieFactory(Binder binder) {
         binder.install(new FactoryModuleBuilder()
-                .implement(CookieProvider.class, Names.named("cookie.session"), SessionCookieProvider.class)
+                .implement(CookieProvider.class, Names.named("service.cookie.factory"), SessionCookieProvider.class)
                 .build(CookieProviderFactory.class)
         );
     }
@@ -124,7 +124,7 @@ public class AuthorizationModule implements Module {
     @Named("authenticator.token.auth")
     Authenticator<RegisteredUser> provideAuthTokenAuthenticator(
             WebTokenFactory tfactory,
-            @Named("service.session.cookie.name") String authCookieName,
+            @Named("service.cookie.auth.name") String authCookieName,
             @Named("claimset.factory.auth") ClaimSetFactory<RegisteredUser> f) {
         return new TokenAuthenticator(authCookieName, tfactory, f);
     }
@@ -133,7 +133,7 @@ public class AuthorizationModule implements Module {
     @Named("authenticator.token.refresh")
     Authenticator<RegisteredUser> provideRefreshTokenAuthenticator(
             WebTokenFactory tfactory,
-            @Named("service.session.cookie.name") String authCookieName,
+            @Named("service.cookie.refresh.name") String authCookieName,
             @Named("claimset.factory.refresh") ClaimSetFactory<RegisteredUser> f) {
         return new TokenAuthenticator(authCookieName, tfactory, f);
     }
