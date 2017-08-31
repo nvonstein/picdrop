@@ -36,8 +36,6 @@ public class RegisteredUser extends User {
 
     protected long lastlogin;
 
-    @Embedded
-    protected List<TokenSetReference> tokens = new ArrayList<>();
     @NotSaved
     protected TokenSet activeToken;
 
@@ -108,47 +106,6 @@ public class RegisteredUser extends User {
     @JsonIgnore
     public void setLastLogin() {
         this.lastlogin = DateTime.now(DateTimeZone.UTC).getMillis();
-    }
-
-    @JsonView(value = Views.Ignore.class)
-    public List<TokenSetReference> getTokens() {
-        return tokens;
-    }
-    
-    @JsonIgnore
-    public List<TokenSet> getTokens(boolean deep) {
-        List<TokenSet> ret = new ArrayList<>();
-        this.tokens.stream()
-                .map(tsref -> tsref.resolve(deep))
-                .forEach(ts -> ret.add(ts));
-        return ret;
-    }
-
-    @JsonView(value = Views.Ignore.class)
-    public void setTokens(List<TokenSetReference> tokens) {
-        this.tokens = tokens;
-    }
-
-    @JsonIgnore
-    public RegisteredUser removeToken(TokenSet ts) {
-        return this.removeToken(ts.refer());
-    }
-
-    @JsonIgnore
-    public RegisteredUser removeToken(TokenSetReference ts) {
-        this.tokens.remove(ts);
-        return this;
-    }
-
-    @JsonIgnore
-    public RegisteredUser addToken(TokenSetReference ts) {
-        this.tokens.add(ts);
-        return this;
-    }
-
-    @JsonIgnore
-    public RegisteredUser addToken(TokenSet ts) {
-        return this.addToken(ts.refer());
     }
 
     @JsonView(value = Views.Detailed.class)
