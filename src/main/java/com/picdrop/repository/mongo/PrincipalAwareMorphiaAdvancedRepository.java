@@ -36,7 +36,6 @@ public class PrincipalAwareMorphiaAdvancedRepository<T> extends PrincipalAwareMo
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
 
         return ds.delete(query).getN();
-
     }
 
     @Override
@@ -55,12 +54,25 @@ public class PrincipalAwareMorphiaAdvancedRepository<T> extends PrincipalAwareMo
 
     @Override
     public int deleteNamed(String qname, Object... params) throws IOException {
-        return this.deleteNamed(qname, this.contextProv.get().getPrincipal().getId(), params);
+        DBObject dbObj = compileQuery(qname, params);
+
+        dbObj = addPrincipalClause(dbObj);
+
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+
+        return ds.delete(query).getN();
     }
 
     @Override
     public List<T> updateNamed(T entity, String qname, Object... params) throws IOException {
-        return this.updateNamed(entity, qname, this.contextProv.get().getPrincipal().getId(), params);
+        DBObject dbObj = compileQuery(qname, params);
+
+        dbObj = addPrincipalClause(dbObj);
+
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+
+        UpdateResults ur = ds.updateFirst(query, entity, false);
+        return Arrays.asList();
     }
 
 }
