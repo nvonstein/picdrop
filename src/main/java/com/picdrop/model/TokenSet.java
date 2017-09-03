@@ -42,6 +42,7 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
     @Indexed(options = @IndexOptions(expireAfterSeconds = 0))
     protected Date expireAt;
     protected long created;
+    protected String name;
     protected RegisteredUserReference owner;
 
     public TokenSet() {
@@ -78,7 +79,7 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
         this.expireAt = expireAt;
     }
 
-    @JsonView(Views.Detailed.class)
+    @JsonView(Views.Public.class)
     public long getCreated() {
         return created;
     }
@@ -92,6 +93,18 @@ public class TokenSet extends Identifiable implements Referable<TokenSetReferenc
     public void setCreated() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
     }
+
+    @JsonView(Views.Public.class)
+    public String getName() {
+        return name;
+    }
+
+    @JsonView(Views.Ignore.class)
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    
 
     @JsonView(value = Views.Detailed.class)
     public RegisteredUserReference getOwner() {

@@ -95,7 +95,8 @@ public class AuthorizationService {
 
     protected TokenSet.JsonWrapper generateTokens(
             RegisteredUser user,
-            String nonce) throws ApplicationException {
+            String nonce,
+            String name) throws ApplicationException {
         JWTClaimsSet authClaims = this.authCsFact.builder()
                 .subject(user.getId())
                 .build();
@@ -108,6 +109,7 @@ public class AuthorizationService {
         ts.setAuthJti(authClaims.getJWTID());
         ts.setRefreshJti(refreshClaims.getJWTID());
         ts.setOwner(user);
+        ts.setName(name);
         ts.setExpireAt(DateTime.now(DateTimeZone.UTC)
                 .plusMinutes(tsExpiry)
                 .toDate());
@@ -131,14 +133,19 @@ public class AuthorizationService {
     @POST
     @Path("/login")
     public Response loginUser(@Context HttpServletRequest request,
-            @QueryParam("nonce") String nonce) throws ApplicationException { // TODO make redirect target injectable
+            @QueryParam("nonce") String nonce,
+            @QueryParam("name") String name) throws ApplicationException { // TODO make redirect target injectable
         RegisteredUser user = basicAuthenticator.authenticate(request);
         if (user == null) {
             throw new ApplicationException()
                     .status(403);
         }
+        
+        if (Strings.isNullOrEmpty(name)) {
+            name = request.getHeader("user-agent");
+        }
 
-        TokenSet.JsonWrapper tokens = generateTokens(user, nonce);
+        TokenSet.JsonWrapper tokens = generateTokens(user, nonce, name);
 
         user.setLastLogin();
         userRepo.update(user.getId(), user);
@@ -162,9 +169,10 @@ public class AuthorizationService {
                     .status(403);
         }
 
-        tsRepo.delete(user.getActiveToken().getId());
+        TokenSet ts = user.getActiveToken();
+        tsRepo.delete(ts.getId());
 
-        TokenSet.JsonWrapper tokens = generateTokens(user, nonce);
+        TokenSet.JsonWrapper tokens = generateTokens(user, nonce, ts.getName());
 
         user.setLastLogin();
         userRepo.update(user.getId(), user);
