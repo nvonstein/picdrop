@@ -79,6 +79,7 @@ public class ApplicationException extends Exception {
         msg.code = code != null ? code.getCode() : null;
         msg.lang = lang;
         msg.message = message;
+        msg.status = status;
 
         if (debug) {
             msg.devMessage = devMessage;
