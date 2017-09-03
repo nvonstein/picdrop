@@ -24,7 +24,9 @@ public enum ErrorMessageCode {
     BAD_REQUEST_BODY("ec000011","Bad request: No request body."), 
     BAD_CITEM("ec000012","Bad request: Collection item is not set or invalid."), 
     BAD_CITEM_NOT_FOUND("ec000013","Bad request: Collection item's resource could not be resolved given id."),
-    BAD_COMMENT("ec000014","Bad request: Invalid comment or unable to find/resolve a name.");
+    BAD_COMMENT("ec000014","Bad request: Invalid comment or unable to find/resolve a name."),
+    ERROR_INTERNAL("ec000015","An internal server error occured. Please try again later."),
+    BAD_JSON("ec000016","Bad Request: Invalid JSON");
 
     private String code;
     private String defaultMessage;
