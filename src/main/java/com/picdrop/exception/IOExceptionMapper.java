@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.IOException;
 import javax.ws.rs.ext.Provider;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 
 /**
  *
@@ -17,6 +18,10 @@ import org.apache.logging.log4j.Level;
  */
 @Provider
 public class IOExceptionMapper extends AbstractExceptionMapper<IOException> {
+
+    public IOExceptionMapper() {
+        this.log = LogManager.getLogger();
+    }
 
     @Override
     protected ErrorMessage processException(IOException ex) {
@@ -36,7 +41,7 @@ public class IOExceptionMapper extends AbstractExceptionMapper<IOException> {
         return msg
                 .code(ErrorMessageCode.ERROR_INTERNAL)
                 .status(500)
-                .devMessage("General or unmapped IOExeption occured: " + ex.getMessage());
+                .devMessage(String.format("Unhandled IO exception [%s] with message: %s", ex.getClass().toString(), ex.getMessage()));
     }
 
 }

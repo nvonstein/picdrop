@@ -5,21 +5,37 @@
  */
 package com.picdrop.exception;
 
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotAllowedException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Provider;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 
 /**
  *
  * @author nvonstein
  */
 @Provider
+@Produces("application/json")
 public class RuntimeExceptionMapper extends AbstractExceptionMapper<RuntimeException> {
 
+    public RuntimeExceptionMapper() {
+        this.log = LogManager.getLogger();
+    }
+
+    
     @Override
     protected ErrorMessage processException(RuntimeException ex) {
-        return new ErrorMessage().code(ErrorMessageCode.ERROR_INTERNAL)
+        ErrorMessage msg = new ErrorMessage()
                 .devMessage(ex.getMessage())
-                .status(500)
                 .trace(ex);
+        
+        return msg
+                .code(ErrorMessageCode.ERROR_INTERNAL)
+                .status(500)
+                .devMessage(String.format("Unhandled runtime exception [%s] with message: %s", ex.getClass().toString(), ex.getMessage()));
     }
 
 }
