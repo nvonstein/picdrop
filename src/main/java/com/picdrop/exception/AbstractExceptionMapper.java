@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.apache.logging.log4j.Level;
@@ -22,7 +23,7 @@ import org.apache.logging.log4j.Logger;
  */
 public abstract class AbstractExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
 
-    Logger log = LogManager.getRootLogger();
+    Logger log = LogManager.getLogger(this.getClass());
 
     @Inject
     protected static ObjectWriter writer;
@@ -39,7 +40,6 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
 
     protected abstract ErrorMessage processException(T ex);
 
-    @Produces("application/json")
     @Override
     public Response toResponse(T exception) {
         ErrorMessage msg = processException(exception);
@@ -49,6 +49,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
         try {
             return Response.status(msg.status)
                     .entity(writer.writeValueAsString(msg.maskFields(true)))
+                    .type(MediaType.APPLICATION_JSON)
                     .build();
         } catch (JsonProcessingException ex) {
             log.error("Error while processing error message to JSON.", ex);

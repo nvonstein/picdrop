@@ -13,9 +13,9 @@
         </File>
     </Appenders>
     <Loggers>
-        <Logger name="com.picdrop" level="trace" additivity="false">
+        <Root name="com.picdrop" level="trace">
             <appender-ref ref="file.log.main" level="debug"/>
             <!--<appender-ref ref="file.log.trace" level="trace"/>-->
-        </Logger>
+        </Root>
     </Loggers>
 </Configuration>

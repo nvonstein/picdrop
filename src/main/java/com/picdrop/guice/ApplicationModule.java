@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
+import com.picdrop.exception.AbstractExceptionMapper;
 import com.picdrop.exception.ApplicationExeptionMapper;
 import com.picdrop.helper.EnvHelper;
 import com.picdrop.json.JacksonConfigProvider;
@@ -56,6 +57,7 @@ public class ApplicationModule implements Module {
     
     protected void bindStaticObjectMapper(Binder binder) {
         binder.requestStaticInjection(ApplicationExeptionMapper.class);
+        binder.requestStaticInjection(AbstractExceptionMapper.class);
     }
     
     protected void bindServices(Binder binder) {
