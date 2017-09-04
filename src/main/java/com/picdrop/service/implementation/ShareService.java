@@ -15,6 +15,7 @@ import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.Collection.Rating;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.Resource;
+import com.picdrop.model.resource.ResourceReference;
 import com.picdrop.model.user.NameOnlyUserReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
@@ -128,13 +129,17 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-        
-        // TODO delete share ref on resource
-        if (!repo.delete(id)) {
-            throw new ApplicationException()
-                    .status(500)
-                    .code(ErrorMessageCode.ERROR_DELETE)
-                    .devMessage("Repository returned 'false'");
+
+        repo.delete(id);
+
+        Resource r = s.getResource(false);
+        r.deleteShare(s);
+        if (r.isCollection()) {
+            this.crepo.update(r.getId(), (Collection) r);
+        }
+
+        if (r.isFileResource()) {
+            this.frepo.update(r.getId(), (FileResource) r);
         }
         log.traceExit();
     }
@@ -177,7 +182,6 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         }
 
         // TODO generate uri
-        
         Share s = super.create(entity);
 
         r = r.addShare(s);
