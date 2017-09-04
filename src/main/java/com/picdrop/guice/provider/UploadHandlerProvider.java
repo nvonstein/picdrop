@@ -20,13 +20,13 @@ public class UploadHandlerProvider implements Provider<ServletFileUpload> {
     @Inject
     FileItemFactory factory;
 
-    int maxfilesize;
-    int maxrequestsize;
+    long maxfilesize;
+    long maxrequestsize;
 
     @Inject
     public UploadHandlerProvider(
-            @Named("service.upload.maxfilesize") int maxfilesize,
-            @Named("service.upload.maxrequestsize") int maxrequestsize) {
+            @Named("service.upload.maxfilesize") long maxfilesize,
+            @Named("service.upload.maxrequestsize") long maxrequestsize) {
         this.maxfilesize = maxfilesize;
         this.maxrequestsize = maxrequestsize;
     }
