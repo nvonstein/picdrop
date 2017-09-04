@@ -83,9 +83,7 @@ public class ApplicationException extends Exception {
 
         if (debug) {
             msg.devMessage = devMessage;
-            StringWriter sw = new StringWriter();
-            this.printStackTrace(new PrintWriter(sw));
-            msg.trace = sw.toString();
+            msg.trace(this);
         }
 
         return msg;
