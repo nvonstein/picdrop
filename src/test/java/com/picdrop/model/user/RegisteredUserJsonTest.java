@@ -66,7 +66,7 @@ public class RegisteredUserJsonTest {
 
     @Before
     public void setUp() throws Exception {
-        this.mapperOnline = JacksonConfigProvider.createMapper();
+        this.mapperOnline = JacksonConfigProvider.createMapper("public");
         this.mapper = new ObjectMapper();
 
         this.mockJson = TestHelper.readMockJson("RegisteredUser");
