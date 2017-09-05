@@ -5,18 +5,18 @@
  */
 package com.picdrop.repository.mongo;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.DBRef;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
+import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
@@ -33,6 +33,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
     @Inject
     public PrincipalAwareMorphiaRepository(Datastore ds, Class<T> entityType) {
         super(ds, entityType);
+        this.log = LogManager.getLogger();
     }
 
     protected DBObject addPrincipalClause(DBObject dbObj) {
@@ -50,6 +51,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             return null;
         }
 
+        log.debug(REPO, "Adding principle clause");
         dbObj.put("owner", new BasicDBObject("_id", new ObjectId(principal.getId())));
 
         return dbObj;
@@ -57,6 +59,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public T update(String id, T entity) {
+        log.traceEntry();
         if (!isValidIdentifier(id)) {
             return null;
         }
@@ -69,13 +72,17 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_UPDATE, "Updating entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
         ds.updateFirst(query, entity, false);
+
+        log.traceExit();
         return get(id);
     }
 
     @Override
     public boolean delete(String id) {
+        log.traceEntry();
         if (!isValidIdentifier(id)) {
             return false;
         }
@@ -88,12 +95,15 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_DELETE, "Deleting entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return ds.delete(query).getN() > 0;
     }
 
     @Override
     public T get(String id) {
+        log.traceEntry();
         if (!isValidIdentifier(id)) {
             return null;
         }
@@ -106,12 +116,15 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_GET, "Getting entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return query.get();
     }
 
     @Override
     public List<T> list() {
+        log.traceEntry();
         DBObject dbObj = addPrincipalClause(new BasicDBObject());
 
         if (dbObj == null) {
@@ -119,12 +132,15 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_GET, "Listing entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return query.asList();
     }
 
     @Override
     public List<T> queryNamed(String qname, Object... params) throws IOException {
+        log.traceEntry();
         DBObject dbObj = compileQuery(qname, params);
 
         dbObj = addPrincipalClause(dbObj);
@@ -134,7 +150,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_GET, "Querying entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return query.asList();
     }
 
@@ -145,6 +163,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     @Override
     public T get(String id, User context) {
+        log.traceEntry();
         if (context == null) {
             return super.get(id);
         }
@@ -160,12 +179,15 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_GET, "Getting entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return query.get();
     }
 
     @Override
     public boolean delete(String id, User context) {
+        log.traceEntry();
         if (context == null) {
             return super.delete(id);
         }
@@ -181,12 +203,15 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_DELETE, "Deleting entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return ds.delete(query).getN() > 0;
     }
 
     @Override
     public T update(String id, T entity, User context) {
+        log.traceEntry();
         if (context == null) {
             return super.update(id, entity);
         }
@@ -202,13 +227,16 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_UPDATE, "Updating entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
         ds.updateFirst(query, entity, false);
+        log.traceExit();
         return get(id);
     }
 
     @Override
     public List<T> list(User context) {
+        log.traceEntry();
         if (context == null) {
             return super.list();
         }
@@ -219,12 +247,15 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_GET, "Listing entity of type '{}'", this.entityType.toString());
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return query.asList();
     }
 
     @Override
     public List<T> queryNamed(String qname, User context, Object... params) throws IOException {
+        log.traceEntry();
         if (context == null) {
             return super.queryNamed(qname, params);
         }
@@ -237,7 +268,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
             // TODO log
         }
 
+        log.debug(REPO_GET, "Querying entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        log.traceExit();
         return query.asList();
     }
 }

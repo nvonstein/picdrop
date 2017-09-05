@@ -6,11 +6,13 @@
 package com.picdrop.repository.mongo;
 
 import com.mongodb.DBObject;
+import static com.picdrop.helper.LogHelper.*;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareAdvancedRepository;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateResults;
@@ -23,55 +25,68 @@ public class PrincipalAwareMorphiaAdvancedRepository<T> extends PrincipalAwareMo
 
     public PrincipalAwareMorphiaAdvancedRepository(Datastore ds, Class<T> entityType) {
         super(ds, entityType);
+        this.log = LogManager.getLogger();
     }
 
     @Override
     public int deleteNamed(String qname, User context, Object... params) throws IOException {
+        log.traceEntry();
         DBObject dbObj = compileQuery(qname, params);
 
         if (context != null) {
             dbObj = addPrincipalClause(dbObj, context);
         }
 
+        log.debug(REPO_DELETE, "Deleting entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
 
+        log.traceExit();
         return ds.delete(query).getN();
     }
 
     @Override
     public List<T> updateNamed(T entity, String qname, User context, Object... params) throws IOException {
+        log.traceEntry();
         DBObject dbObj = compileQuery(qname, params);
 
         if (context != null) {
             dbObj = addPrincipalClause(dbObj, context);
         }
 
+        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
 
         UpdateResults ur = ds.updateFirst(query, entity, false);
+        log.traceExit();
         return Arrays.asList();
     }
 
     @Override
     public int deleteNamed(String qname, Object... params) throws IOException {
+        log.traceEntry();
         DBObject dbObj = compileQuery(qname, params);
 
         dbObj = addPrincipalClause(dbObj);
 
+        log.debug(REPO_DELETE, "Deleting entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
 
+        log.traceExit();
         return ds.delete(query).getN();
     }
 
     @Override
     public List<T> updateNamed(T entity, String qname, Object... params) throws IOException {
+        log.traceEntry();
         DBObject dbObj = compileQuery(qname, params);
 
         dbObj = addPrincipalClause(dbObj);
 
+        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
 
         UpdateResults ur = ds.updateFirst(query, entity, false);
+        log.traceExit();
         return Arrays.asList();
     }
 
