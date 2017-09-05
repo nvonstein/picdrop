@@ -47,6 +47,7 @@ public class MorphiaAdvancedRepository<T> extends MorphiaRepository<T> implement
 
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
 
+        // TODO This must be changed if multi-update is desired on named queries
         UpdateResults ur = ds.updateFirst(query, entity, false);
 
         log.traceExit();
