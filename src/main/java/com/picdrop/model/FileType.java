@@ -48,7 +48,7 @@ public enum FileType {
         return "*".equals(type);
     }
     
-    private boolean isUnknown() {
+    public boolean isUnknown() {
         return this == FileType.UNKNOWN;
     }
 

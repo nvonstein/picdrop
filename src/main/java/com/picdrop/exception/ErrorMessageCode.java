@@ -27,7 +27,8 @@ public enum ErrorMessageCode {
     BAD_COMMENT("ec000014","Bad request: Invalid comment or unable to find/resolve a name."),
     ERROR_INTERNAL("ec000015","An internal server error occured. Please try again later."),
     BAD_JSON("ec000016","Bad Request: Invalid JSON"),
-    BAD_REQUEST("ec000017","Bad Request: Invalid request performed.");
+    BAD_REQUEST("ec000017","Bad Request: Invalid request performed."), 
+    BAD_UPLOAD_MIME("ec000018","Bad Request: Unprocessable mime type.");
 
     private String code;
     private String defaultMessage;

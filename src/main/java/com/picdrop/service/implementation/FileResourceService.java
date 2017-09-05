@@ -45,8 +45,12 @@ import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.security.authentication.Permission;
+import java.io.InputStream;
+import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.Tika;
+import org.apache.tika.metadata.Metadata;
 
 /**
  *
@@ -79,6 +83,9 @@ public class FileResourceService {
     InputStreamProviderFactory instProvFac;
 
     @Inject
+    Tika tika;
+
+    @Inject
     public FileResourceService(
             Repository<String, FileResource> repo,
             AwareRepository<String, Share, User> srepo,
@@ -96,12 +103,49 @@ public class FileResourceService {
         log.trace(SERVICE, "created with ({},{},{},{},{},{})", repo, srepo, cirepo, crepo, fileRepo, processors);
     }
 
+    public Tika getTika() {
+        return tika;
+    }
+
+    public void setTika(Tika tika) {
+        this.tika = tika;
+    }
+
     protected List<FileItem> parseRequest(HttpServletRequest request) throws FileUploadException {
         List<FileItem> files = null;
 
         files = upload.parseRequest(request);
 
         return files;
+    }
+
+    protected FileType parseMimeType(FileItem file) throws ApplicationException, IOException {
+        FileType mime = FileType.forName(file.getContentType());
+
+        if (mime.isUnknown()) {
+            throw new ApplicationException()
+                    .status(400)
+                    .devMessage(String.format("Invalid mime type detected '%s'", file.getContentType()))
+                    .code(ErrorMessageCode.BAD_UPLOAD_MIME);
+        }
+
+        Metadata mdata = new Metadata();
+        InputStream in = file.getInputStream();
+        String tikaMime = null;
+        try {
+            tikaMime = tika.detect(in, mdata);
+        } finally {
+            in.close();
+        }
+
+        log.debug(SERVICE, "Mime types resolved. HTTP Header: '{}' Tika: '{}'", file.getContentType(), tikaMime);
+        if (!FileType.forName(tikaMime).isCovering(mime)) {
+            throw new ApplicationException()
+                    .status(400)
+                    .devMessage(String.format("Mime type mismatch, expected: '%s' detected: '%s'", file.getContentType(), tikaMime))
+                    .code(ErrorMessageCode.BAD_UPLOAD_MIME);
+        }
+        return mime;
     }
 
     protected FileResource processCreateUpdate(FileResource e, FileItem file) throws ApplicationException {
@@ -290,14 +334,22 @@ public class FileResourceService {
         for (FileItem file : files) {
             if (!file.isFormField()) {
                 FileResource r = new FileResource();
-                r.setName(file.getName()); // TODO get extension
+                r.setName(file.getName());
                 r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
 
-                String mime = file.getContentType(); // TODO do content guess and dont trust client
+                try {
+                    log.debug(SERVICE, "Validating mime type");
+                    FileType mime = parseMimeType(file);
 
-                r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
+                    r.setDescriptor(ResourceDescriptor.get(mime));
 
-                res.add(processCreateUpdate(r, file));
+                    res.add(processCreateUpdate(r, file));
+                } catch (IOException ex) {
+                    throw new ApplicationException(ex)
+                            .status(500)
+                            .devMessage(ex.getMessage())
+                            .code(ErrorMessageCode.ERROR_INTERNAL);
+                }
             }
         }
         log.info(SERVICE, "FileResource created");
