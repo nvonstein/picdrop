@@ -75,6 +75,8 @@ public abstract class EnvHelper {
 
         p.put("service.json.view", "public");
 
+        p.put("service.tika.config", "");
+
         return p;
     }
 
