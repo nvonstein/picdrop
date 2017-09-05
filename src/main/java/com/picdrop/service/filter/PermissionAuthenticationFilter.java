@@ -13,6 +13,7 @@ import com.picdrop.model.user.User;
 import com.picdrop.security.authentication.Permission;
 import com.picdrop.security.authentication.PermissionResolver;
 import com.picdrop.security.authentication.authenticator.Authenticator;
+import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -60,10 +61,11 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
         log.traceEntry();
 
         try {
+            log.debug(FILTER, "Resolving service method");
             ResourceMethodInvoker methodInvoker = getMethodInvoker(crc);
 
             if (methodInvoker == null) {
-                log.error("Error on authentication, unable to resolve method invoker entity.");
+                log.error(FILTER, "Error on authentication, unable to resolve method invoker entity.");
                 crc.abortWith(Response.serverError().build());
                 return;
             }
@@ -79,9 +81,10 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
             if (rctx.hasPrincipal()) {
                 user = rctx.getPrincipal();
             } else {
+                log.debug(FILTER, "Authenticating User");
                 user = authenticator.authenticate(request);
                 if (user == null) {
-                    log.debug("Unable to authenticate a user.");
+                    log.debug(FILTER, "Unable to authenticate a user.");
                     crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
                     return;
                 }
@@ -103,13 +106,14 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
 
             String action = getAction(classAnnotation, methodAnnotation);
             String req = parsePermissionString(crc.getUriInfo().getPath(), action);
+            log.debug(FILTER, "Checking required permission {}", req);
             if (!resolvePermission(req, user.getPermissions())) {
-                log.debug("User not authorized. Required permission: {}", req);
+                log.debug(FILTER, "User not authorized. Required permission: {}", req);
                 crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
                 return;
             }
         } catch (Exception e) {
-            log.error("Error on authentication.", e);
+            log.error(FILTER, "Error on authentication.", e);
             crc.abortWith(Response.serverError().build());
             return;
         }

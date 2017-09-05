@@ -6,6 +6,7 @@
 package com.picdrop.service.filter;
 
 import com.google.inject.Inject;
+import static com.picdrop.helper.LogHelper.*;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.ResourceReference;
@@ -21,6 +22,8 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -42,6 +45,8 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
     @Inject
     com.google.inject.Provider<RequestContext> context;
 
+    Logger log = LogManager.getLogger(this.getClass());
+
     public ShareRewriteFilter() {
         this.pattern = Pattern.compile(regex);
     }
@@ -51,8 +56,10 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
         URI uri = requestContext.getUriInfo().getRequestUri();
         String path = uri.getPath();
 
+        log.debug(FILTER, "Checking request path match");
         Matcher mtch = this.pattern.matcher(path);
         if (mtch.matches()) {
+            log.debug(FILTER, "Matching request detected");
             String shareId = mtch.group(2);
 
             Share s = srepo.get(shareId, null);
@@ -61,15 +68,17 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
                 return;
             }
 
+            log.debug(FILTER, "Matching resource uri");
             ResourceReference r = s.getResource();
             if (!r.toResourceString().equals(mtch.group(3))) {
                 requestContext.abortWith(Response.status(Response.Status.NOT_FOUND).build());
                 return;
             }
 
+            log.debug(FILTER, "Generating delegate with permissions");
             RequestContext rctx = context.get();
             RegisteredUserDelegate delegate = new RegisteredUserDelegate(s.getOwner(false));
-            
+
             if (s.isAllowComment()) {
                 delegate.addPermission(String.format("/collections/%s/*/comment", r.getId()));
             }
@@ -77,12 +86,13 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
                 delegate.addPermission(String.format("/collections/%s/*/rate", r.getId()));
             }
             delegate.addPermission(String.format("%s/*/read", r.toResourceString()));
-            
+
             rctx.setPrincipal(delegate);
 
             // Rewrite route
-            path = path.replace(mtch.group(1), "");
-            uri = URI.create(path);
+            String newpath = path.replace(mtch.group(1), "");
+            log.debug(FILTER, "Rewriting route from '{}' to '{}'", path, newpath);
+            uri = URI.create(newpath);
             requestContext.setRequestUri(uri);
         }
 
