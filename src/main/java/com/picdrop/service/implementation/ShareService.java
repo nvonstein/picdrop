@@ -79,7 +79,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
 
-        Share s = this.get(id);
+        Share s = this.getAware(id);
 
         log.debug(SERVICE, "Performing object merge");
         try {
@@ -115,25 +115,40 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         return s;
     }
 
+    protected Share getAware(String id) throws ApplicationException {
+        Share s = this.repo.get(id);
+        if (s == null) {
+            throw new ApplicationException()
+                    .status(404)
+                    .code(ErrorMessageCode.NOT_FOUND)
+                    .devMessage(String.format("Object with id '%s' not found", id));
+        }
+        return s;
+    }
+
     @DELETE
     @Path("/{id}")
     @Permission("write")
     @Override
     public void delete(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
-        Share s = this.get(id);
+        Share s = this.getAware(id);
 
         repo.delete(id);
 
         log.debug(SERVICE, "Deleting share reference on resources");
         Resource r = s.getResource(false);
-        r.deleteShare(s);
-        if (r.isCollection()) {
-            this.crepo.update(r.getId(), (Collection) r);
-        }
+        if (r != null) {
+            r.deleteShare(s);
+            if (r.isCollection()) {
+                this.crepo.update(r.getId(), (Collection) r);
+            }
 
-        if (r.isFileResource()) {
-            this.frepo.update(r.getId(), (FileResource) r);
+            if (r.isFileResource()) {
+                this.frepo.update(r.getId(), (FileResource) r);
+            }
+        } else {
+            log.warn(SERVICE, "Share without resolvable resource detected. Id: '{}'", s.getResource().toResourceString());
         }
         log.info(SERVICE, "Share deleted");
         log.traceExit();
