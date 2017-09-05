@@ -22,6 +22,7 @@ import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Permission;
 import com.picdrop.service.CrudService;
+import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         this.fRepo = fRepo;
         this.sRepo = sRepo;
 
-        log.trace("created with ({},{},{})", ciRepo, fRepo, sRepo);
+        log.trace(SERVICE, "created with ({},{},{})", ciRepo, fRepo, sRepo);
     }
 
     private boolean verifyName(NameOnlyUserReference entity) throws ApplicationException {
@@ -91,6 +92,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         }
         Collection c = this.get(id);
 
+        log.debug(SERVICE, "Performing object merge");
         try {
             c = c.merge(entity);
         } catch (IOException ex) {
@@ -100,8 +102,10 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .devMessage(ex.getMessage());
         }
 
+        c = super.update(id, c);
+        log.info(SERVICE, "Collection updated");
         log.traceExit();
-        return super.update(id, c);
+        return c;
     }
 
     @GET
@@ -117,6 +121,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
+        log.info(SERVICE, "Collection found");
         log.traceExit(c);
         return c;
     }
@@ -129,16 +134,18 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id);
         Collection c = this.get(id);
 
+        log.debug(SERVICE, "Deleting shares of collection");
         for (ShareReference sref : c.getShares()) {
             sRepo.delete(sref.getId());
         }
 
+        log.debug(SERVICE, "Deleting collection items of collection");
         for (Collection.CollectionItemReference ciref : c.getItems()) {
             ciRepo.delete(ciref.getId());
         }
 
         repo.delete(id);
-
+        log.info(SERVICE, "Collection deleted");
         log.traceExit();
     }
 
@@ -160,7 +167,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
-        
+
         RegisteredUser user = context.get().getPrincipal().to(RegisteredUser.class);
 
         entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
@@ -173,6 +180,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         if ((entity.getItems() != null) && !entity.getItems().isEmpty()) {
 
             // Validity check of CollectionItem (to reject invalid requests faster)
+            log.debug(SERVICE, "Checking validity of collection items");
             for (Collection.CollectionItemReference ci : entity.getItems()) {
                 if ((ci.getResource() == null) || Strings.isNullOrEmpty(ci.getResource().getId())) {
                     throw new ApplicationException()
@@ -183,6 +191,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
             }
 
             // Existence check of Resource
+            log.debug(SERVICE, "Checking existence of collection item's resource reference");
             List<Collection.CollectionItem> items = new ArrayList<>();
             for (Collection.CollectionItemReference ciref : entity.getItems()) {
 
@@ -211,7 +220,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         } else {
             entity = super.create(entity);
         }
-
+        log.info(SERVICE, "Collection created");
         log.traceExit(entity);
         return entity;
     }
@@ -239,7 +248,9 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
         for (Collection.CollectionItemReference ciref : c.getItems()) {
             if (ciref.getId().equals(eid)) {
-                return log.traceExit(ciref.resolve(false));
+                log.info(SERVICE, "CollectionItem found");
+                log.traceExit();
+                return ciref.resolve(false);
             }
         }
 
@@ -259,9 +270,11 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         for (Collection.CollectionItemReference ciref : c.getItems()) {
             if (ciref.getId().equals(eid)) {
                 ciRepo.delete(ciref.getId());
+                log.debug(SERVICE, "Removing collection item from collection");
                 c = c.removeItem(ciref);
 
                 repo.update(c.getId(), c);
+                log.info(SERVICE, "CollectionItem deleted");
                 log.traceExit();
                 return;
             }
@@ -280,6 +293,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id, entity);
         Collection c = this.get(id);
 
+        log.debug(SERVICE, "Validating collection item's attributes");
         FileResourceReference frref = entity.getResource();
         if ((frref == null) || Strings.isNullOrEmpty(frref.getId())) {
             throw new ApplicationException()
@@ -295,17 +309,18 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .code(ErrorMessageCode.BAD_CITEM_NOT_FOUND)
                     .devMessage(String.format("Collection item's resource not found for id '%s'", entity.getResource().getId()));
         }
-        
+
         entity.setResource(fr);
         entity.setOwner(context.get().getPrincipal().to(RegisteredUser.class));
         entity = ciRepo.save(entity);
 
+        log.debug(SERVICE, "Adding collection item to collection");
         c = c.addItem(entity);
 
-        // TODO validate update?
         repo.update(c.getId(), c);
 
-        log.traceExit(entity);
+        log.info(SERVICE, "CollectionItem created");
+        log.traceExit();
         return entity;
     }
 
@@ -318,6 +333,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id, eid, entity);
         Collection.CollectionItem ci = this.getElement(id, eid);
 
+        log.debug(SERVICE, "Validating comment's attributes");
         if (Strings.isNullOrEmpty(entity.getName())) {
             User user = this.context.get().getPrincipal();
 
@@ -341,11 +357,11 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         ci.addComment(entity);
 
         ci = this.ciRepo.update(ci.getId(), ci);
-        log.traceExit(ci);
+        log.info(SERVICE, "Comment created");
+        log.traceExit();
         return ci;
     }
-    
-    
+
     @POST
     @Permission("rate")
     @Path("/{id}/elements/{eid}/ratings")
@@ -355,6 +371,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id, eid, entity);
         Collection.CollectionItem ci = this.getElement(id, eid);
 
+        log.debug(SERVICE, "Validating rating's attributes");
         if (Strings.isNullOrEmpty(entity.getName())) {
             User user = this.context.get().getPrincipal();
 
@@ -378,7 +395,8 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         ci.addRating(entity);
 
         ci = this.ciRepo.update(ci.getId(), ci);
-        log.traceExit(ci);
+        log.info(SERVICE, "Rating created");
+        log.traceExit();
         return ci;
     }
 

@@ -20,6 +20,7 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.Repository;
+import static com.picdrop.helper.LogHelper.*;
 import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -70,7 +71,7 @@ public class RegisteredUserService {
         this.crepo = crepo;
         this.cirepo = cirepo;
         this.srepo = srepo;
-        log.trace("created with ({},{},{},{},{},{})", repo, tsrepo, frepo, crepo, cirepo, srepo);
+        log.trace(SERVICE, "created with ({},{},{},{},{},{})", repo, tsrepo, frepo, crepo, cirepo, srepo);
     }
 
     @Inject
@@ -87,7 +88,7 @@ public class RegisteredUserService {
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
-
+        log.debug(SERVICE, "Validating user attributes");
         if (Strings.isNullOrEmpty(entity.getPhash())) {
             throw new ApplicationException()
                     .code(ErrorMessageCode.BAD_PHASH)
@@ -106,15 +107,18 @@ public class RegisteredUserService {
             entity.setName("PicdropUser");
         }
 
-        return log.traceExit(repo.save(entity));
+        entity = repo.save(entity);
+
+        log.debug(SERVICE, "Validating user attributes");
+        log.traceExit();
+        return entity;
     }
 
     @GET
     @Path("/me")
     @Permission("read")
     public User getMe() {
-        log.traceEntry();
-        return log.traceExit(contextProv.get().getPrincipal());
+        return contextProv.get().getPrincipal();
     }
 
     @DELETE
@@ -125,6 +129,7 @@ public class RegisteredUserService {
         User me = contextProv.get().getPrincipal();
         if (me != null) {
             repo.delete(me.getId());
+            log.debug(SERVICE, "Deleting all owned resources");
             try {
                 tsrepo.deleteNamed("with.owner", me.getId());
                 cirepo.deleteNamed("with.owner", me.getId());
@@ -132,9 +137,10 @@ public class RegisteredUserService {
                 frepo.deleteNamed("with.owner", me.getId()); // TODO remove files
                 srepo.deleteNamed("with.owner", me.getId());
             } catch (IOException ex) {
-                log.warn("Error during invalidation of existing tokens", ex);
+                log.warn("Error during removal of owned resources and tokens", ex);
             }
         }
+        log.info(SERVICE, "User deleted");
         log.traceExit();
     }
 
@@ -150,6 +156,8 @@ public class RegisteredUserService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage("No principal set");
         }
+
+        log.debug(SERVICE, "Performing object merge");
         try {
             me = me.merge(entity);
         } catch (IOException ex) {
@@ -158,7 +166,11 @@ public class RegisteredUserService {
                     .code(ErrorMessageCode.ERROR_OBJ_MERGE)
                     .devMessage(ex.getMessage());
         }
-        return log.traceExit(repo.update(me.getId(), me));
+        me = repo.update(me.getId(), me);
+
+        log.info(SERVICE, "User updated");
+        log.traceExit();
+        return me;
     }
 
 }

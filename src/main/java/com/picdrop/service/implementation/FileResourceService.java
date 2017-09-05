@@ -15,6 +15,7 @@ import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.resource.FileResource;
+import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,28 +56,28 @@ import org.apache.logging.log4j.Logger;
 @Consumes("application/json")
 @Produces("application/json")
 public class FileResourceService {
-    
+
     Logger log = LogManager.getLogger(this.getClass());
-    
+
     Repository<String, FileResource> repo;
     AwareRepository<String, Share, User> srepo;
     Repository<String, Collection.CollectionItem> cirepo;
     Repository<String, Collection> crepo;
-    
+
     FileRepository<String> fileRepo;
     List<Processor<FileResource>> processors;
-    
+
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
-    
+
     @Inject
     ServletFileUpload upload;
-    
+
     @Inject
     Provider<RequestContext> contextProv;
-    
+
     @Inject
     InputStreamProviderFactory instProvFac;
-    
+
     @Inject
     public FileResourceService(
             Repository<String, FileResource> repo,
@@ -89,25 +90,26 @@ public class FileResourceService {
         this.srepo = srepo;
         this.cirepo = cirepo;
         this.crepo = crepo;
-        
+
         this.fileRepo = fileRepo;
         this.processors = processors;
-        log.trace("created with ({},{},{},{},{},{})", repo, srepo, cirepo, crepo, fileRepo, processors);
+        log.trace(SERVICE, "created with ({},{},{},{},{},{})", repo, srepo, cirepo, crepo, fileRepo, processors);
     }
-    
+
     protected List<FileItem> parseRequest(HttpServletRequest request) throws FileUploadException {
         List<FileItem> files = null;
-        
+
         files = upload.parseRequest(request);
-        
+
         return files;
     }
-    
+
     protected FileResource processCreateUpdate(FileResource e, FileItem file) throws ApplicationException {
         log.entry(e);
         FileResource loce = e;
         String fileId;
         // Pre store
+        log.debug(SERVICE, "Pre-Store: Processing file");
         InputStreamProvider isp = instProvFac.create(file);
         try {
             for (Processor<FileResource> p : processors) {
@@ -137,6 +139,7 @@ public class FileResourceService {
         }
 
         // Post store
+        log.debug(SERVICE, "Post-Store: Processing file");
         isp = instProvFac.create(loce);
         try {
             for (Processor<FileResource> p : processors) {
@@ -148,16 +151,17 @@ public class FileResourceService {
                     .code(ErrorMessageCode.ERROR_UPLOAD)
                     .devMessage("Error while post-store phase: " + ex.getMessage());
         }
-        
+
         log.traceExit(loce);
         return loce;
     }
-    
+
     protected void processDelete(FileResource e) throws ApplicationException {
         log.entry(e);
         boolean res = false;
 
         // Delete citems referring this res
+        log.debug(SERVICE, "Pre-Delete: Retrieving collection items");
         List<Collection.CollectionItem> cis;
         try {
             cis = this.cirepo.queryNamed("citems.with.resource", e.getId());
@@ -167,6 +171,7 @@ public class FileResourceService {
                     .status(500)
                     .devMessage("Error while querying citems: " + ex.getMessage());
         }
+        log.debug(SERVICE, "Pre-Delete: Deleting collection items");
         for (Collection.CollectionItem ci : cis) {
             this.cirepo.delete(ci.getId());
             Collection c = ci.getParentCollection().resolve(false);
@@ -175,12 +180,14 @@ public class FileResourceService {
         }
 
         // Deleting Shares referring this res
+        log.debug(SERVICE, "Pre-Delete: Deleting shares");
         for (ShareReference sref : e.getShares()) {
             this.srepo.delete(sref.getId());
         }
         e.setShares(new ArrayList<>());
 
         // Pre process
+        log.debug(SERVICE, "Pre-Delete: Processing file");
         try {
             for (Processor<FileResource> p : processors) {
                 p.onPreDelete(e);
@@ -222,6 +229,7 @@ public class FileResourceService {
         }
 
         // Post process
+        log.debug(SERVICE, "Post-Delete: Processing file");
         try {
             for (Processor<FileResource> p : processors) {
                 p.onPostDelete(e);
@@ -234,7 +242,7 @@ public class FileResourceService {
         }
         log.traceExit();
     }
-    
+
     @GET
     @Path("/{id}")
     @Permission("read")
@@ -247,18 +255,18 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
+        log.info(SERVICE, "FileResource found");
         log.traceExit(fr);
         return fr;
     }
-    
+
     @GET
     @Path("/")
     @Permission("read")
     public List<FileResource> listResource() {
-        log.traceEntry();
-        return log.traceExit(this.repo.list());
+        return this.repo.list();
     }
-    
+
     @POST
     @Path("/")
     @Permission("write")
@@ -267,7 +275,8 @@ public class FileResourceService {
         log.traceEntry();
         List<FileResource> res = new ArrayList<>();
         List<FileItem> files;
-        
+
+        log.debug(SERVICE, "Parsing multipart request");
         try {
             files = parseRequest(request);
         } catch (FileUploadException ex) {
@@ -276,24 +285,26 @@ public class FileResourceService {
                     .devMessage(ex.getMessage())
                     .code(ErrorMessageCode.BAD_UPLOAD);
         }
-        
+
+        log.debug(SERVICE, "Processing file items");
         for (FileItem file : files) {
             if (!file.isFormField()) {
                 FileResource r = new FileResource();
                 r.setName(file.getName()); // TODO get extension
                 r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
-                
+
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
                 r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
-                
+
                 res.add(processCreateUpdate(r, file));
             }
         }
+        log.info(SERVICE, "FileResource created");
         log.traceExit(res);
         return res;
     }
-    
+
     @PUT
     @Path("/{id}")
     @Permission("write")
@@ -306,7 +317,7 @@ public class FileResourceService {
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
-        
+
         FileResource r = getResource(id);
         if (r == null) {
             throw new ApplicationException()
@@ -314,7 +325,8 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-        
+
+        log.debug(SERVICE, "Performing object merge");
         try {
             r = r.merge(entity);
         } catch (IOException ex) {
@@ -323,9 +335,10 @@ public class FileResourceService {
                     .code(ErrorMessageCode.ERROR_OBJ_MERGE)
                     .devMessage(ex.getMessage());
         }
+        log.info(SERVICE, "FileResource updated");
         return log.traceExit(repo.update(id, r));
     }
-    
+
     @PUT
     @Path("/{id}")
     @Permission("write")
@@ -340,7 +353,8 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-        
+
+        log.debug(SERVICE, "Parsing multipart request");
         try {
             files = parseRequest(request);
         } catch (FileUploadException ex) {
@@ -349,21 +363,23 @@ public class FileResourceService {
                     .devMessage(ex.getMessage())
                     .code(ErrorMessageCode.BAD_UPLOAD);
         }
-        
+
+        log.debug(SERVICE, "Processing file items");
         for (FileItem file : files) {
             if (!file.isFormField()) {
                 String mime = file.getContentType(); // TODO do content guess and dont trust client
 
                 r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
-                
+
                 r = processCreateUpdate(r, file);
             }
         }
-        
+
+        log.info(SERVICE, "FileResource updated");
         log.traceExit(r);
         return r;
     }
-    
+
     @DELETE
     @Permission("write")
     @Path("/{id}")
@@ -378,6 +394,7 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
+        log.info(SERVICE, "FileResource deleted");
         log.traceExit();
     }
 }

@@ -12,17 +12,15 @@ import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.Collection;
-import com.picdrop.model.resource.Collection.Rating;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.Resource;
-import com.picdrop.model.resource.ResourceReference;
-import com.picdrop.model.user.NameOnlyUserReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Permission;
 import com.picdrop.service.CrudService;
+import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -36,7 +34,6 @@ import javax.ws.rs.Produces;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 /**
  *
@@ -67,7 +64,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         this.frepo = frepo;
         this.cirepo = cirepo;
 
-        log.trace("created with ({},{},{},{})", repo, crepo, cirepo, frepo);
+        log.trace(SERVICE, "created with ({},{},{},{})", repo, crepo, cirepo, frepo);
     }
 
     @PUT
@@ -82,13 +79,9 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
 
-        Share s = super.get(id);
-        if (s == null) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", id));
-        }
+        Share s = this.get(id);
+
+        log.debug(SERVICE, "Performing object merge");
         try {
             s = s.merge(entity);
         } catch (IOException ex) {
@@ -97,7 +90,12 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .code(ErrorMessageCode.ERROR_OBJ_MERGE)
                     .devMessage(ex.getMessage());
         }
-        return log.traceExit(super.update(id, s));
+
+        s = super.update(id, s);
+
+        log.info(SERVICE, "Share updated");
+        log.traceExit();
+        return s;
     }
 
     @GET
@@ -112,6 +110,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
+        log.info(SERVICE, "Share found");
         log.traceExit(s);
         return s;
     }
@@ -122,16 +121,11 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     @Override
     public void delete(@PathParam("id") String id) throws ApplicationException {
         log.entry(id);
-        Share s = super.get(id);
-        if (s == null) {
-            throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.NOT_FOUND)
-                    .devMessage(String.format("Object with id '%s' not found", id));
-        }
+        Share s = this.get(id);
 
         repo.delete(id);
 
+        log.debug(SERVICE, "Deleting share reference on resources");
         Resource r = s.getResource(false);
         r.deleteShare(s);
         if (r.isCollection()) {
@@ -141,6 +135,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         if (r.isFileResource()) {
             this.frepo.update(r.getId(), (FileResource) r);
         }
+        log.info(SERVICE, "Share deleted");
         log.traceExit();
     }
 
@@ -148,8 +143,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
     @Permission("read")
     @Override
     public List<Share> list() throws ApplicationException {
-        log.traceEntry();
-        return log.traceExit(super.list());
+        return super.list();
     }
 
     @POST
@@ -166,6 +160,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         entity.setCreated(DateTime.now().getMillis());
         entity.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
 
+        log.debug(SERVICE, "Validating share's attributes");
         if (entity.getResource() == null) {
             throw new ApplicationException()
                     .status(400)
@@ -184,15 +179,20 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
         // TODO generate uri
         Share s = super.create(entity);
 
+        log.debug(SERVICE, "Adding share reference to resource");
         r = r.addShare(s);
 
         if (r.isCollection()) {
             this.crepo.update(r.getId(), (Collection) r);
+            log.info(SERVICE, "Share created");
+            log.traceExit();
             return s;
         }
 
         if (r.isFileResource()) {
             this.frepo.update(r.getId(), (FileResource) r);
+            log.info(SERVICE, "Share updated");
+            log.traceExit();
             return s;
         }
 

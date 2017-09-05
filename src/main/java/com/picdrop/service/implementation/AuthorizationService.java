@@ -22,6 +22,7 @@ import com.picdrop.security.authentication.Permission;
 import com.picdrop.security.authentication.authenticator.Authenticator;
 import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
+import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -32,6 +33,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -41,6 +44,8 @@ import org.joda.time.DateTimeZone;
  */
 @Path("/app")
 public class AuthorizationService {
+
+    Logger log = LogManager.getLogger();
 
     Repository<String, RegisteredUser> userRepo;
     Repository<String, TokenSet> tsRepo;
@@ -135,24 +140,31 @@ public class AuthorizationService {
     public Response loginUser(@Context HttpServletRequest request,
             @QueryParam("nonce") String nonce,
             @QueryParam("name") String name) throws ApplicationException { // TODO make redirect target injectable
+        log.traceEntry();
+
         RegisteredUser user = basicAuthenticator.authenticate(request);
         if (user == null) {
             throw new ApplicationException()
                     .status(403);
         }
-        
+        log.debug(SERVICE, "User successfully authenticated by credentials");
+
         if (Strings.isNullOrEmpty(name)) {
             name = request.getHeader("user-agent");
         }
 
+        log.debug(SERVICE, "Generating tokens");
         TokenSet.JsonWrapper tokens = generateTokens(user, nonce, name);
 
         user.setLastLogin();
         userRepo.update(user.getId(), user);
 
+        log.debug(SERVICE, "Generating cookies");
         NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
         NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
 
+        log.info(SERVICE, "User logged in");
+        log.traceExit();
         return Response
                 .ok(tokens, MediaType.APPLICATION_JSON)
                 .cookie(authC, refreshC)
@@ -163,23 +175,30 @@ public class AuthorizationService {
     @Path("/refresh")
     public Response refreshToken(@Context HttpServletRequest request,
             @QueryParam("nonce") String nonce) throws ApplicationException {
+        log.traceEntry();
         RegisteredUser user = refreshAuthenticator.authenticate(request);
         if (user == null) {
             throw new ApplicationException()
                     .status(403);
         }
+        log.debug(SERVICE, "User successfully authenticated by refresh token");
 
+        log.debug(SERVICE, "Deleting old tokens");
         TokenSet ts = user.getActiveToken();
         tsRepo.delete(ts.getId());
 
+        log.debug(SERVICE, "Generating tokens");
         TokenSet.JsonWrapper tokens = generateTokens(user, nonce, ts.getName());
 
         user.setLastLogin();
         userRepo.update(user.getId(), user);
 
+        log.debug(SERVICE, "Generating cookies");
         NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
         NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
 
+        log.info(SERVICE, "User token's refreshed");
+        log.traceExit();
         return Response
                 .ok(tokens, MediaType.APPLICATION_JSON)
                 .cookie(authC, refreshC)
@@ -190,21 +209,25 @@ public class AuthorizationService {
     @Path("/logout")
     @Permission("*/logout")
     public Response logoutUser() { // TODO rework login/logout
+        log.traceEntry();
         User user = contextProv.get().getPrincipal();
         if (user == null) {
             return Response.ok().build();
         }
 
+        log.debug(SERVICE, "Deleting tokens");
         RegisteredUser ru = user.to(RegisteredUser.class);
         tsRepo.delete(ru.getActiveToken().getId());
 
-        // generate kill cookie
+        log.debug(SERVICE, "Generating kill cookies");
         NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, "").get();
         NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, "").get();
 
         NewCookie killcookie1 = new NewCookie(authC, authC.getComment(), 0, authC.isSecure());
         NewCookie killcookie2 = new NewCookie(refreshC, refreshC.getComment(), 0, refreshC.isSecure());
 
+        log.info(SERVICE, "User logged out");
+        log.traceExit();
         return Response.ok()
                 .cookie(killcookie1, killcookie2)
                 .build();
