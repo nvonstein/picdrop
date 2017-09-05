@@ -8,19 +8,13 @@
         </Console>
         <File name="file.log.main" fileName="${sys:catalina.base}/logs/picdrop.main.out" append="false">
             <PatternLayout alwaysWriteExceptions="false">
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%level [%t] %c{-5}} - %msg%replace{%n%ex{7}%n}{[\r\n]+$}{}%n</pattern>
-            </PatternLayout>
-        </File>
-        <File name="file.log.main.throwable" fileName="${sys:catalina.base}/logs/picdrop.main.out" append="false">
-            <PatternLayout>
-                <pattern>%xEx{7}%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%level [%t] %c{-5} %L} - %msg%replace{%n%ex{7}%n}{[\r\n]+$}{}%n</pattern>
             </PatternLayout>
         </File>
     </Appenders>
     <Loggers>
         <Logger name="com.picdrop" level="debug" additivity="false">
             <appender-ref ref="file.log.main" level="debug"/>
-            <!--<appender-ref ref="file.log.main.throwable" level="debug"/>-->
         </Logger>
         <Root level="trace">
             <appender-ref ref="stdout" level="error"/>
