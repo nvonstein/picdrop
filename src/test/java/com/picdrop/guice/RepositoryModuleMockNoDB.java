@@ -6,16 +6,19 @@
 package com.picdrop.guice;
 
 import com.google.inject.Binder;
-import com.google.inject.TypeLiteral;
 import com.picdrop.model.Share;
+import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
-import com.picdrop.model.resource.CollectionReference;
 import com.picdrop.model.resource.FileResource;
+import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
-import com.picdrop.repository.AwareRepository;
-import com.picdrop.repository.Repository;
-import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
+import com.picdrop.repository.AdvancedRepository;
+import com.picdrop.repository.AwareAdvancedRepository;
+import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
+import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import javax.enterprise.util.TypeLiteral;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 import org.mongodb.morphia.Datastore;
 
 /**
@@ -24,16 +27,26 @@ import org.mongodb.morphia.Datastore;
  */
 public class RepositoryModuleMockNoDB extends RepositoryModule {
 
-    protected Repository<String, FileResource> resRepo;
-    protected Repository<String, Collection> cRepo;
-    protected Repository<String, Collection.CollectionItem> ciRepo;
-    protected AwareRepository<String, Share, User> shareRepo;
+    protected AdvancedRepository<String, TokenSet> tsrepo;
+    protected AdvancedRepository<String, Collection.CollectionItem> cirepo;
+    protected AwareAdvancedRepository<String, Collection, User> crepo;
+    protected AwareAdvancedRepository<String, FileResource, User> rrepo;
+    protected AwareAdvancedRepository<String, Share, User> srepo;
+    protected AdvancedRepository<String, RegisteredUser> urepo;
 
-    private RepositoryModuleMockNoDB() {
-    }
-
-    public RepositoryModuleMockNoDB(Repository<String, FileResource> resRepo) {
-        this.resRepo = resRepo;
+    public RepositoryModuleMockNoDB() {
+        this.tsrepo = mock(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
+        }.getRawType());
+        this.cirepo = mock(new TypeLiteral<AdvancedRepository<String, Collection.CollectionItem>>() {
+        }.getRawType());
+        this.crepo = mock(new TypeLiteral<AwareAdvancedRepository<String, Collection, User>>() {
+        }.getRawType());
+        this.rrepo = mock(new TypeLiteral<AwareAdvancedRepository<String, FileResource, User>>() {
+        }.getRawType());
+        this.srepo = mock(new TypeLiteral<AwareAdvancedRepository<String, Share, User>>() {
+        }.getRawType());
+        this.urepo = mock(new TypeLiteral<AdvancedRepository<String, RegisteredUser>>() {
+        }.getRawType());
     }
 
     @Override
@@ -43,92 +56,81 @@ public class RepositoryModuleMockNoDB extends RepositoryModule {
     }
 
     @Override
-    protected void bindResourceRepo(Binder binder, Datastore ds) {
-        if (this.resRepo != null) {
-            binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
-            }).toInstance(this.resRepo);
-        } else {
-            super.bindResourceRepo(binder, ds);
-        }
+    protected AdvancedRepository<String, RegisteredUser> createRegisteredUserRepo(Datastore ds) {
+        return this.urepo;
     }
 
     @Override
-    protected void bindShareRepo(Binder binder, Datastore ds) {
-        if (this.shareRepo != null) {
-            binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
-            }).toInstance(this.shareRepo);
-            binder.bind(new TypeLiteral<Repository<String, Share>>() {
-            }).toInstance(this.shareRepo);
-        } else {
-            super.bindShareRepo(binder, ds);
-        }
+    protected AwareAdvancedRepository<String, Share, User> createShareRepo(Datastore ds) {
+        return this.srepo;
     }
 
     @Override
-    protected void bindCollectionsRepo(Binder binder, Datastore ds) {
-        if (this.cRepo != null) {
-            binder.bind(new TypeLiteral<Repository<String, Collection>>() {
-            }).toInstance(this.cRepo);
-        } else {
-            super.bindCollectionsRepo(binder, ds);
-        }
+    protected AwareAdvancedRepository<String, FileResource, User> createResourceRepo(Datastore ds) {
+        return this.rrepo;
     }
 
     @Override
-    protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
-        if (this.ciRepo != null) {
-            binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
-            }).toInstance(this.ciRepo);
-        } else {
-            super.bindCollectionItemRepo(binder, ds);
-        }
+    protected AwareAdvancedRepository<String, Collection, User> createCollectionRepo(Datastore ds) {
+        return this.crepo;
     }
 
-    public static RepositoryModuleBuilder builder() {
-        return new RepositoryModuleBuilder();
+    @Override
+    protected AdvancedRepository<String, Collection.CollectionItem> createCollectionItemRepo(Datastore ds) {
+        return this.cirepo;
     }
 
-    public static class RepositoryModuleBuilder {
+    @Override
+    protected AdvancedRepository<String, TokenSet> createTokenSetRepo(Datastore ds) {
+        return this.tsrepo;
+    }
 
-        protected Repository<String, FileResource> resRepo;
-        protected Repository<String, Collection> cRepo;
-        protected Repository<String, Collection.CollectionItem> ciRepo;
-        protected AwareRepository<String, Share, User> shareRepo;
+    public AdvancedRepository<String, TokenSet> getTsrepo() {
+        return tsrepo;
+    }
 
-        private RepositoryModuleBuilder() {
+    public AdvancedRepository<String, Collection.CollectionItem> getCirepo() {
+        return cirepo;
+    }
 
-        }
+    public AwareAdvancedRepository<String, Collection, User> getCrepo() {
+        return crepo;
+    }
 
-        public RepositoryModuleMockNoDB build() {
-            RepositoryModuleMockNoDB module = new RepositoryModuleMockNoDB();
+    public AwareAdvancedRepository<String, FileResource, User> getRrepo() {
+        return rrepo;
+    }
 
-            module.resRepo = this.resRepo;
-            module.shareRepo = this.shareRepo;
-            module.cRepo = this.cRepo;
-            module.ciRepo = this.ciRepo;
+    public AwareAdvancedRepository<String, Share, User> getSrepo() {
+        return srepo;
+    }
 
-            return module;
-        }
+    public AdvancedRepository<String, RegisteredUser> getUrepo() {
+        return urepo;
+    }
 
-        public RepositoryModuleBuilder resRepo(Repository<String, FileResource> repo) {
-            this.resRepo = repo;
-            return this;
-        }
+    public void setTsrepo(AdvancedRepository<String, TokenSet> tsrepo) {
+        this.tsrepo = tsrepo;
+    }
 
-        public RepositoryModuleBuilder cRepo(Repository<String, Collection> repo) {
-            this.cRepo = repo;
-            return this;
-        }
+    public void setCirepo(AdvancedRepository<String, Collection.CollectionItem> cirepo) {
+        this.cirepo = cirepo;
+    }
 
-        public RepositoryModuleBuilder shareRepo(AwareRepository<String, Share, User> repo) {
-            this.shareRepo = repo;
-            return this;
-        }
+    public void setCrepo(AwareAdvancedRepository<String, Collection, User> crepo) {
+        this.crepo = crepo;
+    }
 
-        public RepositoryModuleBuilder ciRepo(Repository<String, Collection.CollectionItem> repo) {
-            this.ciRepo = repo;
-            return this;
-        }
+    public void setRrepo(AwareAdvancedRepository<String, FileResource, User> rrepo) {
+        this.rrepo = rrepo;
+    }
+
+    public void setSrepo(AwareAdvancedRepository<String, Share, User> srepo) {
+        this.srepo = srepo;
+    }
+
+    public void setUrepo(AdvancedRepository<String, RegisteredUser> urepo) {
+        this.urepo = urepo;
     }
 
 }

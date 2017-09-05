@@ -78,12 +78,16 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindRegisteredUserRepo(Binder binder, Datastore ds) {
+        AdvancedRepository<String, RegisteredUser> repo = createRegisteredUserRepo(ds);
+
+        binder.bind(new TypeLiteral<AdvancedRepository<String, RegisteredUser>>() {
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
-        }).toInstance(new MorphiaRepository<>(ds, RegisteredUser.class));
+        }).toInstance(repo);
     }
 
     protected void bindResourceRepo(Binder binder, Datastore ds) {
-        PrincipalAwareMorphiaAdvancedRepository<FileResource> repo = new PrincipalAwareMorphiaAdvancedRepository<>(ds, FileResource.class);
+        AwareAdvancedRepository<String, FileResource, User> repo = createResourceRepo(ds);
 
         binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
         }).toInstance(repo);
@@ -96,7 +100,7 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindCollectionsRepo(Binder binder, Datastore ds) {
-        PrincipalAwareMorphiaAdvancedRepository<Collection> repo = new PrincipalAwareMorphiaAdvancedRepository<>(ds, Collection.class);
+        AwareAdvancedRepository<String, Collection, User> repo = createCollectionRepo(ds);
 
         binder.bind(new TypeLiteral<Repository<String, Collection>>() {
         }).toInstance(repo);
@@ -109,8 +113,8 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
-        AdvancedRepository<String, Collection.CollectionItem> repo = new MorphiaAdvancedRepository<>(ds, Collection.CollectionItem.class);
-        
+        AdvancedRepository<String, Collection.CollectionItem> repo = createCollectionItemRepo(ds);
+
         binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, Collection.CollectionItem>>() {
@@ -118,7 +122,7 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindShareRepo(Binder binder, Datastore ds) {
-        PrincipalAwareMorphiaAdvancedRepository<Share> repo = new PrincipalAwareMorphiaAdvancedRepository<>(ds, Share.class);
+        AwareAdvancedRepository<String, Share, User> repo = createShareRepo(ds);
 
         binder.bind(new TypeLiteral<Repository<String, Share>>() {
         }).toInstance(repo);
@@ -131,7 +135,8 @@ public class RepositoryModule implements Module {
     }
 
     protected void bindTokenSetRepo(Binder binder, Datastore ds) {
-        AdvancedRepository<String, TokenSet> repo = new MorphiaAdvancedRepository<>(ds, TokenSet.class);
+        AdvancedRepository<String, TokenSet> repo = createTokenSetRepo(ds);
+        
         binder.bind(new TypeLiteral<Repository<String, TokenSet>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
@@ -145,5 +150,29 @@ public class RepositoryModule implements Module {
         binder.requestStaticInjection(RegisteredUserReference.class);
         binder.requestStaticInjection(Collection.CollectionItemReference.class);
         binder.requestStaticInjection(TokenSetReference.class);
+    }
+
+    protected AdvancedRepository<String, TokenSet> createTokenSetRepo(Datastore ds) {
+        return new MorphiaAdvancedRepository<>(ds, TokenSet.class);
+    }
+
+    protected AdvancedRepository<String, Collection.CollectionItem> createCollectionItemRepo(Datastore ds) {
+        return new MorphiaAdvancedRepository<>(ds, Collection.CollectionItem.class);
+    }
+
+    protected AwareAdvancedRepository<String, Collection, User> createCollectionRepo(Datastore ds) {
+        return new PrincipalAwareMorphiaAdvancedRepository<>(ds, Collection.class);
+    }
+
+    protected AwareAdvancedRepository<String, FileResource, User> createResourceRepo(Datastore ds) {
+        return new PrincipalAwareMorphiaAdvancedRepository<>(ds, FileResource.class);
+    }
+
+    protected AwareAdvancedRepository<String, Share, User> createShareRepo(Datastore ds) {
+        return new PrincipalAwareMorphiaAdvancedRepository<>(ds, Share.class);
+    }
+
+    protected AdvancedRepository<String, RegisteredUser> createRegisteredUserRepo(Datastore ds) {
+        return new MorphiaAdvancedRepository<>(ds, RegisteredUser.class);
     }
 }

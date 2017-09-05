@@ -13,7 +13,6 @@ import com.picdrop.guice.ApplicationModuleMock;
 import com.picdrop.guice.AuthorizationModuleMock;
 import com.picdrop.guice.FileHandlingModule;
 import com.picdrop.guice.RepositoryModuleMockNoDB;
-import com.picdrop.helper.EnvHelper;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.FileResource;
@@ -23,7 +22,6 @@ import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
 import java.io.IOException;
-import java.util.Map;
 import static org.mockito.Mockito.*;
 import org.jboss.resteasy.plugins.guice.ext.RequestScopeModule;
 import org.junit.After;
@@ -32,12 +30,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import static com.picdrop.helper.TestHelper.*;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
@@ -45,6 +39,7 @@ import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.UserReference;
 import java.util.Arrays;
 import java.util.List;
+import org.mockito.Mock;
 
 /**
  *
@@ -57,15 +52,10 @@ public class ShareServiceTest {
 
     @Mock
     RequestContext ctx;
-    @Mock
+
     AwareRepository<String, Share, User> repo;
-
-    @Mock
     Repository<String, FileResource> frepo;
-    @Mock
     Repository<String, Collection> crepo;
-
-    Map<String, String> config = EnvHelper.getPropertiesTest();
 
     String ID1 = "590497a4cd27f408d6e79d98";
     String ID2 = "123456a4cd37f408d6e79d90";
@@ -84,16 +74,17 @@ public class ShareServiceTest {
     @Before
     public void setUp() throws IOException {
 
+        RepositoryModuleMockNoDB repoModule = new RepositoryModuleMockNoDB();
+
         Injector inj = Guice.createInjector(new ApplicationModuleMock(),
                 new AuthorizationModuleMock(ctx),
-                RepositoryModuleMockNoDB
-                        .builder()
-                        .shareRepo(repo)
-                        .resRepo(frepo)
-                        .cRepo(crepo)
-                        .build(),
+                repoModule,
                 new FileHandlingModule(),
                 new RequestScopeModule());
+
+        this.crepo = repoModule.getCrepo();
+        this.frepo = repoModule.getRrepo();
+        this.repo = repoModule.getSrepo();
 
         this.service = inj.getInstance(ShareService.class);
     }
@@ -225,16 +216,45 @@ public class ShareServiceTest {
 
     @Test
     public void deleteTestValid() throws Exception {
-        Share mock = mock(Share.class);
+        FileResource r = new FileResource(ID2);
+        Share s = new Share(ID1);
+        s.setResource(r);
 
         when(repo.delete(ID1)).thenReturn(true);
-        when(repo.get(ID1)).thenReturn(mock);
+        when(repo.get(ID1, null)).thenReturn(s);
+        when(repo.get(ID1)).thenReturn(s);
+        when(frepo.update(eq(ID2), any())).thenReturn(r);
+        when(frepo.get(eq(ID2))).thenReturn(r);
 
         this.service.delete(ID1);
 
         verify(repo, times(1)).get(ID1);
         verify(repo, times(1)).delete(ID1);
+        verify(frepo, times(1)).update(ID2, any());
 
+        verify(repo, times(0)).get(any(), any());
+        verify(repo, times(0)).delete(any(), any());
+    }
+    
+     @Test
+    public void deleteTestErrorByMissingResource() throws Exception {
+        FileResource r = new FileResource(ID2);
+        Share s = new Share(ID1);
+        s.setResource(r);
+
+        when(repo.delete(ID1)).thenReturn(true);
+        when(repo.get(ID1, null)).thenReturn(s);
+        when(repo.get(ID1)).thenReturn(s);
+        when(frepo.update(eq(ID2), any())).thenReturn(r);
+        
+        when(frepo.get(eq(ID2))).thenReturn(null);
+
+        this.service.delete(ID1);
+
+        verify(repo, times(1)).get(ID1);
+        verify(repo, times(1)).delete(ID1);
+        
+        verify(frepo, times(0)).update(any(), any());
         verify(repo, times(0)).get(any(), any());
         verify(repo, times(0)).delete(any(), any());
     }
@@ -250,20 +270,20 @@ public class ShareServiceTest {
             assertEquals("Wrong error code", ex.getCode(), ErrorMessageCode.NOT_FOUND);
             throw ex;
         } finally {
-            verify(repo, times(1)).get(ID1);
+            verify(repo, times(1)).get(ID1, null);
             verify(repo, times(0)).delete(ID1);
 
-            verify(repo, times(0)).get(any(), any());
             verify(repo, times(0)).delete(any(), any());
         }
     }
 
     @Test(expected = ApplicationException.class)
     public void deleteTestErrorOnDelete() throws Exception {
-        Share mock = mock(Share.class);
+        Share s = new Share(ID1);
 
         when(repo.delete(ID1)).thenReturn(false);
-        when(repo.get(ID1)).thenReturn(mock);
+        when(repo.get(ID1)).thenReturn(s);
+        when(repo.get(ID1, null)).thenReturn(s);
 
         try {
             this.service.delete(ID1);
@@ -272,7 +292,7 @@ public class ShareServiceTest {
             assertEquals("Wrong error code", ex.getCode(), ErrorMessageCode.ERROR_DELETE);
             throw ex;
         } finally {
-            verify(repo, times(1)).get(ID1);
+            verify(repo, times(1)).get(ID1, null);
             verify(repo, times(1)).delete(ID1);
 
             verify(repo, times(0)).get(any(), any());
@@ -284,7 +304,7 @@ public class ShareServiceTest {
     public void updateTestValid() throws Exception {
         Share obj1 = new Share(ID1);
 
-        when(repo.get(ID1)).thenReturn(obj1);
+        when(repo.get(ID1, null)).thenReturn(obj1);
         when(repo.update(ID1, obj1)).thenReturn(obj1);
 
         this.service.update(ID1, obj1);

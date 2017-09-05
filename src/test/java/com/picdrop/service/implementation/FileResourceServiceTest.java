@@ -9,6 +9,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
+import com.picdrop.guice.ApplicationModule;
 import com.picdrop.guice.ApplicationModuleMock;
 import com.picdrop.guice.AuthorizationModuleMock;
 import com.picdrop.guice.FileHandlingModuleMock;
@@ -48,8 +49,11 @@ import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
+import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.AwareRepository;
+import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
 import java.util.Arrays;
+import javax.enterprise.util.TypeLiteral;
 
 /**
  *
@@ -60,14 +64,11 @@ public class FileResourceServiceTest {
 
     FileResourceService service;
 
-    @Mock
     Repository<String, FileResource> repo;
-    @Mock
     AwareRepository<String, Share, User> srepo;
-    @Mock
     Repository<String, Collection.CollectionItem> cirepo;
-    @Mock
-    Repository<String, Collection> crepo;
+    AwareAdvancedRepository<String, Collection, User> crepo;
+
     @Mock
     FileWriter writer;
     @Mock
@@ -76,8 +77,6 @@ public class FileResourceServiceTest {
     RequestContext ctx;
     @Mock
     FileRepository<String> fr;
-
-    Map<String, String> config = EnvHelper.getPropertiesTest();
 
     String ID1 = "590497a4cd27f408d6e79d98";
     String ID2 = "123456a4cd37f408d6e79d90";
@@ -96,18 +95,22 @@ public class FileResourceServiceTest {
     @Before
     public void setUp() throws IOException {
 
-        Injector inj = Guice.createInjector(new ApplicationModuleMock(),
+        EnvHelper.setConfig(EnvHelper.getPropertiesTest());
+
+        RepositoryModuleMockNoDB repoModule = new RepositoryModuleMockNoDB();
+
+        Injector inj = Guice.createInjector(new ApplicationModule(),
                 new AuthorizationModuleMock(ctx),
-                RepositoryModuleMockNoDB.builder()
-                        .resRepo(repo)
-                        .shareRepo(srepo)
-                        .ciRepo(cirepo)
-                        .cRepo(crepo)
-                        .build(),
+                repoModule,
                 new FileHandlingModuleMock(writer, reader, fr),
                 new RequestScopeModule());
 
-        this.service = inj.getInstance(FileResourceService.class);
+        this.crepo = repoModule.getCrepo();
+        this.cirepo = repoModule.getCirepo();
+        this.repo = repoModule.getRrepo();
+        this.srepo = repoModule.getSrepo();
+
+        this.service = spy(inj.getInstance(FileResourceService.class));
     }
 
     @After
@@ -146,19 +149,19 @@ public class FileResourceServiceTest {
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
         file.addShare(new ShareReference(ID2));
-        
+
         ImageDescriptor desc = ResourceDescriptor.get(FileType.IMAGE_JPEG)
                 .to(ImageDescriptor.class);
         desc.addThumbnailUri("test", "test");
         file.setDescriptor(desc);
-        
+
         Collection c = new Collection(ID2);
         Collection.CollectionItem ci = new Collection.CollectionItem(ID2);
         c.addItem(ci);
         ci.setParentCollection(c);
 
         when(repo.get(ID1)).thenReturn(file);
-        when(cirepo.queryNamed(eq("citems.byResourceId"), any()))
+        when(cirepo.queryNamed(eq("citems.with.resource"), any()))
                 .thenReturn(Arrays.asList(ci));
         when(crepo.get(ID2)).thenReturn(c);
         when(repo.delete(ID1)).thenReturn(true);
@@ -319,6 +322,7 @@ public class FileResourceServiceTest {
                 return arg0.getArgument(1);
             }
         });
+        doReturn(FileType.IMAGE_PNG).when(service).parseMimeType(any());
 
         List<FileResource> files = service.create(req);
 
@@ -360,6 +364,7 @@ public class FileResourceServiceTest {
                 return arg0.getArgument(1);
             }
         });
+        doReturn(FileType.IMAGE_JPEG).when(service).parseMimeType(any());
 
         List<FileResource> files = service.create(req);
 
@@ -401,6 +406,7 @@ public class FileResourceServiceTest {
                 return arg0.getArgument(1);
             }
         });
+        doReturn(FileType.IMAGE_TIFF).when(service).parseMimeType(any());
 
         List<FileResource> files = service.create(req);
 
@@ -424,8 +430,8 @@ public class FileResourceServiceTest {
     }
 
     @Ignore("Currently not testing uploaded data about conformity")
-    @Test(expected = ApplicationException.class)
-    public void createTestJpegInvalidExtension() throws IOException, ApplicationException {
+//    @Test(expected = ApplicationException.class)
+    public void createTestJpegInvalidFileContent() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture", "image/jpeg", "somedata".getBytes()));
 
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
@@ -460,6 +466,7 @@ public class FileResourceServiceTest {
 
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
         when(fr.write(any(), any())).thenThrow(new IOException("Some error occured!"));
+        doReturn(FileType.IMAGE_JPEG).when(service).parseMimeType(any());
 
         try {
             List<FileResource> files = service.create(req);
