@@ -20,6 +20,7 @@
         <mockito.version>2.8.47</mockito.version>
         <spring.version>4.3.9.RELEASE</spring.version>
         <log4j.version>2.8.2</log4j.version>
+        <tika.version>1.15</tika.version>
     </properties>
     
     <dependencies>
@@ -154,6 +155,11 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>${tika.version}</version>
         </dependency>
     </dependencies>
 
