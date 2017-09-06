@@ -15,5 +15,5 @@ import java.io.IOException;
  */
 public interface TokenSigner {
     SignedJWT sign(JWTClaimsSet claims) throws IOException;
-    boolean verify(SignedJWT jwt);
+    boolean verify(SignedJWT jwt) throws IOException;
 }

@@ -16,6 +16,7 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
+import com.picdrop.guice.provider.JWETokenCryptoProvider;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -28,9 +29,9 @@ public class TokenCipherImpl implements TokenCipher {
     JWEAlgorithm alg;
     EncryptionMethod meth;
     @Inject
-    Provider<JWEEncrypter> encryptorProv;
+    JWETokenCryptoProvider.EncrypterCheckedProvider encryptorProv;
     @Inject
-    Provider<JWEDecrypter> decryptorProv;
+    JWETokenCryptoProvider.DecrypterCheckedProvider decryptorProv;
 
     @Inject
     public TokenCipherImpl(

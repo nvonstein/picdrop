@@ -6,15 +6,13 @@
 package com.picdrop.security.token.signer;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.picdrop.guice.provider.JWSTokenSignatureProvider;
 import java.io.IOException;
 
 /**
@@ -25,9 +23,9 @@ public class TokenSignerImpl implements TokenSigner {
 
     JWSAlgorithm alg;
     @Inject
-    Provider<JWSSigner> signerProv;
+    JWSTokenSignatureProvider.SignerCheckedProvider signerProv;
     @Inject
-    Provider<JWSVerifier> verifierProv;
+    JWSTokenSignatureProvider.VerifierCheckedProvider verifierProv;
 
     @Inject
     public TokenSignerImpl(@Named("token.signer.alg") String alg) {
@@ -46,7 +44,7 @@ public class TokenSignerImpl implements TokenSigner {
     }
 
     @Override
-    public boolean verify(SignedJWT sjwt) {
+    public boolean verify(SignedJWT sjwt) throws IOException {
         if (sjwt == null) {
             return false;
         }
