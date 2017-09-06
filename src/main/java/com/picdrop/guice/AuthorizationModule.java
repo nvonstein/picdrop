@@ -13,17 +13,10 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.JWEEncrypter;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.JWSVerifier;
 import com.picdrop.guice.provider.CookieProvider;
-import com.picdrop.guice.provider.JWETokenDirectEncrypterDecrypterProvider;
-import com.picdrop.guice.provider.JWSTokenMACSignerVerifierProvider;
 import com.picdrop.model.RequestContext;
 import com.picdrop.guice.provider.SessionCookieProvider;
 import com.picdrop.model.user.RegisteredUser;
-import com.picdrop.model.user.User;
 import com.picdrop.security.authentication.authenticator.Authenticator;
 import com.picdrop.security.authentication.authenticator.BasicAuthenticator;
 import com.picdrop.security.authentication.authenticator.TokenAuthenticator;
@@ -55,14 +48,12 @@ public class AuthorizationModule implements Module {
         bindAuthenticationFilter(binder);
 
         bindRequestContext(binder);
-        
+
         bindClaimSetFactories(binder);
 
         bindAuthenticators(binder);
 
         bindWebTokenFactory(binder);
-
-        bindCipherSignerProviders(binder);
     }
 
     protected void bindSessionCookieFactory(Binder binder) {
@@ -84,11 +75,6 @@ public class AuthorizationModule implements Module {
     protected void bindAuthenticators(Binder binder) {
         binder.bind(new TypeLiteral<Authenticator<RegisteredUser>>() {
         }).annotatedWith(Names.named("authenticator.basic")).to(BasicAuthenticator.class);
-
-//        binder.bind(new TypeLiteral<Authenticator<User>>() {
-//        }).annotatedWith(Names.named("token")).to(TokenAuthenticator.class);
-//        binder.bind(new TypeLiteral<Authenticator<User>>() {
-//        });
     }
 
     protected void bindClaimSetFactories(Binder binder) {
@@ -104,22 +90,6 @@ public class AuthorizationModule implements Module {
         binder.bind(TokenCipher.class).to(TokenCipherImpl.class);
     }
 
-    protected void bindCipherSignerProviders(Binder binder) {
-        binder.bind(JWEDecrypter.class).toProvider(JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectDecrypterProvider.class);
-        binder.bind(JWEEncrypter.class).toProvider(JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectEncrypterProvider.class);
-        binder.bind(JWSSigner.class).toProvider(JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider.class);
-        binder.bind(JWSVerifier.class).toProvider(JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider.class);
-    }
-
-//    @Provides
-//    @Named("authenticator.token.auth")
-//    TokenAuthenticator provideAuthTokenAuthenticator(
-//            WebTokenFactory tfactory,
-//            @Named("service.session.cookie.name") String authCookieName,
-//            @Named("claimset.factory.auth") ClaimSetFactory<User> f) {
-//        return new TokenAuthenticator(authCookieName, tfactory, f);
-//    }
-    
     @Provides
     @Named("authenticator.token.auth")
     Authenticator<RegisteredUser> provideAuthTokenAuthenticator(
