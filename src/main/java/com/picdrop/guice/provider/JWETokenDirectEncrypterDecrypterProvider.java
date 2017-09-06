@@ -5,16 +5,17 @@
  */
 package com.picdrop.guice.provider;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEEncrypter;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
-import java.security.NoSuchAlgorithmException;
-import javax.crypto.KeyGenerator;
+import java.io.IOException;
+import javax.crypto.SecretKey;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -22,48 +23,84 @@ import javax.crypto.KeyGenerator;
  */
 public abstract class JWETokenDirectEncrypterDecrypterProvider {
 
-    protected final JWEEncrypter encryptor;
-    protected final JWEDecrypter decrypter;
+    Logger log = LogManager.getLogger();
 
-    private static byte[] key = null;
+    private final SymmetricKeyProvider symKProv;
+    private final SecretKey KEY;
 
-    public JWETokenDirectEncrypterDecrypterProvider() throws KeyLengthException, NoSuchAlgorithmException {
-//        String key = "999C9A2C572AE8C2A71B2E255FA78";
-        generateKey();
-        this.encryptor = new DirectEncrypter(key);
-        this.decrypter = new DirectDecrypter(key);
+    private boolean isInit = false;
+
+    protected JWEEncrypter encryptor;
+    protected JWEDecrypter decrypter;
+
+    public JWETokenDirectEncrypterDecrypterProvider(SymmetricKeyProvider symKProv) {
+        this.symKProv = symKProv;
+        this.KEY = null;
     }
 
-    private static void generateKey() throws NoSuchAlgorithmException {
-        if (key == null) {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(256);
-            key = keyGen.generateKey().getEncoded();
+    public JWETokenDirectEncrypterDecrypterProvider(SecretKey key) {
+        this.symKProv = null;
+        this.KEY = key;
+    }
+
+    protected void init() throws IOException, KeyLengthException {
+        if (!isInit) {
+            SecretKey lkey = (this.KEY == null)
+                    ? symKProv.get()
+                    : this.KEY;
+
+            this.encryptor = new DirectEncrypter(lkey);
+            this.decrypter = new DirectDecrypter(lkey);
+            isInit = true;
         }
     }
 
-    public static class JWETokenDirectEncrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements Provider<JWEEncrypter> {
+    public static class JWETokenDirectEncrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements JWETokenCryptoProvider.EncrypterCheckedProvider {
 
-        public JWETokenDirectEncrypterProvider() throws KeyLengthException, NoSuchAlgorithmException {
-            super();
+        public JWETokenDirectEncrypterProvider(SymmetricKeyProvider symKProv) {
+            super(symKProv);
+            log = LogManager.getLogger();
+        }
+
+        public JWETokenDirectEncrypterProvider(SecretKey key) {
+            super(key);
+            log = LogManager.getLogger();
         }
 
         @Override
-        public JWEEncrypter get() {
-            return super.encryptor;
+        public JWEEncrypter get() throws IOException {
+            try {
+                init();
+            } catch (KeyLengthException ex) {
+                log.fatal("Invalid key size", ex);
+                throw new IOException(ex.getMessage(), ex);
+            }
+            return this.encryptor;
         }
 
     }
 
-    public static class JWETokenDirectDecrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements Provider<JWEDecrypter> {
+    public static class JWETokenDirectDecrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements JWETokenCryptoProvider.DecrypterCheckedProvider {
 
-        public JWETokenDirectDecrypterProvider() throws KeyLengthException, NoSuchAlgorithmException {
-            super();
+        public JWETokenDirectDecrypterProvider(SymmetricKeyProvider symKProv) {
+            super(symKProv);
+            log = LogManager.getLogger();
+        }
+
+        public JWETokenDirectDecrypterProvider(SecretKey key) {
+            super(key);
+            log = LogManager.getLogger();
         }
 
         @Override
-        public JWEDecrypter get() {
-            return super.decrypter;
+        public JWEDecrypter get() throws IOException {
+            try {
+                init();
+            } catch (KeyLengthException ex) {
+                log.fatal("Invalid key size", ex);
+                throw new IOException(ex.getMessage(), ex);
+            }
+            return this.decrypter;
         }
 
     }

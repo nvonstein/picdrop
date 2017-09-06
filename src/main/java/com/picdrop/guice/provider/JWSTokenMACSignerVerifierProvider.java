@@ -5,15 +5,16 @@
  */
 package com.picdrop.guice.provider;
 
-import com.google.inject.Provider;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
-import java.security.NoSuchAlgorithmException;
-import javax.crypto.KeyGenerator;
+import java.io.IOException;
+import javax.crypto.SecretKey;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -21,48 +22,84 @@ import javax.crypto.KeyGenerator;
  */
 public abstract class JWSTokenMACSignerVerifierProvider {
 
-    protected final JWSSigner signer;
-    protected final JWSVerifier verfier;
+    Logger log = LogManager.getLogger();
 
-    private static byte[] key = null;
+    private final SymmetricKeyProvider symKProv;
+    private final SecretKey KEY;
 
-    public JWSTokenMACSignerVerifierProvider() throws KeyLengthException, JOSEException, NoSuchAlgorithmException {
-//        String key = "D4271D5AE4D8ADC966A35EC11F1F5";
-        generateKey();
-        this.signer = new MACSigner(key);
-        this.verfier = new MACVerifier(key);
+    private boolean isInit = false;
+
+    protected JWSSigner signer;
+    protected JWSVerifier verfier;
+
+    public JWSTokenMACSignerVerifierProvider(SymmetricKeyProvider symKProv) {
+        this.symKProv = symKProv;
+        this.KEY = null;
     }
 
-    private static void generateKey() throws NoSuchAlgorithmException {
-        if (key == null) {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(256);
-            key = keyGen.generateKey().getEncoded();
+    public JWSTokenMACSignerVerifierProvider(SecretKey key) {
+        this.KEY = key;
+        this.symKProv = null;
+    }
+
+    protected void init() throws IOException, KeyLengthException, JOSEException {
+        if (!isInit) {
+            SecretKey lkey = (this.KEY == null)
+                    ? symKProv.get()
+                    : this.KEY;
+
+            this.signer = new MACSigner(lkey);
+            this.verfier = new MACVerifier(lkey);
+            isInit = true;
         }
     }
 
-    public static class JWSTokenMACSignerProvider extends JWSTokenMACSignerVerifierProvider implements Provider<JWSSigner> {
+    public static class JWSTokenMACSignerProvider extends JWSTokenMACSignerVerifierProvider implements JWSTokenSignatureProvider.SignerCheckedProvider {
 
-        public JWSTokenMACSignerProvider() throws KeyLengthException, JOSEException, NoSuchAlgorithmException {
-            super();
+        public JWSTokenMACSignerProvider(SymmetricKeyProvider symKProv) {
+            super(symKProv);
+            this.log = LogManager.getLogger();
+        }
+
+        public JWSTokenMACSignerProvider(SecretKey key) {
+            super(key);
+            this.log = LogManager.getLogger();
         }
 
         @Override
-        public JWSSigner get() {
-            return super.signer;
+        public JWSSigner get() throws IOException {
+            try {
+                init();
+            } catch (JOSEException ex) {
+                log.fatal("Invalid key size", ex);
+                throw new IOException(ex.getMessage(), ex);
+            }
+            return this.signer;
         }
 
     }
 
-    public static class JWSTokenMACVerifierProvider extends JWSTokenMACSignerVerifierProvider implements Provider<JWSVerifier> {
+    public static class JWSTokenMACVerifierProvider extends JWSTokenMACSignerVerifierProvider implements JWSTokenSignatureProvider.VerifierCheckedProvider {
 
-        public JWSTokenMACVerifierProvider() throws KeyLengthException, JOSEException, NoSuchAlgorithmException {
-            super();
+        public JWSTokenMACVerifierProvider(SymmetricKeyProvider symKProv) {
+            super(symKProv);
+            this.log = LogManager.getLogger();
+        }
+
+        public JWSTokenMACVerifierProvider(SecretKey key) {
+            super(key);
+            this.log = LogManager.getLogger();
         }
 
         @Override
-        public JWSVerifier get() {
-            return super.verfier;
+        public JWSVerifier get() throws IOException {
+            try {
+                init();
+            } catch (JOSEException ex) {
+                log.fatal("Invalid key size", ex);
+                throw new IOException(ex.getMessage(), ex);
+            }
+            return this.verfier;
         }
 
     }
