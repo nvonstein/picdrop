@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.guice.provider.implementation;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
+import com.picdrop.guice.provider.CookieProvider;
 import javax.ws.rs.core.NewCookie;
 
 /**

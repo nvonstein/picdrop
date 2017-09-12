@@ -15,7 +15,7 @@ import java.io.IOException;
  *
  * @author nvonstein
  */
-public interface JWETokenCryptoProvider {
+public interface JWECryptoProvider {
 
     public static interface EncrypterCheckedProvider extends CheckedProvider<JWEEncrypter> {
 

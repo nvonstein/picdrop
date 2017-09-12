@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.guice.provider.implementation;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -13,16 +13,18 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
+import com.picdrop.guice.provider.SymmetricKeyProvider;
 import java.io.IOException;
 import javax.crypto.SecretKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.picdrop.guice.provider.JWSSignatureProvider;
 
 /**
  *
  * @author nvonstein
  */
-public abstract class JWSTokenMACSignerVerifierProvider {
+public abstract class JWSMACSignatureProvider {
 
     Logger log = LogManager.getLogger();
 
@@ -34,12 +36,12 @@ public abstract class JWSTokenMACSignerVerifierProvider {
     protected JWSSigner signer;
     protected JWSVerifier verfier;
 
-    JWSTokenMACSignerVerifierProvider(SymmetricKeyProvider symKProv) {
+    JWSMACSignatureProvider(SymmetricKeyProvider symKProv) {
         this.symKProv = symKProv;
         this.KEY = null;
     }
 
-    public JWSTokenMACSignerVerifierProvider(SecretKey key) {
+    public JWSMACSignatureProvider(SecretKey key) {
         this.KEY = key;
         this.symKProv = null;
     }
@@ -56,15 +58,15 @@ public abstract class JWSTokenMACSignerVerifierProvider {
         }
     }
 
-    public static class JWSTokenMACSignerProvider extends JWSTokenMACSignerVerifierProvider implements JWSTokenSignatureProvider.SignerCheckedProvider {
+    public static class SignerProvider extends JWSMACSignatureProvider implements JWSSignatureProvider.SignerCheckedProvider {
 
         @Inject
-        JWSTokenMACSignerProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
+        SignerProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             this.log = LogManager.getLogger();
         }
 
-        public JWSTokenMACSignerProvider(SecretKey key) {
+        public SignerProvider(SecretKey key) {
             super(key);
             this.log = LogManager.getLogger();
         }
@@ -82,15 +84,15 @@ public abstract class JWSTokenMACSignerVerifierProvider {
 
     }
 
-    public static class JWSTokenMACVerifierProvider extends JWSTokenMACSignerVerifierProvider implements JWSTokenSignatureProvider.VerifierCheckedProvider {
+    public static class VerifierProvider extends JWSMACSignatureProvider implements JWSSignatureProvider.VerifierCheckedProvider {
 
         @Inject
-        JWSTokenMACVerifierProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
+        VerifierProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             this.log = LogManager.getLogger();
         }
 
-        public JWSTokenMACVerifierProvider(SecretKey key) {
+        public VerifierProvider(SecretKey key) {
             super(key);
             this.log = LogManager.getLogger();
         }

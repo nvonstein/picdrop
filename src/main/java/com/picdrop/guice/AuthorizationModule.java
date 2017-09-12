@@ -16,7 +16,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.picdrop.guice.provider.CookieProvider;
 import com.picdrop.model.RequestContext;
-import com.picdrop.guice.provider.SessionCookieProvider;
+import com.picdrop.guice.provider.implementation.SessionCookieProvider;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.security.authentication.authenticator.Authenticator;
 import com.picdrop.security.authentication.authenticator.BasicAuthenticator;

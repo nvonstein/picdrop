@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.guice.provider.implementation;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -12,16 +12,18 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
+import com.picdrop.guice.provider.SymmetricKeyProvider;
 import java.io.IOException;
 import javax.crypto.SecretKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.picdrop.guice.provider.JWECryptoProvider;
 
 /**
  *
  * @author nvonstein
  */
-public abstract class JWETokenDirectEncrypterDecrypterProvider {
+public abstract class JWEDirectCryptoProvider {
 
     Logger log = LogManager.getLogger();
 
@@ -33,12 +35,12 @@ public abstract class JWETokenDirectEncrypterDecrypterProvider {
     protected JWEEncrypter encryptor;
     protected JWEDecrypter decrypter;
 
-    JWETokenDirectEncrypterDecrypterProvider(SymmetricKeyProvider symKProv) {
+    JWEDirectCryptoProvider(SymmetricKeyProvider symKProv) {
         this.symKProv = symKProv;
         this.KEY = null;
     }
 
-    public JWETokenDirectEncrypterDecrypterProvider(SecretKey key) {
+    public JWEDirectCryptoProvider(SecretKey key) {
         this.symKProv = null;
         this.KEY = key;
     }
@@ -55,15 +57,15 @@ public abstract class JWETokenDirectEncrypterDecrypterProvider {
         }
     }
 
-    public static class JWETokenDirectEncrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements JWETokenCryptoProvider.EncrypterCheckedProvider {
+    public static class EncrypterProvider extends JWEDirectCryptoProvider implements JWECryptoProvider.EncrypterCheckedProvider {
 
         @Inject
-        JWETokenDirectEncrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
+        EncrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             log = LogManager.getLogger();
         }
 
-        public JWETokenDirectEncrypterProvider(SecretKey key) {
+        public EncrypterProvider(SecretKey key) {
             super(key);
             log = LogManager.getLogger();
         }
@@ -81,15 +83,15 @@ public abstract class JWETokenDirectEncrypterDecrypterProvider {
 
     }
 
-    public static class JWETokenDirectDecrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements JWETokenCryptoProvider.DecrypterCheckedProvider {
+    public static class DecrypterProvider extends JWEDirectCryptoProvider implements JWECryptoProvider.DecrypterCheckedProvider {
 
         @Inject
-        JWETokenDirectDecrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
+        DecrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             log = LogManager.getLogger();
         }
 
-        public JWETokenDirectDecrypterProvider(SecretKey key) {
+        public DecrypterProvider(SecretKey key) {
             super(key);
             log = LogManager.getLogger();
         }

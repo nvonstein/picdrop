@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.guice.provider.implementation;
 
 import com.google.inject.Inject;
 import com.nimbusds.jose.JWEDecrypter;
@@ -11,16 +11,18 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEProvider;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
+import com.picdrop.guice.provider.PKIXProvider;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+import com.picdrop.guice.provider.JWECryptoProvider;
 
 /**
  *
  * @author nvonstein
  */
-public abstract class JWETokenRSAEncrypterDecrypterProvider {
+public abstract class JWERSACryptoProvider {
 
     private final PKIXProvider pki;
 
@@ -29,7 +31,7 @@ public abstract class JWETokenRSAEncrypterDecrypterProvider {
     protected JWEEncrypter encryptor;
     protected JWEDecrypter decrypter;
 
-    public JWETokenRSAEncrypterDecrypterProvider(PKIXProvider pki) {
+    public JWERSACryptoProvider(PKIXProvider pki) {
         this.pki = pki;
     }
     
@@ -56,10 +58,10 @@ public abstract class JWETokenRSAEncrypterDecrypterProvider {
 
     public abstract JWEProvider get() throws IOException;
 
-    public static class JWETokenRSAEncrypterProvider extends JWETokenRSAEncrypterDecrypterProvider implements JWETokenCryptoProvider.EncrypterCheckedProvider {
+    public static class EncrypterProvider extends JWERSACryptoProvider implements JWECryptoProvider.EncrypterCheckedProvider {
 
         @Inject
-        public JWETokenRSAEncrypterProvider(PKIXProvider pki) {
+        public EncrypterProvider(PKIXProvider pki) {
             super(pki);
         }
 
@@ -71,10 +73,10 @@ public abstract class JWETokenRSAEncrypterDecrypterProvider {
 
     }
 
-    public static class JWETokenRSADecrypterProvider extends JWETokenRSAEncrypterDecrypterProvider implements JWETokenCryptoProvider.DecrypterCheckedProvider {
+    public static class DecrypterProvider extends JWERSACryptoProvider implements JWECryptoProvider.DecrypterCheckedProvider {
 
         @Inject
-        public JWETokenRSADecrypterProvider(PKIXProvider pki) {
+        public DecrypterProvider(PKIXProvider pki) {
             super(pki);
         }
 

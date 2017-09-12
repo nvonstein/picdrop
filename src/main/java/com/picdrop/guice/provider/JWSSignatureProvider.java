@@ -17,7 +17,7 @@ import java.io.IOException;
  *
  * @author nvonstein
  */
-public interface JWSTokenSignatureProvider {
+public interface JWSSignatureProvider {
 
     public static interface SignerCheckedProvider extends CheckedProvider<JWSSigner> {
 

@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.guice.provider.implementation;
 
+import com.picdrop.guice.provider.SecureStoreProvider;
+import com.picdrop.guice.provider.SymmetricKeyProvider;
 import com.picdrop.security.SecureStore;
 import java.io.IOException;
 import java.security.KeyStoreException;

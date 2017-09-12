@@ -19,15 +19,13 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
-import com.picdrop.guice.provider.JWETokenCryptoProvider;
-import com.picdrop.guice.provider.JWETokenDirectEncrypterDecrypterProvider;
-import com.picdrop.guice.provider.JWSTokenMACSignerVerifierProvider;
-import com.picdrop.guice.provider.JWSTokenSignatureProvider;
+import com.picdrop.guice.provider.implementation.JWEDirectCryptoProvider;
+import com.picdrop.guice.provider.implementation.JWSMACSignatureProvider;
 import com.picdrop.guice.provider.PKIXProvider;
-import com.picdrop.guice.provider.SecureStorePKIXProvider;
+import com.picdrop.guice.provider.implementation.SecureStorePKIXProvider;
 import com.picdrop.guice.provider.SecureStoreProvider;
-import com.picdrop.guice.provider.SecureStoreProviderImpl;
-import com.picdrop.guice.provider.StaticSymmetricKeyProvider;
+import com.picdrop.guice.provider.implementation.SecureStoreProviderImpl;
+import com.picdrop.guice.provider.implementation.StaticSymmetricKeyProvider;
 import com.picdrop.guice.provider.SymmetricKeyProvider;
 import com.picdrop.guice.provider.TokenCipherProvider;
 import com.picdrop.guice.provider.TokenSignerProvider;
@@ -39,6 +37,8 @@ import com.picdrop.security.token.signer.TokenSignerImpl;
 import java.io.IOException;
 import java.security.KeyPair;
 import javax.crypto.SecretKey;
+import com.picdrop.guice.provider.JWECryptoProvider;
+import com.picdrop.guice.provider.JWSSignatureProvider;
 
 /**
  *
@@ -70,25 +70,25 @@ public class CryptoModule implements Module {
 
     protected void bindSignatureProviders(Binder binder) {
         ThrowingProviderBinder.create(binder)
-                .bind(JWSTokenSignatureProvider.SignerCheckedProvider.class, JWSSigner.class)
-                .to(JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider.class)
+                .bind(JWSSignatureProvider.SignerCheckedProvider.class, JWSSigner.class)
+                .to(JWSMACSignatureProvider.SignerProvider.class)
                 .asEagerSingleton();
 
         ThrowingProviderBinder.create(binder)
-                .bind(JWSTokenSignatureProvider.VerifierCheckedProvider.class, JWSVerifier.class)
-                .to(JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider.class)
+                .bind(JWSSignatureProvider.VerifierCheckedProvider.class, JWSVerifier.class)
+                .to(JWSMACSignatureProvider.VerifierProvider.class)
                 .asEagerSingleton();
     }
 
     protected void bindCryptoProviders(Binder binder) {
         ThrowingProviderBinder.create(binder)
-                .bind(JWETokenCryptoProvider.EncrypterCheckedProvider.class, JWEEncrypter.class)
-                .to(JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectEncrypterProvider.class)
+                .bind(JWECryptoProvider.EncrypterCheckedProvider.class, JWEEncrypter.class)
+                .to(JWEDirectCryptoProvider.EncrypterProvider.class)
                 .asEagerSingleton();
 
         ThrowingProviderBinder.create(binder)
-                .bind(JWETokenCryptoProvider.DecrypterCheckedProvider.class, JWEDecrypter.class)
-                .to(JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectDecrypterProvider.class)
+                .bind(JWECryptoProvider.DecrypterCheckedProvider.class, JWEDecrypter.class)
+                .to(JWEDirectCryptoProvider.DecrypterProvider.class)
                 .asEagerSingleton();
     }
 
@@ -118,8 +118,8 @@ public class CryptoModule implements Module {
     protected TokenCipher provideTokenCipher(
             @Named("token.cipher.alg") String alg,
             @Named("token.cipher.meth") String meth,
-            JWETokenCryptoProvider.EncrypterCheckedProvider encProv,
-            JWETokenCryptoProvider.DecrypterCheckedProvider decProv) throws IOException {
+            JWECryptoProvider.EncrypterCheckedProvider encProv,
+            JWECryptoProvider.DecrypterCheckedProvider decProv) throws IOException {
         JWEEncrypter enc = encProv.get();
         JWEDecrypter dec = decProv.get();
         JWEAlgorithm algParsed = JWEAlgorithm.parse(alg);
@@ -139,8 +139,8 @@ public class CryptoModule implements Module {
     @CheckedProvides(TokenSignerProvider.class)
     protected TokenSigner provideTokenSigner(
             @Named("token.signer.alg") String alg,
-            JWSTokenSignatureProvider.SignerCheckedProvider signProv,
-            JWSTokenSignatureProvider.VerifierCheckedProvider verifProv) throws IOException {
+            JWSSignatureProvider.SignerCheckedProvider signProv,
+            JWSSignatureProvider.VerifierCheckedProvider verifProv) throws IOException {
         JWSSigner sig = signProv.get();
         JWSVerifier verf = verifProv.get();
         JWSAlgorithm algParsed = JWSAlgorithm.parse(alg);

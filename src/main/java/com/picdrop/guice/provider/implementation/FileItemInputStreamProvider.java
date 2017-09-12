@@ -3,35 +3,32 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.guice.provider;
+package com.picdrop.guice.provider.implementation;
 
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.picdrop.io.writer.FileReader;
-import com.picdrop.model.resource.FileResource;
+import com.picdrop.guice.provider.InputStreamProvider;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.commons.fileupload.FileItem;
 
 /**
  *
  * @author i330120
  */
-public class ResourceInputStreamProvider implements InputStreamProvider {
+public class FileItemInputStreamProvider implements InputStreamProvider {
 
-    FileResource res;
-    FileReader reader;
+    FileItem fi;
 
     @AssistedInject
-    public ResourceInputStreamProvider(
-            FileReader reader,
-            @Assisted FileResource res) {
-        this.reader = reader;
-        this.res = res;
+    public FileItemInputStreamProvider(@Assisted FileItem fi) {
+        this.fi = fi;
     }
 
     @Override
     public InputStream get() throws IOException {
-        return reader.read(res.getFileUri());
+        return this.fi.getInputStream();
     }
 
 }
