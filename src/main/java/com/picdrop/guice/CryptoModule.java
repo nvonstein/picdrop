@@ -7,7 +7,6 @@ package com.picdrop.guice;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -22,12 +21,12 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
 import com.picdrop.guice.provider.JWETokenCryptoProvider;
 import com.picdrop.guice.provider.JWETokenDirectEncrypterDecrypterProvider;
-import com.picdrop.guice.provider.JWETokenRSAEncrypterDecrypterProvider;
 import com.picdrop.guice.provider.JWSTokenMACSignerVerifierProvider;
 import com.picdrop.guice.provider.JWSTokenSignatureProvider;
+import com.picdrop.guice.provider.PKIXProvider;
+import com.picdrop.guice.provider.SecureStorePKIXProvider;
 import com.picdrop.guice.provider.SecureStoreProvider;
 import com.picdrop.guice.provider.SecureStoreProviderImpl;
-import com.picdrop.guice.provider.SecureStoreSymmetricKeyProvider;
 import com.picdrop.guice.provider.StaticSymmetricKeyProvider;
 import com.picdrop.guice.provider.SymmetricKeyProvider;
 import com.picdrop.guice.provider.TokenCipherProvider;
@@ -38,6 +37,7 @@ import com.picdrop.security.token.cipher.TokenCipherImpl;
 import com.picdrop.security.token.signer.TokenSigner;
 import com.picdrop.security.token.signer.TokenSignerImpl;
 import java.io.IOException;
+import java.security.KeyPair;
 import javax.crypto.SecretKey;
 
 /**
@@ -57,6 +57,8 @@ public class CryptoModule implements Module {
         bindCryptoProviders(binder);
 
         bindSymmeticKeyProviders(binder);
+
+        bindPKIXProvider(binder);
     }
 
     protected void bindSecureStore(Binder binder) {
@@ -102,6 +104,13 @@ public class CryptoModule implements Module {
                 .annotatedWith(Names.named("security.crypto.sym.key.provider"))
                 .to(StaticSymmetricKeyProvider.class)
                 .asEagerSingleton();
+    }
+
+    protected void bindPKIXProvider(Binder binder) {
+        ThrowingProviderBinder.create(binder)
+                .bind(PKIXProvider.class, KeyPair.class)
+                .to(SecureStorePKIXProvider.class)
+                .in(Singleton.class);
     }
 
     @Singleton

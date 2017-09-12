@@ -39,7 +39,7 @@ import com.picdrop.guice.provider.PKIXProvider;
  *
  * @author nvonstein
  */
-public class SecureStore implements PKIXProvider {
+public class SecureStore {
     
     static final String KS_NAME = "Keystore.jks";
     
@@ -258,14 +258,5 @@ public class SecureStore implements PKIXProvider {
             inoff += size;
         }
         return bo.toByteArray();
-    }
-    
-    @Override
-    public KeyPair get() throws IOException {
-        try {
-            return new KeyPair(getPublicKey(), getPrivateKey());
-        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException ex) {
-            throw new IOException(ex.getMessage(), ex);
-        }
     }
 }

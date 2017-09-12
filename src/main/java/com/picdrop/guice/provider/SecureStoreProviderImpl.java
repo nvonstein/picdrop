@@ -7,7 +7,6 @@ package com.picdrop.guice.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.google.inject.throwingproviders.CheckedProvider;
 import com.picdrop.security.SecureStore;
 import java.io.FileNotFoundException;
 import java.io.IOException;
