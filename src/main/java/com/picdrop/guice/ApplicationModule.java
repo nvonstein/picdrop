@@ -93,11 +93,11 @@ public class ApplicationModule implements Module {
     }
 
     protected void bindServices(Binder binder) {
-        binder.bind(FileResourceService.class).in(Singleton.class);
-        binder.bind(RegisteredUserService.class).in(Singleton.class);
-        binder.bind(AuthorizationService.class).in(Singleton.class);
-        binder.bind(CollectionService.class).in(Singleton.class);
-        binder.bind(ShareService.class).in(Singleton.class);
+        binder.bind(FileResourceService.class).asEagerSingleton();
+        binder.bind(RegisteredUserService.class).asEagerSingleton();
+        binder.bind(AuthorizationService.class).asEagerSingleton();
+        binder.bind(CollectionService.class).asEagerSingleton();
+        binder.bind(ShareService.class).asEagerSingleton();
     }
 
     @Provides
