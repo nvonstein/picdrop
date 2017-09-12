@@ -14,6 +14,7 @@ import java.text.ParseException;
  * @author i330120
  */
 public interface WebTokenFactory {
+    void init() throws IOException;
     String getToken(JWTClaimsSet claims) throws IOException;
     JWTClaimsSet parseToken(String token) throws IOException, ParseException;
 }

@@ -13,6 +13,8 @@ import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.picdrop.guice.provider.TokenCipherProvider;
+import com.picdrop.guice.provider.TokenSignerProvider;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -22,25 +24,40 @@ import java.text.ParseException;
  */
 public class WebTokenFactoryImpl implements WebTokenFactory {
 
-    TokenCipher tcipher;
-    TokenSigner tsigner;
+    private final TokenCipherProvider tcipherProv;
+    private final TokenSignerProvider tsignerProv;
+
+    protected TokenCipher tcipher;
+    protected TokenSigner tsigner;
 
     @Inject
-    public WebTokenFactoryImpl(TokenCipher tcipher, TokenSigner tsigner) {
-        this.tcipher = tcipher;
-        this.tsigner = tsigner;
+    public WebTokenFactoryImpl(TokenCipherProvider tcipher, TokenSignerProvider tsigner) {
+        this.tcipherProv = tcipher;
+        this.tsignerProv = tsigner;
+    }
+
+    protected boolean isInit() {
+        return (this.tcipher != null) && (this.tsigner != null);
+    }
+
+    protected void checkInit() {
+        if (!isInit()) {
+            throw new IllegalStateException("Token factory not initialized");
+        }
     }
 
     @Override
     public String getToken(JWTClaimsSet claims) throws IOException {
+        checkInit();
         SignedJWT sjwt = tsigner.sign(claims);
-        JWEObject jwe = tcipher.encrypt(new Payload(sjwt),"JWT");
+        JWEObject jwe = tcipher.encrypt(new Payload(sjwt), "JWT");
 
         return jwe.serialize();
     }
 
     @Override
     public JWTClaimsSet parseToken(String token) throws ParseException, IOException {
+        checkInit();
         if (Strings.isNullOrEmpty(token)) {
             throw new IOException("Empty token");
         }
@@ -51,6 +68,14 @@ public class WebTokenFactoryImpl implements WebTokenFactory {
         }
 
         return sjwt.getJWTClaimsSet();
+    }
+
+    @Override
+    public void init() throws IOException {
+        if (!isInit()) {
+            this.tcipher = tcipherProv.get();
+            this.tsigner = tsignerProv.get();
+        }
     }
 
 }
