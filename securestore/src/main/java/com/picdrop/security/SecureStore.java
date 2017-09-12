@@ -5,16 +5,15 @@
  */
 package com.picdrop.security;
 
-import com.google.common.base.Charsets;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -25,6 +24,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Scanner;
 import javax.crypto.BadPaddingException;
@@ -33,49 +33,48 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import com.picdrop.guice.provider.PKIXProvider;
 
 /**
  *
  * @author nvonstein
  */
 public class SecureStore {
-    
+
     static final String KS_NAME = "Keystore.jks";
-    
+
     private static final String STORE_PASS = "84nsMSUa8xZAWdLOwTuKGO0mS1GqHOtugnxxS5BFELcd8s0B1y37BE4278Wnhko"; // TODO !!! JUST FOR DEMO !!!
     private static final String ENTRY_PASS = "m2nl6L0cWjF6hgQoV73JDM2dO4KvrnjzcPDoXOcX1152qqeBgEg8huob2ZY1Beu"; // TODO !!! JUST FOR DEMO !!!
     private static final String CERT_ALIAS = "picdrop-cert";
-    
+
     private final String dir;
     private KeyStore ks;
-    
+
     public final static int MAXINDATALIMIT = 116;
     public final static int MAXOUTDATALIMIT = 128;
     public final static int DATA2HEXMULTIPLIER = 2;
-    
+
     public SecureStore(String dir) {
         this.dir = dir;
     }
-    
+
     public SecureStore(String dir, boolean load) throws IOException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
         this(dir);
         if (load) {
             loadStore();
         }
     }
-    
+
     public boolean exists() {
         return new File(dir, KS_NAME).exists();
     }
-    
+
     protected final void loadStore() throws FileNotFoundException, IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
         if (this.ks == null) {
             FileInputStream fs = null;
             try {
                 File f = new File(this.dir, KS_NAME);
                 fs = new FileInputStream(f);
-                
+
                 ks = KeyStore.getInstance("JCEKS");
                 ks.load(fs, STORE_PASS.toCharArray());
             } finally {
@@ -85,7 +84,7 @@ public class SecureStore {
             }
         }
     }
-    
+
     protected final void writeStore() throws FileNotFoundException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         if (this.ks != null) {
             FileOutputStream fo = null;
@@ -101,7 +100,11 @@ public class SecureStore {
             }
         }
     }
-    
+
+    public Enumeration<String> listAlias() throws KeyStoreException {
+        return this.ks.aliases();
+    }
+
     protected boolean createKeyStore() throws IOException, InterruptedException {
         List<String> cmd = Arrays.asList(
                 //        ProcessBuilder pb = new ProcessBuilder(
@@ -118,40 +121,40 @@ public class SecureStore {
                 "-dname", "CN=picdrop.com, OU=NRW, O=PICDROP, L=PICDROP, S=app, C=DE");
         ProcessBuilder pb = new ProcessBuilder(cmd);
         pb.redirectErrorStream(true);
-        
+
         Process p = pb.start();
         int ret = p.waitFor();
-        
+
         if (ret != 0) {
             Scanner sc = new Scanner(p.getInputStream());
             StringBuilder sb = new StringBuilder();
-            
+
             while (sc.hasNext()) {
                 sb.append(sc.nextLine());
             }
             sc.close();
             throw new RuntimeException(sb.toString());
         }
-        
+
         return ret == 0;
     }
-    
+
     protected boolean storeValue(String key, String value) throws KeyStoreException, IOException {
         try {
             loadStore();
         } catch (Exception ex) {
             throw new IOException(ex.getMessage(), ex);
         }
-        SecretKeySpec valueKs = new SecretKeySpec(value.getBytes(Charsets.UTF_8), "AES");
+        SecretKeySpec valueKs = new SecretKeySpec(value.getBytes(Charset.forName("UTF-8")), "AES");
         KeyStore.SecretKeyEntry valueKe = new KeyStore.SecretKeyEntry(valueKs);
-        
+
         KeyStore.PasswordProtection passproto = new KeyStore.PasswordProtection(ENTRY_PASS.toCharArray());
-        
+
         ks.setEntry(key, valueKe, passproto);
-        
+
         return true;
     }
-    
+
     public PublicKey getPublicKey() throws KeyStoreException, IOException {
         try {
             loadStore();
@@ -161,7 +164,7 @@ public class SecureStore {
         Certificate crt = ks.getCertificate(CERT_ALIAS);
         return crt.getPublicKey();
     }
-    
+
     public PrivateKey getPrivateKey() throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, IOException {
         try {
             loadStore();
@@ -169,10 +172,10 @@ public class SecureStore {
             throw new IOException(ex.getMessage(), ex);
         }
         Key k = ks.getKey(CERT_ALIAS, STORE_PASS.toCharArray());
-        
+
         return (PrivateKey) k;
     }
-    
+
     public SecretKey readValueRaw(String key) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
         try {
             loadStore();
@@ -180,22 +183,22 @@ public class SecureStore {
             throw new IOException(ex.getMessage(), ex);
         }
         KeyStore.PasswordProtection passproto = new KeyStore.PasswordProtection(ENTRY_PASS.toCharArray());
-        
+
         KeyStore.SecretKeyEntry valueKe = (KeyStore.SecretKeyEntry) ks.getEntry(key, passproto);
         return valueKe.getSecretKey();
     }
-    
+
     public byte[] readValueByte(String key) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
         SecretKey sk = readValueRaw(key);
         return (sk == null)
                 ? new byte[0]
                 : sk.getEncoded();
     }
-    
+
     public String readValue(String key) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
-        return new String(readValueByte(key), Charsets.UTF_8);
+        return new String(readValueByte(key), Charset.forName("UTF-8"));
     }
-    
+
     public boolean hasValue(String key) throws KeyStoreException, IOException {
         try {
             loadStore();
@@ -204,19 +207,19 @@ public class SecureStore {
         }
         return ks.containsAlias(key);
     }
-    
+
     protected boolean deleteValue(String key) throws KeyStoreException, IOException {
         try {
             loadStore();
         } catch (Exception ex) {
             throw new IOException(ex.getMessage(), ex);
         }
-        
+
         ks.deleteEntry(key);
-        
+
         return true;
     }
-    
+
     public byte[] toSecure(byte[] indata) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, KeyStoreException, IllegalBlockSizeException, BadPaddingException, IOException {
         try {
             loadStore();
@@ -234,10 +237,10 @@ public class SecureStore {
             bo.write(b);
             inoff += size;
         }
-        
+
         return bo.toByteArray();
     }
-    
+
     public byte[] toInsecure(byte[] indata) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnrecoverableKeyException, KeyStoreException, IllegalBlockSizeException, BadPaddingException, IOException {
         try {
             loadStore();
@@ -248,7 +251,7 @@ public class SecureStore {
         ci.init(Cipher.DECRYPT_MODE, ks.getKey(CERT_ALIAS, STORE_PASS.toCharArray()));
         int inoff = 0;
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        
+
         while (inoff < indata.length) {
             int size = ((inoff + MAXOUTDATALIMIT) < indata.length) ? MAXOUTDATALIMIT : indata.length - inoff;
             // size is fine
