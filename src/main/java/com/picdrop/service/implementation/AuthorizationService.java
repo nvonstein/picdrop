@@ -27,7 +27,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -88,6 +87,12 @@ public class AuthorizationService {
         this.userRepo = userRepo;
         this.cookieProvFactory = cookieProvFactory;
         this.tokenFactory = tokenFactory;
+        try {
+            this.tokenFactory.init();
+        } catch (IOException ex) {
+            log.fatal("Unable to initialize token factory", ex);
+        }
+
         this.authCsFact = authCsFact;
         this.refreshCsFact = refreshCsFact;
         this.basicAuthenticator = basicAuthenticator;
