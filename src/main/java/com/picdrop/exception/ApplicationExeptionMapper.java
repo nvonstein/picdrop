@@ -5,16 +5,9 @@
  */
 package com.picdrop.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.base.Strings;
-import com.google.inject.Inject;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -22,58 +15,16 @@ import org.apache.logging.log4j.Logger;
  */
 @Provider
 @Produces("application/json")
-public class ApplicationExeptionMapper implements ExceptionMapper<ApplicationException> {
-    
-    Logger log = LogManager.getRootLogger();
-    
-    @Inject
-    protected static ObjectWriter writer;
-    
-    protected void logMessage(ApplicationException e) {       
-        if (e.getStatus() >= 500) {
-            doLogError(e);
-        } else {
-            doLogDebug(e);
-        }
+public class ApplicationExeptionMapper extends AbstractExceptionMapper<ApplicationException> {
+
+    public ApplicationExeptionMapper() {
+        this.log = LogManager.getLogger();
     }
+
     
     @Override
-    public Response toResponse(ApplicationException exception) {
-        logMessage(exception);
-        try {
-            return Response
-                    .status(exception.getStatus())
-                    .entity(writer.writeValueAsString(
-                                    exception.toErrorMessage(false)) // TODO app mode
-                    ).build();
-        } catch (JsonProcessingException ex) {
-            log.debug("Error while processing error message to JSON.", ex);
-            return Response.status(exception.getStatus()).entity("{}").build();
-        }
+    protected ErrorMessage processException(ApplicationException ex) {
+        return ex.toErrorMessage(true); // TODO app mode
     }
-    
-    private void doLogError(ApplicationException e) {
-        String msg = Strings.isNullOrEmpty(e.getDevMessage())
-                ? e.getMessage()
-                : e.getDevMessage();
-        
-        if (e.getCause() != null) {
-            log.error(msg, e);
-        } else {
-            log.error(msg);
-        }
-    }
-    
-    private void doLogDebug(ApplicationException e) {
-        String msg = Strings.isNullOrEmpty(e.getDevMessage())
-                ? e.getMessage()
-                : e.getDevMessage();
-        
-        if (e.getCause() != null) {
-            log.debug(msg, e);
-        } else {
-            log.debug(msg);
-        }
-    }
-    
+
 }
