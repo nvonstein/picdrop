@@ -5,14 +5,13 @@
  */
 package com.picdrop.security.token.signer;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.picdrop.guice.provider.JWSTokenSignatureProvider;
 import java.io.IOException;
 
 /**
@@ -22,21 +21,27 @@ import java.io.IOException;
 public class TokenSignerImpl implements TokenSigner {
 
     JWSAlgorithm alg;
-    @Inject
-    JWSTokenSignatureProvider.SignerCheckedProvider signerProv;
-    @Inject
-    JWSTokenSignatureProvider.VerifierCheckedProvider verifierProv;
 
-    @Inject
-    public TokenSignerImpl(@Named("token.signer.alg") String alg) {
+    final JWSSigner sign;
+    final JWSVerifier verif;
+
+    public TokenSignerImpl(JWSAlgorithm alg, JWSSigner sign, JWSVerifier verif) {
+        this.alg = alg;
+        this.sign = sign;
+        this.verif = verif;
+    }
+
+    public TokenSignerImpl(String alg, JWSSigner sign, JWSVerifier verif) {
         this.alg = JWSAlgorithm.parse(alg);
+        this.sign = sign;
+        this.verif = verif;
     }
 
     @Override
     public SignedJWT sign(JWTClaimsSet claims) throws IOException {
         SignedJWT sjwt = new SignedJWT(new JWSHeader(alg), claims);
         try {
-            sjwt.sign(signerProv.get());
+            sjwt.sign(sign);
         } catch (JOSEException ex) {
             throw new IOException("Unable to sign token: " + ex.getMessage(), ex);
         }
@@ -49,7 +54,7 @@ public class TokenSignerImpl implements TokenSigner {
             return false;
         }
         try {
-            return sjwt.verify(verifierProv.get());
+            return sjwt.verify(verif);
         } catch (JOSEException ex) {
             return false;
         }
