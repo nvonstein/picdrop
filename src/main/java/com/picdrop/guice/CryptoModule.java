@@ -13,8 +13,11 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.throwingproviders.CheckedProvides;
 import com.google.inject.throwingproviders.ThrowingProviderBinder;
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEEncrypter;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
 import com.picdrop.guice.provider.JWETokenCryptoProvider;
@@ -27,7 +30,13 @@ import com.picdrop.guice.provider.SecureStoreProviderImpl;
 import com.picdrop.guice.provider.SecureStoreSymmetricKeyProvider;
 import com.picdrop.guice.provider.StaticSymmetricKeyProvider;
 import com.picdrop.guice.provider.SymmetricKeyProvider;
+import com.picdrop.guice.provider.TokenCipherProvider;
+import com.picdrop.guice.provider.TokenSignerProvider;
 import com.picdrop.security.SecureStore;
+import com.picdrop.security.token.cipher.TokenCipher;
+import com.picdrop.security.token.cipher.TokenCipherImpl;
+import com.picdrop.security.token.signer.TokenSigner;
+import com.picdrop.security.token.signer.TokenSignerImpl;
 import java.io.IOException;
 import javax.crypto.SecretKey;
 
@@ -46,7 +55,7 @@ public class CryptoModule implements Module {
         bindSignatureProviders(binder);
 
         bindCryptoProviders(binder);
-        
+
         bindSymmeticKeyProviders(binder);
     }
 
@@ -61,12 +70,12 @@ public class CryptoModule implements Module {
         ThrowingProviderBinder.create(binder)
                 .bind(JWSTokenSignatureProvider.SignerCheckedProvider.class, JWSSigner.class)
                 .to(JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider.class)
-                .in(Singleton.class);
+                .asEagerSingleton();
 
         ThrowingProviderBinder.create(binder)
                 .bind(JWSTokenSignatureProvider.VerifierCheckedProvider.class, JWSVerifier.class)
                 .to(JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider.class)
-                .in(Singleton.class);
+                .asEagerSingleton();
     }
 
     protected void bindCryptoProviders(Binder binder) {
@@ -84,108 +93,53 @@ public class CryptoModule implements Module {
     protected void bindSymmeticKeyProviders(Binder binder) {
         ThrowingProviderBinder.create(binder)
                 .bind(SymmetricKeyProvider.class, SecretKey.class)
-                .annotatedWith(Names.named("security.signature.key"))
+                .annotatedWith(Names.named("security.signature.key.provider"))
                 .to(StaticSymmetricKeyProvider.class)
                 .asEagerSingleton();
 
         ThrowingProviderBinder.create(binder)
                 .bind(SymmetricKeyProvider.class, SecretKey.class)
-                .annotatedWith(Names.named("security.crypto.sym.key"))
+                .annotatedWith(Names.named("security.crypto.sym.key.provider"))
                 .to(StaticSymmetricKeyProvider.class)
                 .asEagerSingleton();
     }
 
-    @Provides
-    protected StaticSymmetricKeyProvider provideStaticSymKeyProvider() {
-        StaticSymmetricKeyProvider skProv;
-        skProv = new StaticSymmetricKeyProvider();
-
-        return skProv;
-    }
-
-//    @Provides
-//    @Singleton
-//    protected SecureStoreSymmetricKeyProvider provideSecureStoreSymKeyProvider() {
-//        SecureStoreSymmetricKeyProvider skProv;
-//        skProv = new SecureStoreSymmetricKeyProvider(ssProv, keyName)
-//
-//        return skProv;
-//    }
-
-    @Provides
     @Singleton
-    protected JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider provideTokenMACVerifierProvider(@Named("security.signature.key") SymmetricKeyProvider symKProv) {
-        JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider verf;
-        try {
-            verf = new JWSTokenMACSignerVerifierProvider.JWSTokenMACVerifierProvider(symKProv.get());
-        } catch (IOException ex) {
-            return null;
+    @CheckedProvides(TokenCipherProvider.class)
+    protected TokenCipher provideTokenCipher(
+            @Named("token.cipher.alg") String alg,
+            @Named("token.cipher.meth") String meth,
+            JWETokenCryptoProvider.EncrypterCheckedProvider encProv,
+            JWETokenCryptoProvider.DecrypterCheckedProvider decProv) throws IOException {
+        JWEEncrypter enc = encProv.get();
+        JWEDecrypter dec = decProv.get();
+        JWEAlgorithm algParsed = JWEAlgorithm.parse(alg);
+        EncryptionMethod methParsed = EncryptionMethod.parse(meth);
+
+        if (!enc.supportedJWEAlgorithms().contains(algParsed) || dec.supportedJWEAlgorithms().contains(algParsed)) {
+            throw new IOException(String.format("Unsupported encryption algorithm provided. Must be one of the following: %s", enc.supportedJWEAlgorithms().toString()));
         }
 
-        return verf;
+        if (!enc.supportedEncryptionMethods().contains(methParsed) || dec.supportedEncryptionMethods().contains(methParsed)) {
+            throw new IOException(String.format("Unsupported encryption method provided. Must be one of the following: %s", enc.supportedEncryptionMethods().toString()));
+        }
+        return new TokenCipherImpl(algParsed, methParsed, enc, dec);
     }
 
-    @Provides
     @Singleton
-    protected JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider provideTokenMACSignerProvider(@Named("security.signature.key") SymmetricKeyProvider symKProv) {
-        JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider sig;
-        try {
-            sig = new JWSTokenMACSignerVerifierProvider.JWSTokenMACSignerProvider(symKProv.get());
-        } catch (IOException ex) {
-            return null;
+    @CheckedProvides(TokenSignerProvider.class)
+    protected TokenSigner provideTokenSigner(
+            @Named("token.signer.alg") String alg,
+            JWSTokenSignatureProvider.SignerCheckedProvider signProv,
+            JWSTokenSignatureProvider.VerifierCheckedProvider verifProv) throws IOException {
+        JWSSigner sig = signProv.get();
+        JWSVerifier verf = verifProv.get();
+        JWSAlgorithm algParsed = JWSAlgorithm.parse(alg);
+
+        if (!sig.supportedJWSAlgorithms().contains(algParsed) || verf.supportedJWSAlgorithms().contains(algParsed)) {
+            throw new IOException(String.format("Unsupported signature algorithm provided. Must be one of the following: %s", sig.supportedJWSAlgorithms().toString()));
         }
 
-        return sig;
+        return new TokenSignerImpl(algParsed, sig, verf);
     }
-
-//    @Provides
-//    @Singleton
-//    protected JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectEncrypterProvider provideTokenDirectEncrypterProvider(@Named("security.crypto.key.provider") SymmetricKeyProvider symKProv) {
-//        JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectEncrypterProvider obj;
-//        try {
-//            obj = new JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectEncrypterProvider(symKProv.get());
-//        } catch (IOException ex) {
-//            return null;
-//        }
-//
-//        return obj;
-//    }
-//
-//    @Provides
-//    @Singleton
-//    protected JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectDecrypterProvider provideTokenDirectDecrypterProvider(@Named("security.crypto.key.provider") SymmetricKeyProvider symKProv) {
-//        JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectDecrypterProvider obj;
-//        try {
-//            obj = new JWETokenDirectEncrypterDecrypterProvider.JWETokenDirectDecrypterProvider(symKProv.get());
-//        } catch (IOException ex) {
-//            return null;
-//        }
-//
-//        return obj;
-//    }
-//
-//    @CheckedProvides(JWETokenCryptoProvider.EncrypterCheckedProvider.class)
-//    @Singleton
-//    protected JWETokenRSAEncrypterDecrypterProvider.JWETokenRSAEncrypterProvider provideTokenRSAEncrypterProvider(SecureStoreProvider ssprov) throws IOException {
-//        JWETokenRSAEncrypterDecrypterProvider.JWETokenRSAEncrypterProvider enc;
-////        try {
-//            enc = new JWETokenRSAEncrypterDecrypterProvider.JWETokenRSAEncrypterProvider(ssprov.get());
-////        } catch (IOException ex) {
-////            return null;
-////        }
-//        return enc;
-//    }
-//
-//    @Provides
-//    @Singleton
-//    protected JWETokenRSAEncrypterDecrypterProvider.JWETokenRSADecrypterProvider provideTokenRSADecrypterProvider(SecureStoreProvider ssprov) {
-//        JWETokenRSAEncrypterDecrypterProvider.JWETokenRSADecrypterProvider dec;
-//        try {
-//            dec = new JWETokenRSAEncrypterDecrypterProvider.JWETokenRSADecrypterProvider(ssprov.get());
-//        } catch (IOException ex) {
-//            return null;
-//        }
-//        return dec;
-//    }
-
 }
