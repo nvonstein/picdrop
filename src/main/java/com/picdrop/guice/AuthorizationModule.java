@@ -86,7 +86,7 @@ public class AuthorizationModule implements Module {
     }
 
     protected void bindWebTokenFactory(Binder binder) {
-        binder.bind(WebTokenFactory.class).to(WebTokenFactoryImpl.class).in(Singleton.class);
+        binder.bind(WebTokenFactory.class).to(WebTokenFactoryImpl.class).asEagerSingleton();
     }
 
     @Provides
