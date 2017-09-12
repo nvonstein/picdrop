@@ -125,11 +125,11 @@ public class CryptoModule implements Module {
         JWEAlgorithm algParsed = JWEAlgorithm.parse(alg);
         EncryptionMethod methParsed = EncryptionMethod.parse(meth);
 
-        if (!enc.supportedJWEAlgorithms().contains(algParsed) || dec.supportedJWEAlgorithms().contains(algParsed)) {
+        if (!enc.supportedJWEAlgorithms().contains(algParsed) || !dec.supportedJWEAlgorithms().contains(algParsed)) {
             throw new IOException(String.format("Unsupported encryption algorithm provided. Must be one of the following: %s", enc.supportedJWEAlgorithms().toString()));
         }
 
-        if (!enc.supportedEncryptionMethods().contains(methParsed) || dec.supportedEncryptionMethods().contains(methParsed)) {
+        if (!enc.supportedEncryptionMethods().contains(methParsed) || !dec.supportedEncryptionMethods().contains(methParsed)) {
             throw new IOException(String.format("Unsupported encryption method provided. Must be one of the following: %s", enc.supportedEncryptionMethods().toString()));
         }
         return new TokenCipherImpl(algParsed, methParsed, enc, dec);
@@ -145,7 +145,7 @@ public class CryptoModule implements Module {
         JWSVerifier verf = verifProv.get();
         JWSAlgorithm algParsed = JWSAlgorithm.parse(alg);
 
-        if (!sig.supportedJWSAlgorithms().contains(algParsed) || verf.supportedJWSAlgorithms().contains(algParsed)) {
+        if (!sig.supportedJWSAlgorithms().contains(algParsed) || !verf.supportedJWSAlgorithms().contains(algParsed)) {
             throw new IOException(String.format("Unsupported signature algorithm provided. Must be one of the following: %s", sig.supportedJWSAlgorithms().toString()));
         }
 
