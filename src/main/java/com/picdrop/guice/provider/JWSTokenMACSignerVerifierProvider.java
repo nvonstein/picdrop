@@ -5,6 +5,8 @@
  */
 package com.picdrop.guice.provider;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
@@ -32,7 +34,7 @@ public abstract class JWSTokenMACSignerVerifierProvider {
     protected JWSSigner signer;
     protected JWSVerifier verfier;
 
-    public JWSTokenMACSignerVerifierProvider(SymmetricKeyProvider symKProv) {
+    JWSTokenMACSignerVerifierProvider(SymmetricKeyProvider symKProv) {
         this.symKProv = symKProv;
         this.KEY = null;
     }
@@ -56,7 +58,8 @@ public abstract class JWSTokenMACSignerVerifierProvider {
 
     public static class JWSTokenMACSignerProvider extends JWSTokenMACSignerVerifierProvider implements JWSTokenSignatureProvider.SignerCheckedProvider {
 
-        public JWSTokenMACSignerProvider(SymmetricKeyProvider symKProv) {
+        @Inject
+        JWSTokenMACSignerProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             this.log = LogManager.getLogger();
         }
@@ -81,7 +84,8 @@ public abstract class JWSTokenMACSignerVerifierProvider {
 
     public static class JWSTokenMACVerifierProvider extends JWSTokenMACSignerVerifierProvider implements JWSTokenSignatureProvider.VerifierCheckedProvider {
 
-        public JWSTokenMACVerifierProvider(SymmetricKeyProvider symKProv) {
+        @Inject
+        JWSTokenMACVerifierProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             this.log = LogManager.getLogger();
         }

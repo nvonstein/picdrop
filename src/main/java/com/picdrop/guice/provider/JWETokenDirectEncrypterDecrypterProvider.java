@@ -33,7 +33,7 @@ public abstract class JWETokenDirectEncrypterDecrypterProvider {
     protected JWEEncrypter encryptor;
     protected JWEDecrypter decrypter;
 
-    public JWETokenDirectEncrypterDecrypterProvider(SymmetricKeyProvider symKProv) {
+    JWETokenDirectEncrypterDecrypterProvider(SymmetricKeyProvider symKProv) {
         this.symKProv = symKProv;
         this.KEY = null;
     }
@@ -57,7 +57,8 @@ public abstract class JWETokenDirectEncrypterDecrypterProvider {
 
     public static class JWETokenDirectEncrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements JWETokenCryptoProvider.EncrypterCheckedProvider {
 
-        public JWETokenDirectEncrypterProvider(SymmetricKeyProvider symKProv) {
+        @Inject
+        JWETokenDirectEncrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             log = LogManager.getLogger();
         }
@@ -82,7 +83,8 @@ public abstract class JWETokenDirectEncrypterDecrypterProvider {
 
     public static class JWETokenDirectDecrypterProvider extends JWETokenDirectEncrypterDecrypterProvider implements JWETokenCryptoProvider.DecrypterCheckedProvider {
 
-        public JWETokenDirectDecrypterProvider(SymmetricKeyProvider symKProv) {
+        @Inject
+        JWETokenDirectDecrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
             super(symKProv);
             log = LogManager.getLogger();
         }

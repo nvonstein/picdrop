@@ -5,6 +5,7 @@
  */
 package com.picdrop.guice.provider;
 
+import com.google.inject.Inject;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEProvider;
@@ -57,6 +58,7 @@ public abstract class JWETokenRSAEncrypterDecrypterProvider {
 
     public static class JWETokenRSAEncrypterProvider extends JWETokenRSAEncrypterDecrypterProvider implements JWETokenCryptoProvider.EncrypterCheckedProvider {
 
+        @Inject
         public JWETokenRSAEncrypterProvider(PKIXProvider pki) {
             super(pki);
         }
@@ -71,6 +73,7 @@ public abstract class JWETokenRSAEncrypterDecrypterProvider {
 
     public static class JWETokenRSADecrypterProvider extends JWETokenRSAEncrypterDecrypterProvider implements JWETokenCryptoProvider.DecrypterCheckedProvider {
 
+        @Inject
         public JWETokenRSADecrypterProvider(PKIXProvider pki) {
             super(pki);
         }
