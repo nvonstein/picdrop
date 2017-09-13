@@ -13,6 +13,8 @@ import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.guice.factory.CookieProviderFactory;
+import com.picdrop.guice.names.AuthorizationToken;
+import com.picdrop.guice.names.Credentials;
 import com.picdrop.guice.names.RefreshToken;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.TokenSet;
@@ -76,10 +78,10 @@ public class AuthorizationService {
             Repository<String, TokenSet> tsRepo,
             CookieProviderFactory cookieProvFactory,
             WebTokenFactory tokenFactory,
-            @Named("authenticator.basic") Authenticator<RegisteredUser> basicAuthenticator,
+            @Credentials Authenticator<RegisteredUser> basicAuthenticator,
             @RefreshToken Authenticator<RegisteredUser> refreshAuthenticator,
-            @Named("claimset.factory.auth") ClaimSetFactory<RegisteredUser> authCsFact,
-            @Named("claimset.factory.refresh") ClaimSetFactory<RegisteredUser> refreshCsFact,
+            @AuthorizationToken ClaimSetFactory<RegisteredUser> authCsFact,
+            @RefreshToken ClaimSetFactory<RegisteredUser> refreshCsFact,
             @Named("service.cookie.enabled") boolean cookieEnabled,
             @Named("service.cookie.auth.name") String authCookieName,
             @Named("service.cookie.refresh.name") String refreshCookieName,

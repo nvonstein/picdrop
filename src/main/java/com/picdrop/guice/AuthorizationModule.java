@@ -14,6 +14,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.picdrop.guice.names.AuthorizationToken;
+import com.picdrop.guice.names.Credentials;
 import com.picdrop.guice.names.RefreshToken;
 import com.picdrop.guice.provider.CookieProvider;
 import com.picdrop.model.RequestContext;
@@ -72,14 +73,14 @@ public class AuthorizationModule implements Module {
 
     protected void bindAuthenticators(Binder binder) {
         binder.bind(new TypeLiteral<Authenticator<RegisteredUser>>() {
-        }).annotatedWith(Names.named("authenticator.basic")).to(BasicAuthenticator.class);
+        }).annotatedWith(Credentials.class).to(BasicAuthenticator.class);
     }
 
     protected void bindClaimSetFactories(Binder binder) {
         binder.bind(new TypeLiteral<ClaimSetFactory<RegisteredUser>>() {
-        }).annotatedWith(Names.named("claimset.factory.auth")).to(AuthTokenClaimSetFactory.class);
+        }).annotatedWith(AuthorizationToken.class).to(AuthTokenClaimSetFactory.class);
         binder.bind(new TypeLiteral<ClaimSetFactory<RegisteredUser>>() {
-        }).annotatedWith(Names.named("claimset.factory.refresh")).to(RefreshTokenClaimSetFactory.class);
+        }).annotatedWith(RefreshToken.class).to(RefreshTokenClaimSetFactory.class);
     }
 
     protected void bindWebTokenFactory(Binder binder) {
