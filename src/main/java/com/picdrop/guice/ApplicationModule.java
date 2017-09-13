@@ -16,6 +16,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.picdrop.exception.AbstractExceptionMapper;
 import com.picdrop.exception.ApplicationExeptionMapper;
+import com.picdrop.guice.names.Config;
 import com.picdrop.helper.EnvHelper;
 import com.picdrop.json.JacksonConfigProvider;
 import com.picdrop.json.Views;
@@ -73,7 +74,11 @@ public class ApplicationModule implements Module {
     }
 
     protected void bindProperties(Binder binder) throws IOException {
-        Names.bindProperties(binder, EnvHelper.getProperties());
+        Properties config = EnvHelper.getProperties();
+        Names.bindProperties(binder, config);
+        binder.bind(Properties.class)
+                .annotatedWith(Config.class)
+                .toInstance(config);
     }
 
     protected void bindObjectMapper(Binder binder) throws IOException {
