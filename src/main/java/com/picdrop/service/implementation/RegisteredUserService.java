@@ -109,7 +109,7 @@ public class RegisteredUserService {
 
         entity = repo.save(entity);
 
-        log.debug(SERVICE, "Validating user attributes");
+        log.info(SERVICE, "User created");
         log.traceExit();
         return entity;
     }
