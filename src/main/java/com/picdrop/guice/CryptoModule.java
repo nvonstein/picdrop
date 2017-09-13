@@ -50,7 +50,7 @@ public class CryptoModule implements Module {
     public void configure(Binder binder) {
         binder.install(ThrowingProviderBinder.forModule(this));
 
-        bindSecureStore(binder);
+//        bindSecureStore(binder);
 
         bindSignatureProviders(binder);
 
@@ -58,7 +58,7 @@ public class CryptoModule implements Module {
 
         bindSymmeticKeyProviders(binder);
 
-        bindPKIXProvider(binder);
+//        bindPKIXProvider(binder);
     }
 
     protected void bindSecureStore(Binder binder) {

@@ -7,6 +7,7 @@ package com.picdrop.service.filter;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.picdrop.guice.names.AuthorizationToken;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
@@ -44,7 +45,7 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
     Logger log = LogManager.getLogger(this.getClass());
 
     @Inject
-    @Named("authenticator.token.auth")
+    @AuthorizationToken
     Authenticator<RegisteredUser> authenticator;
     @Context
     HttpServletRequest request;

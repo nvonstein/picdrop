@@ -9,11 +9,12 @@ import com.picdrop.guice.factory.CookieProviderFactory;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.picdrop.guice.names.AuthorizationToken;
+import com.picdrop.guice.names.RefreshToken;
 import com.picdrop.guice.provider.CookieProvider;
 import com.picdrop.model.RequestContext;
 import com.picdrop.guice.provider.implementation.SessionCookieProvider;
@@ -26,10 +27,6 @@ import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.RefreshTokenClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import com.picdrop.security.token.WebTokenFactoryImpl;
-import com.picdrop.security.token.cipher.TokenCipher;
-import com.picdrop.security.token.cipher.TokenCipherImpl;
-import com.picdrop.security.token.signer.TokenSigner;
-import com.picdrop.security.token.signer.TokenSignerImpl;
 import com.picdrop.service.filter.PermissionAuthenticationFilter;
 import com.picdrop.service.filter.ShareRewriteFilter;
 import org.jboss.resteasy.plugins.guice.RequestScoped;
@@ -90,20 +87,20 @@ public class AuthorizationModule implements Module {
     }
 
     @Provides
-    @Named("authenticator.token.auth")
+    @AuthorizationToken
     Authenticator<RegisteredUser> provideAuthTokenAuthenticator(
             WebTokenFactory tfactory,
             @Named("service.cookie.auth.name") String authCookieName,
-            @Named("claimset.factory.auth") ClaimSetFactory<RegisteredUser> f) {
+            @AuthorizationToken ClaimSetFactory<RegisteredUser> f) {
         return new TokenAuthenticator(authCookieName, tfactory, f);
     }
 
     @Provides
-    @Named("authenticator.token.refresh")
+    @RefreshToken
     Authenticator<RegisteredUser> provideRefreshTokenAuthenticator(
             WebTokenFactory tfactory,
             @Named("service.cookie.refresh.name") String authCookieName,
-            @Named("claimset.factory.refresh") ClaimSetFactory<RegisteredUser> f) {
+            @RefreshToken ClaimSetFactory<RegisteredUser> f) {
         return new TokenAuthenticator(authCookieName, tfactory, f);
     }
 }
