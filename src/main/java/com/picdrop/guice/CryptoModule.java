@@ -52,22 +52,13 @@ public class CryptoModule implements Module {
     public void configure(Binder binder) {
         binder.install(ThrowingProviderBinder.forModule(this));
 
-//        bindSecureStore(binder);
-
         bindSignatureProviders(binder);
 
         bindCryptoProviders(binder);
-
-        bindSymmeticKeyProviders(binder);
-
-//        bindPKIXProvider(binder);
     }
 
     protected void bindSecureStore(Binder binder) {
-        ThrowingProviderBinder.create(binder)
-                .bind(SecureStoreProvider.class, SecureStore.class)
-                .to(SecureStoreProviderImpl.class)
-                .in(Singleton.class);
+
     }
 
     protected void bindSignatureProviders(Binder binder) {
@@ -79,6 +70,12 @@ public class CryptoModule implements Module {
         ThrowingProviderBinder.create(binder)
                 .bind(JWSSignatureProvider.VerifierCheckedProvider.class, JWSVerifier.class)
                 .to(JWSMACSignatureProvider.VerifierProvider.class)
+                .asEagerSingleton();
+
+        ThrowingProviderBinder.create(binder)
+                .bind(SymmetricKeyProvider.class, SecretKey.class)
+                .annotatedWith(Signature.class)
+                .to(StaticSymmetricKeyProvider.class)
                 .asEagerSingleton();
     }
 
@@ -92,28 +89,25 @@ public class CryptoModule implements Module {
                 .bind(JWECryptoProvider.DecrypterCheckedProvider.class, JWEDecrypter.class)
                 .to(JWEDirectCryptoProvider.DecrypterProvider.class)
                 .asEagerSingleton();
-    }
 
-    protected void bindSymmeticKeyProviders(Binder binder) {
-        ThrowingProviderBinder.create(binder)
-                .bind(SymmetricKeyProvider.class, SecretKey.class)
-                .annotatedWith(Signature.class)
-                .to(StaticSymmetricKeyProvider.class)
-                .asEagerSingleton();
-
+//        Required for symm. encryption --------------------
         ThrowingProviderBinder.create(binder)
                 .bind(SymmetricKeyProvider.class, SecretKey.class)
                 .annotatedWith(Encryption.class)
                 .to(StaticSymmetricKeyProvider.class)
                 .asEagerSingleton();
-    }
 
-    protected void bindPKIXProvider(Binder binder) {
-        ThrowingProviderBinder.create(binder)
-                .bind(PKIXProvider.class, KeyPair.class)
-                .annotatedWith(Encryption.class)
-                .to(SecureStorePKIXProvider.class)
-                .in(Singleton.class);
+//        Required for asymm. encryption --------------------
+//        ThrowingProviderBinder.create(binder)
+//                .bind(SecureStoreProvider.class, SecureStore.class)
+//                .to(SecureStoreProviderImpl.class)
+//                .in(Singleton.class);
+//
+//        ThrowingProviderBinder.create(binder)
+//                .bind(PKIXProvider.class, KeyPair.class)
+//                .annotatedWith(Encryption.class)
+//                .to(SecureStorePKIXProvider.class)
+//                .in(Singleton.class);
     }
 
     @Singleton
