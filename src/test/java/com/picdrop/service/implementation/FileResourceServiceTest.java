@@ -12,6 +12,7 @@ import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.guice.ApplicationModule;
 import com.picdrop.guice.ApplicationModuleMock;
 import com.picdrop.guice.AuthorizationModuleMock;
+import com.picdrop.guice.CryptoModule;
 import com.picdrop.guice.FileHandlingModuleMock;
 import com.picdrop.guice.RepositoryModuleMockNoDB;
 import com.picdrop.helper.EnvHelper;
@@ -101,6 +102,7 @@ public class FileResourceServiceTest {
 
         Injector inj = Guice.createInjector(new ApplicationModule(),
                 new AuthorizationModuleMock(ctx),
+                new CryptoModule(),
                 repoModule,
                 new FileHandlingModuleMock(writer, reader, fr),
                 new RequestScopeModule());

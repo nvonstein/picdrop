@@ -8,6 +8,7 @@ package com.picdrop.guice;
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import com.picdrop.guice.names.File;
 import com.picdrop.io.MurmurFileRepository;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
@@ -37,9 +38,7 @@ public class FileHandlingModuleMock extends FileHandlingModule {
         binder.bind(FileReader.class).toInstance(reader);
         
         binder.bind(new TypeLiteral<FileRepository<String>>() {
-        }).annotatedWith(Names.named("repository.file.main")).toInstance(fp);
-        binder.bind(new TypeLiteral<FileRepository<String>>() {
-        }).annotatedWith(Names.named("repository.file.thumbnails")).toInstance(fp);
+        }).annotatedWith(File.class).toInstance(fp);
     }
     
     

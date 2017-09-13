@@ -238,7 +238,7 @@ public class AuthorizationService {
 
     @POST
     @Path("/logout")
-    @Permission("*/logout")
+    @Permission("logout")
     public Response logoutUser() { // TODO rework login/logout
         log.traceEntry();
         User user = contextProv.get().getPrincipal();

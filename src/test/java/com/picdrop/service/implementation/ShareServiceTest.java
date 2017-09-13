@@ -11,6 +11,7 @@ import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.guice.ApplicationModuleMock;
 import com.picdrop.guice.AuthorizationModuleMock;
+import com.picdrop.guice.CryptoModule;
 import com.picdrop.guice.FileHandlingModule;
 import com.picdrop.guice.RepositoryModuleMockNoDB;
 import com.picdrop.model.RequestContext;
@@ -79,6 +80,7 @@ public class ShareServiceTest {
 
         Injector inj = Guice.createInjector(new ApplicationModuleMock(),
                 new AuthorizationModuleMock(ctx),
+                new CryptoModule(),
                 repoModule,
                 new FileHandlingModule(),
                 new RequestScopeModule());
