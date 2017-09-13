@@ -19,6 +19,8 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
+import com.picdrop.guice.names.Encryption;
+import com.picdrop.guice.names.Signature;
 import com.picdrop.guice.provider.implementation.JWEDirectCryptoProvider;
 import com.picdrop.guice.provider.implementation.JWSMACSignatureProvider;
 import com.picdrop.guice.provider.PKIXProvider;
@@ -95,13 +97,13 @@ public class CryptoModule implements Module {
     protected void bindSymmeticKeyProviders(Binder binder) {
         ThrowingProviderBinder.create(binder)
                 .bind(SymmetricKeyProvider.class, SecretKey.class)
-                .annotatedWith(Names.named("security.signature.key.provider"))
+                .annotatedWith(Signature.class)
                 .to(StaticSymmetricKeyProvider.class)
                 .asEagerSingleton();
 
         ThrowingProviderBinder.create(binder)
                 .bind(SymmetricKeyProvider.class, SecretKey.class)
-                .annotatedWith(Names.named("security.crypto.sym.key.provider"))
+                .annotatedWith(Encryption.class)
                 .to(StaticSymmetricKeyProvider.class)
                 .asEagerSingleton();
     }
@@ -109,6 +111,7 @@ public class CryptoModule implements Module {
     protected void bindPKIXProvider(Binder binder) {
         ThrowingProviderBinder.create(binder)
                 .bind(PKIXProvider.class, KeyPair.class)
+                .annotatedWith(Encryption.class)
                 .to(SecureStorePKIXProvider.class)
                 .in(Singleton.class);
     }

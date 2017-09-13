@@ -12,6 +12,7 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
+import com.picdrop.guice.names.Encryption;
 import com.picdrop.guice.provider.SymmetricKeyProvider;
 import java.io.IOException;
 import javax.crypto.SecretKey;
@@ -60,7 +61,7 @@ public abstract class JWEDirectCryptoProvider {
     public static class EncrypterProvider extends JWEDirectCryptoProvider implements JWECryptoProvider.EncrypterCheckedProvider {
 
         @Inject
-        EncrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
+        EncrypterProvider(@Encryption SymmetricKeyProvider symKProv) {
             super(symKProv);
             log = LogManager.getLogger();
         }
@@ -86,7 +87,7 @@ public abstract class JWEDirectCryptoProvider {
     public static class DecrypterProvider extends JWEDirectCryptoProvider implements JWECryptoProvider.DecrypterCheckedProvider {
 
         @Inject
-        DecrypterProvider(@Named("security.crypto.sym.key.provider") SymmetricKeyProvider symKProv) {
+        DecrypterProvider(@Encryption SymmetricKeyProvider symKProv) {
             super(symKProv);
             log = LogManager.getLogger();
         }

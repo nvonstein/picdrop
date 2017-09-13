@@ -11,6 +11,7 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEProvider;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
+import com.picdrop.guice.names.Encryption;
 import com.picdrop.guice.provider.PKIXProvider;
 import java.io.IOException;
 import java.security.KeyPair;
@@ -61,7 +62,7 @@ public abstract class JWERSACryptoProvider {
     public static class EncrypterProvider extends JWERSACryptoProvider implements JWECryptoProvider.EncrypterCheckedProvider {
 
         @Inject
-        public EncrypterProvider(PKIXProvider pki) {
+        public EncrypterProvider(@Encryption PKIXProvider pki) {
             super(pki);
         }
 
@@ -76,7 +77,7 @@ public abstract class JWERSACryptoProvider {
     public static class DecrypterProvider extends JWERSACryptoProvider implements JWECryptoProvider.DecrypterCheckedProvider {
 
         @Inject
-        public DecrypterProvider(PKIXProvider pki) {
+        public DecrypterProvider(@Encryption PKIXProvider pki) {
             super(pki);
         }
 

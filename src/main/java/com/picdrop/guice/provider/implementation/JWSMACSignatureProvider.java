@@ -13,6 +13,7 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
+import com.picdrop.guice.names.Signature;
 import com.picdrop.guice.provider.SymmetricKeyProvider;
 import java.io.IOException;
 import javax.crypto.SecretKey;
@@ -61,7 +62,7 @@ public abstract class JWSMACSignatureProvider {
     public static class SignerProvider extends JWSMACSignatureProvider implements JWSSignatureProvider.SignerCheckedProvider {
 
         @Inject
-        SignerProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
+        SignerProvider(@Signature SymmetricKeyProvider symKProv) {
             super(symKProv);
             this.log = LogManager.getLogger();
         }
@@ -87,7 +88,7 @@ public abstract class JWSMACSignatureProvider {
     public static class VerifierProvider extends JWSMACSignatureProvider implements JWSSignatureProvider.VerifierCheckedProvider {
 
         @Inject
-        VerifierProvider(@Named("security.signature.key.provider") SymmetricKeyProvider symKProv) {
+        VerifierProvider(@Signature SymmetricKeyProvider symKProv) {
             super(symKProv);
             this.log = LogManager.getLogger();
         }
