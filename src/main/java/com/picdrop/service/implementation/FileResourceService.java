@@ -83,7 +83,6 @@ public class FileResourceService {
     @Inject
     InputStreamProviderFactory instProvFac;
 
-    @Inject
     Tika tika;
 
     @Inject
@@ -108,6 +107,7 @@ public class FileResourceService {
         return tika;
     }
 
+    @Inject
     public void setTika(Tika tika) {
         this.tika = tika;
     }
