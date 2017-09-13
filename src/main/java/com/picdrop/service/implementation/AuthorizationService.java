@@ -5,7 +5,6 @@
  */
 package com.picdrop.service.implementation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -47,62 +46,86 @@ import org.joda.time.DateTimeZone;
 @Path("/app")
 public class AuthorizationService {
 
-    Logger log = LogManager.getLogger();
+    protected Logger log = LogManager.getLogger();
 
-    Repository<String, RegisteredUser> userRepo;
-    Repository<String, TokenSet> tsRepo;
+    protected Repository<String, RegisteredUser> userRepo;
+    protected Repository<String, TokenSet> tsRepo;
 
-    CookieProviderFactory cookieProvFactory;
-    WebTokenFactory tokenFactory;
+    protected CookieProviderFactory cookieProvFactory;
+    protected WebTokenFactory tokenFactory;
 
-    Authenticator<RegisteredUser> basicAuthenticator;
-    Authenticator<RegisteredUser> refreshAuthenticator;
+    protected Authenticator<RegisteredUser> basicAuthenticator;
+    protected Authenticator<RegisteredUser> refreshAuthenticator;
 
-    ClaimSetFactory<RegisteredUser> authCsFact;
-    ClaimSetFactory<RegisteredUser> refreshCsFact;
-
-    @Inject
-    Provider<RequestContext> contextProv;
+    protected ClaimSetFactory<RegisteredUser> authCsFact;
+    protected ClaimSetFactory<RegisteredUser> refreshCsFact;
 
     @Inject
-    ObjectMapper mapper;
+    protected Provider<RequestContext> contextProv;
 
-    final boolean cookieEnabled;
-    final String authCookieName;
-    final String refreshCookieName;
-    final int tsExpiry;
+    protected boolean cookieEnabled;
+    protected String authCookieName;
+    protected String refreshCookieName;
+    protected int tsExpiry;
 
     @Inject
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
             Repository<String, TokenSet> tsRepo,
-            CookieProviderFactory cookieProvFactory,
-            WebTokenFactory tokenFactory,
-            @Credentials Authenticator<RegisteredUser> basicAuthenticator,
-            @RefreshToken Authenticator<RegisteredUser> refreshAuthenticator,
-            @AuthorizationToken ClaimSetFactory<RegisteredUser> authCsFact,
-            @RefreshToken ClaimSetFactory<RegisteredUser> refreshCsFact,
-            @Named("service.cookie.enabled") boolean cookieEnabled,
-            @Named("service.cookie.auth.name") String authCookieName,
-            @Named("service.cookie.refresh.name") String refreshCookieName,
-            @Named("service.jwt.refresh.exp") int tsExpiry) {
+            WebTokenFactory tokenFactory) {
         this.tsRepo = tsRepo;
         this.userRepo = userRepo;
-        this.cookieProvFactory = cookieProvFactory;
+
         this.tokenFactory = tokenFactory;
         try {
             this.tokenFactory.init();
         } catch (IOException ex) {
             log.fatal("Unable to initialize token factory", ex);
         }
+    }
 
-        this.authCsFact = authCsFact;
-        this.refreshCsFact = refreshCsFact;
+    @Inject
+    public void setCookieProvFactory(CookieProviderFactory cookieProvFactory) {
+        this.cookieProvFactory = cookieProvFactory;
+    }
+
+    @Inject
+    public void setBasicAuthenticator(@Credentials Authenticator<RegisteredUser> basicAuthenticator) {
         this.basicAuthenticator = basicAuthenticator;
+    }
+
+    @Inject
+    public void setRefreshAuthenticator(@RefreshToken Authenticator<RegisteredUser> refreshAuthenticator) {
         this.refreshAuthenticator = refreshAuthenticator;
+    }
+
+    @Inject
+    public void setAuthClaimSetFact(@AuthorizationToken ClaimSetFactory<RegisteredUser> authCsFact) {
+        this.authCsFact = authCsFact;
+    }
+
+    @Inject
+    public void setRefreshClaimSetFact(@RefreshToken ClaimSetFactory<RegisteredUser> refreshCsFact) {
+        this.refreshCsFact = refreshCsFact;
+    }
+
+    @Inject
+    public void setCookieEnabled(@Named("service.cookie.enabled") boolean cookieEnabled) {
         this.cookieEnabled = cookieEnabled;
+    }
+
+    @Inject
+    public void setAuthCookieName(@Named("service.cookie.auth.name") String authCookieName) {
         this.authCookieName = authCookieName;
+    }
+
+    @Inject
+    public void setRefreshCookieName(@Named("service.cookie.refresh.name") String refreshCookieName) {
         this.refreshCookieName = refreshCookieName;
+    }
+
+    @Inject
+    public void setTokenSetExpiry(@Named("service.jwt.refresh.exp") int tsExpiry) {
         this.tsExpiry = tsExpiry;
     }
 
