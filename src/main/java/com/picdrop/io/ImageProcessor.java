@@ -21,13 +21,10 @@ import java.io.IOException;
  */
 public class ImageProcessor extends AbstractUpdateProcessor<FileResource> {
 
-    FileRepository<String> fileRepo;
     
     @Inject
-    public ImageProcessor(Repository<String, FileResource> repo,
-            @Named("repository.file.thumbnails") FileRepository<String> fileRepo) {
+    public ImageProcessor(Repository<String, FileResource> repo) {
         super(repo);
-        this.fileRepo = fileRepo;
     }
 
     @Override
@@ -35,10 +32,6 @@ public class ImageProcessor extends AbstractUpdateProcessor<FileResource> {
         ResourceDescriptor rdes = entity.getDescriptor();
         if ((rdes != null) && (rdes.getType().isCoveredBy(FileType.IMAGE_WILDTYPE))) {
             ImageDescriptor ides = rdes.to(ImageDescriptor.class);
-
-            // calc properties
-//            ides.addThumbnailUri("small", "dummy");
-//            ides.addThumbnailUri("medium", "dummy2");
 
             entity.setDescriptor(ides);
         }

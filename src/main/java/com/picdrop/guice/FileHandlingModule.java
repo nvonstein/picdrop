@@ -10,8 +10,9 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.google.inject.name.Names;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
+import com.picdrop.guice.names.File;
+import com.picdrop.guice.names.Resource;
 import com.picdrop.guice.provider.implementation.FileItemFactoryProvider;
 import com.picdrop.guice.provider.implementation.FileItemInputStreamProvider;
 import com.picdrop.guice.provider.InputStreamProvider;
@@ -61,22 +62,20 @@ public class FileHandlingModule implements Module {
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
 
         binder.bind(new TypeLiteral<FileRepository<String>>() {
-        }).annotatedWith(Names.named("repository.file.main")).to(MurmurFileRepository.class).in(Singleton.class);
-        binder.bind(new TypeLiteral<FileRepository<String>>() {
-        }).annotatedWith(Names.named("repository.file.thumbnails")).to(MurmurFileRepository.class).in(Singleton.class);
+        }).annotatedWith(File.class).to(MurmurFileRepository.class).in(Singleton.class);
     }
 
     protected void bindFileStreamProvider(Binder binder) {
         binder.install(new FactoryModuleBuilder()
-                .implement(InputStreamProvider.class, Names.named("inputstream.resource"), ResourceInputStreamProvider.class)
-                .implement(InputStreamProvider.class, Names.named("inputstream.fileitem"), FileItemInputStreamProvider.class)
+                .implement(InputStreamProvider.class, Resource.class, ResourceInputStreamProvider.class)
+                .implement(InputStreamProvider.class, File.class, FileItemInputStreamProvider.class)
                 .build(InputStreamProviderFactory.class)
         );
     }
 
     protected void bindProcessorList(Binder binder) {
         binder.bind(new TypeLiteral<List<Processor<FileResource>>>() {
-        }).annotatedWith(Names.named("processors")).toProvider(ProcessorListProviders.class);
+        }).annotatedWith(File.class).toProvider(ProcessorListProviders.class);
     }
 
     protected void bindProcessors(Binder binder) {

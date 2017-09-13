@@ -6,7 +6,7 @@
 package com.picdrop.guice.factory;
 
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.name.Named;
+import com.picdrop.guice.names.Session;
 import com.picdrop.guice.provider.CookieProvider;
 
 /**
@@ -15,7 +15,7 @@ import com.picdrop.guice.provider.CookieProvider;
  */
 public interface CookieProviderFactory {
 
-    @Named("service.cookie.factory")
+    @Session
     CookieProvider getSessionCookieProvider(@Assisted("name") String name,
             @Assisted("value") String value);
 }

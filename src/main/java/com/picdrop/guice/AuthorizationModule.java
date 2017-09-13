@@ -16,6 +16,7 @@ import com.google.inject.name.Names;
 import com.picdrop.guice.names.AuthorizationToken;
 import com.picdrop.guice.names.Credentials;
 import com.picdrop.guice.names.RefreshToken;
+import com.picdrop.guice.names.Session;
 import com.picdrop.guice.provider.CookieProvider;
 import com.picdrop.model.RequestContext;
 import com.picdrop.guice.provider.implementation.SessionCookieProvider;
@@ -57,7 +58,7 @@ public class AuthorizationModule implements Module {
 
     protected void bindSessionCookieFactory(Binder binder) {
         binder.install(new FactoryModuleBuilder()
-                .implement(CookieProvider.class, Names.named("service.cookie.factory"), SessionCookieProvider.class)
+                .implement(CookieProvider.class, Session.class, SessionCookieProvider.class)
                 .build(CookieProviderFactory.class)
         );
     }

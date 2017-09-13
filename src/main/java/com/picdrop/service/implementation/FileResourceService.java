@@ -13,6 +13,7 @@ import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
+import com.picdrop.guice.names.File;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.resource.FileResource;
 import static com.picdrop.helper.LogHelper.*;
@@ -91,8 +92,8 @@ public class FileResourceService {
             AwareRepository<String, Share, User> srepo,
             Repository<String, Collection.CollectionItem> cirepo,
             Repository<String, Collection> crepo,
-            @Named("repository.file.main") FileRepository<String> fileRepo,
-            @Named("processors") List<Processor<FileResource>> processors) {
+            @File FileRepository<String> fileRepo,
+            @File List<Processor<FileResource>> processors) {
         this.repo = repo;
         this.srepo = srepo;
         this.cirepo = cirepo;

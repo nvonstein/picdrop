@@ -8,9 +8,9 @@ package com.picdrop.guice;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import com.picdrop.guice.names.Queries;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.TokenSet;
@@ -28,9 +28,7 @@ import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
-import com.picdrop.repository.mongo.MorphiaRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
-import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
 import java.util.Map;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
@@ -44,7 +42,7 @@ public class RepositoryModule implements Module {
     @Override
     public void configure(Binder binder) {
         binder.bind(new TypeLiteral<Map<String, String>>() {
-        }).annotatedWith(Names.named("queries")).toInstance(NamedQueries.getQueries());
+        }).annotatedWith(Queries.class).toInstance(NamedQueries.getQueries());
 
         Datastore ds = bindDatastore(binder);
 

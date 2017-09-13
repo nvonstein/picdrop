@@ -12,6 +12,7 @@ import com.google.inject.name.Named;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
+import com.picdrop.guice.names.Queries;
 import com.picdrop.repository.Repository;
 import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
     }
 
     @Inject
-    public void setNamedQueries(@Named("queries") Map<String, String> namedQueries) {
+    public void setNamedQueries(@Queries Map<String, String> namedQueries) {
         this.namedQueries = namedQueries;
     }
 

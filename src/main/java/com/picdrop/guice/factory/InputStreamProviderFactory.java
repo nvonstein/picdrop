@@ -5,7 +5,8 @@
  */
 package com.picdrop.guice.factory;
 
-import com.google.inject.name.Named;
+import com.picdrop.guice.names.File;
+import com.picdrop.guice.names.Resource;
 import com.picdrop.guice.provider.InputStreamProvider;
 import com.picdrop.model.resource.FileResource;
 import org.apache.commons.fileupload.FileItem;
@@ -16,9 +17,9 @@ import org.apache.commons.fileupload.FileItem;
  */
 public interface InputStreamProviderFactory {
 
-    @Named("inputstream.resource")
+    @Resource
     InputStreamProvider create(FileResource res);
 
-    @Named("inputstream.fileitem")
+    @File
     InputStreamProvider create(FileItem fi);
 }
