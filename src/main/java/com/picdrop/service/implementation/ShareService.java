@@ -199,7 +199,7 @@ public class ShareService extends CrudService<String, Share, AwareRepository<Str
 
         if (r.isCollection()) {
             this.crepo.update(r.getId(), (Collection) r);
-            log.info(SERVICE, "Share created");
+            log.info(SERVICE, "Share updated");
             log.traceExit();
             return s;
         }
