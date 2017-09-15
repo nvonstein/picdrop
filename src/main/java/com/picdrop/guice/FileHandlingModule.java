@@ -10,9 +10,13 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.throwingproviders.CheckedProvides;
+import com.google.inject.throwingproviders.ThrowingProviderBinder;
 import com.picdrop.guice.factory.InputStreamProviderFactory;
+import com.picdrop.guice.names.Config;
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.names.Resource;
+import com.picdrop.guice.provider.FileRepositoryProvider;
 import com.picdrop.guice.provider.implementation.FileItemFactoryProvider;
 import com.picdrop.guice.provider.implementation.FileItemInputStreamProvider;
 import com.picdrop.guice.provider.InputStreamProvider;
@@ -30,6 +34,9 @@ import java.util.List;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import com.picdrop.io.FileRepository;
+import com.picdrop.io.RoundRobinFileRepository;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  *
@@ -39,12 +46,14 @@ public class FileHandlingModule implements Module {
 
     @Override
     public void configure(Binder binder) {
+        binder.install(ThrowingProviderBinder.forModule(this));
         // Upload handeling
         bindUploadHandler(binder);
 
         // File writing
         bindFileStreamProvider(binder);
         bindFileIOProcessors(binder);
+//        bindFileRepository(binder);
 
         // File processors
         bindProcessorList(binder);
@@ -60,7 +69,9 @@ public class FileHandlingModule implements Module {
     protected void bindFileIOProcessors(Binder binder) {
         binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
         binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
+    }
 
+    protected void bindFileRepository(Binder binder) {
         binder.bind(new TypeLiteral<FileRepository<String>>() {
         }).annotatedWith(File.class).to(MurmurFileRepository.class).in(Singleton.class);
     }
@@ -80,5 +91,25 @@ public class FileHandlingModule implements Module {
 
     protected void bindProcessors(Binder binder) {
         binder.bind(ImageProcessor.class);
+    }
+
+    @CheckedProvides(FileRepositoryProvider.class)
+    @File
+    FileRepository<String> provideFileRepository(@Config Properties config) throws IOException {
+        RoundRobinFileRepository rrFRepo = new RoundRobinFileRepository();
+        boolean gen;
+        try {
+            config.entrySet().stream()
+                    .filter(e -> ((String) e.getKey()).startsWith("service.file.stores."))
+                    .forEach(e -> rrFRepo.registerRepository(
+                    ((String) e.getKey()).replace("service.file.stores.", ""),
+                    new MurmurFileRepository((String) e.getValue())));
+
+            gen = Boolean.valueOf(config.getProperty("service.file.store.generate", "true"));
+        } catch (Exception e) {
+            throw new IOException(e.getMessage(), e);
+        }
+        rrFRepo.init(gen);
+        return rrFRepo;
     }
 }
