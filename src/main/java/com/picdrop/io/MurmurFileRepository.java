@@ -57,21 +57,21 @@ public class MurmurFileRepository extends AbstractFileRepository<String> {
     public String write(String entity, ResourceContainer cnt) throws IOException {
         checkInit();
         String fileId = entity;
-        if ((fileId == null) || Strings.isNullOrEmpty(fileId)) {
+
+        if (Strings.isNullOrEmpty(fileId)) {
             String uuid = UUID.randomUUID().toString();
             byte[] hash = hashf.hashUnencodedChars(uuid).asBytes();
-            fileId = DatatypeConverter.printHexBinary(hash);
-        } else {
-            fileId = (fileId.startsWith("/"))
-                    ? fileId.substring(1)
-                    : fileId;
+            fileId = String.format("/%s/%s",
+                    DatatypeConverter.printHexBinary(hash).toLowerCase(),
+                    cnt.getName());
         }
 
         File f = new File(rootDir, fileId);
-
+        f.mkdirs();
+        
         Files.copy(cnt.get(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-        return "/" + fileId;
+        return fileId;
     }
 
 }
