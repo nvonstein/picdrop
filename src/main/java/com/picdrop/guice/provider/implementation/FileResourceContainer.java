@@ -8,6 +8,7 @@ package com.picdrop.guice.provider.implementation;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.picdrop.guice.names.File;
+import com.picdrop.guice.provider.FileRepositoryProvider;
 import com.picdrop.guice.provider.ResourceContainer;
 import com.picdrop.io.repository.FileRepository;
 import com.picdrop.io.writer.FileReader;
@@ -22,19 +23,19 @@ import java.io.InputStream;
 public class FileResourceContainer implements ResourceContainer {
 
     FileResource res;
-    FileRepository<String> fileRepo;
+    FileRepositoryProvider fileRepoProv;
 
     @AssistedInject
     public FileResourceContainer(
-            @File FileRepository<String> fileRepo,
+            @File FileRepositoryProvider fileRepoProv,
             @Assisted FileResource res) {
-        this.fileRepo = fileRepo;
+        this.fileRepoProv = fileRepoProv;
         this.res = res;
     }
 
     @Override
     public InputStream get() throws IOException {
-        return fileRepo.read(res.getFileId());
+        return fileRepoProv.get().read(res.getFileId());
     }
 
     @Override
