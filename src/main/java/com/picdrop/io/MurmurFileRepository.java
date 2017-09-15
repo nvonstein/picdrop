@@ -8,7 +8,7 @@ package com.picdrop.io;
 import com.google.common.base.Strings;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -54,7 +54,7 @@ public class MurmurFileRepository extends AbstractFileRepository<String> {
     }
 
     @Override
-    public String write(String entity, InputStreamProvider in) throws IOException {
+    public String write(String entity, ResourceContainer cnt) throws IOException {
         checkInit();
         String fileId = entity;
         if ((fileId == null) || Strings.isNullOrEmpty(fileId)) {
@@ -69,7 +69,7 @@ public class MurmurFileRepository extends AbstractFileRepository<String> {
 
         File f = new File(rootDir, fileId);
 
-        Files.copy(in.get(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(cnt.get(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         return "/" + fileId;
     }

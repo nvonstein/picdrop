@@ -6,8 +6,7 @@
 package com.picdrop.io;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.ImageDescriptor;
 import com.picdrop.model.resource.FileResource;
@@ -28,14 +27,14 @@ public class ImageProcessor extends AbstractUpdateProcessor<FileResource> {
     }
 
     @Override
-    public FileResource onPostStore(FileResource entity, InputStreamProvider in) throws IOException {
+    public FileResource onPostStore(FileResource entity, ResourceContainer cnt) throws IOException {
         ResourceDescriptor rdes = entity.getDescriptor();
         if ((rdes != null) && (rdes.getType().isCoveredBy(FileType.IMAGE_WILDTYPE))) {
             ImageDescriptor ides = rdes.to(ImageDescriptor.class);
 
             entity.setDescriptor(ides);
         }
-        return super.onPostStore(entity, in);
+        return super.onPostStore(entity, cnt);
     }
 
 }

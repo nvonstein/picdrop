@@ -5,7 +5,7 @@
  */
 package com.picdrop.io;
 
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import com.picdrop.model.Identifiable;
 import com.picdrop.repository.Repository;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public abstract class AbstractUpdateProcessor<T extends Identifiable> extends Ab
     }
 
     @Override
-    public T onPostStore(T entity, InputStreamProvider in) throws IOException {
+    public T onPostStore(T entity, ResourceContainer cnt) throws IOException {
         return repo.update(entity.getId(), entity);
     }
 }

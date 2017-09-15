@@ -5,7 +5,7 @@
  */
 package com.picdrop.io;
 
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -14,7 +14,7 @@ import java.io.InputStream;
  * @author i330120
  */
 public interface FileRepository<T> {
-    T write(T entity, InputStreamProvider in) throws IOException;
+    T write(T entity, ResourceContainer cnt) throws IOException;
     InputStream read(T entity) throws IOException;
     boolean delete(T entity) throws IOException;
     void init(boolean generate) throws IOException;

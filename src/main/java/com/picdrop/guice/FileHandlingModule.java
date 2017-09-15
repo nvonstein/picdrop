@@ -12,16 +12,14 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.throwingproviders.CheckedProvides;
 import com.google.inject.throwingproviders.ThrowingProviderBinder;
-import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.guice.names.Config;
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.names.Resource;
 import com.picdrop.guice.provider.FileRepositoryProvider;
 import com.picdrop.guice.provider.implementation.FileItemFactoryProvider;
-import com.picdrop.guice.provider.implementation.FileItemInputStreamProvider;
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.implementation.FileItemResourceContainer;
 import com.picdrop.guice.provider.implementation.ProcessorListProviders;
-import com.picdrop.guice.provider.implementation.ResourceInputStreamProvider;
+import com.picdrop.guice.provider.implementation.FileResourceContainer;
 import com.picdrop.guice.provider.implementation.UploadHandlerProvider;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
@@ -37,6 +35,8 @@ import com.picdrop.io.FileRepository;
 import com.picdrop.io.RoundRobinFileRepository;
 import java.io.IOException;
 import java.util.Properties;
+import com.picdrop.guice.factory.ResourceContainerFactory;
+import com.picdrop.guice.provider.ResourceContainer;
 
 /**
  *
@@ -78,9 +78,9 @@ public class FileHandlingModule implements Module {
 
     protected void bindFileStreamProvider(Binder binder) {
         binder.install(new FactoryModuleBuilder()
-                .implement(InputStreamProvider.class, Resource.class, ResourceInputStreamProvider.class)
-                .implement(InputStreamProvider.class, File.class, FileItemInputStreamProvider.class)
-                .build(InputStreamProviderFactory.class)
+                .implement(ResourceContainer.class, Resource.class, FileResourceContainer.class)
+                .implement(ResourceContainer.class, File.class, FileItemResourceContainer.class)
+                .build(ResourceContainerFactory.class)
         );
     }
 

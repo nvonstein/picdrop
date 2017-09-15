@@ -6,7 +6,7 @@
 package com.picdrop.io;
 
 import com.google.common.base.Strings;
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -95,17 +95,16 @@ public class RoundRobinFileRepository implements FileRepository<String> {
     }
     
     @Override
-    public String write(String entity, InputStreamProvider in) throws IOException {
+    public String write(String entity, ResourceContainer cnt) throws IOException {
         checkInit();
         String name = (entity == null)
                 ? chooseRepository()
                 : resolveRepository(entity);
         
         FileRepository<String> repo = this.repos.get(name);
-        String id = repo.write(
-                (entity == null)
+        String id = repo.write((entity == null)
                         ? entity
-                        : maskRepository(entity, name), in);
+                        : maskRepository(entity, name), cnt);
         
         String sep = (id.startsWith("/"))
                 ? ""

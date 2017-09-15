@@ -5,10 +5,9 @@
  */
 package com.picdrop.guice.provider.implementation;
 
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.fileupload.FileItem;
@@ -17,18 +16,23 @@ import org.apache.commons.fileupload.FileItem;
  *
  * @author i330120
  */
-public class FileItemInputStreamProvider implements InputStreamProvider {
+public class FileItemResourceContainer implements ResourceContainer {
 
     FileItem fi;
 
     @AssistedInject
-    public FileItemInputStreamProvider(@Assisted FileItem fi) {
+    public FileItemResourceContainer(@Assisted FileItem fi) {
         this.fi = fi;
     }
 
     @Override
     public InputStream get() throws IOException {
         return this.fi.getInputStream();
+    }
+
+    @Override
+    public String getName() {
+        return this.fi.getName();
     }
 
 }

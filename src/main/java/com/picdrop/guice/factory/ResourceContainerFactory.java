@@ -7,7 +7,7 @@ package com.picdrop.guice.factory;
 
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.names.Resource;
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import com.picdrop.model.resource.FileResource;
 import org.apache.commons.fileupload.FileItem;
 
@@ -15,11 +15,11 @@ import org.apache.commons.fileupload.FileItem;
  *
  * @author i330120
  */
-public interface InputStreamProviderFactory {
+public interface ResourceContainerFactory {
 
     @Resource
-    InputStreamProvider create(FileResource res);
+    ResourceContainer create(FileResource res);
 
     @File
-    InputStreamProvider create(FileItem fi);
+    ResourceContainer create(FileItem fi);
 }

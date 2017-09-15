@@ -10,8 +10,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
-import com.picdrop.guice.provider.InputStreamProvider;
-import com.picdrop.guice.factory.InputStreamProviderFactory;
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.provider.FileRepositoryProvider;
 import com.picdrop.model.RequestContext;
@@ -47,11 +45,12 @@ import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.security.authentication.Permission;
 import java.io.InputStream;
-import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
+import com.picdrop.guice.factory.ResourceContainerFactory;
+import com.picdrop.guice.provider.ResourceContainer;
 
 /**
  *
@@ -81,7 +80,7 @@ public class FileResourceService {
     Provider<RequestContext> contextProv;
     
     @Inject
-    InputStreamProviderFactory instProvFac;
+    ResourceContainerFactory instProvFac;
     
     Tika tika;
     
@@ -159,10 +158,10 @@ public class FileResourceService {
         String fileId;
         // Pre store
         log.debug(SERVICE, "Pre-Store: Processing file");
-        InputStreamProvider isp = instProvFac.create(file);
+        ResourceContainer cnt = instProvFac.create(file);
         try {
             for (Processor<FileResource> p : processors) {
-                loce = p.onPreStore(loce, isp);
+                loce = p.onPreStore(loce, cnt);
             }
         } catch (IOException ex) {
             throw new ApplicationException(ex)
@@ -173,7 +172,7 @@ public class FileResourceService {
 
         // Store
         try {
-            fileId = fileRepo.write(null, isp);
+            fileId = fileRepo.write(null, cnt);
             loce.setFileId(fileId);
         } catch (IOException ex) {
             throw new ApplicationException(ex)
@@ -189,10 +188,10 @@ public class FileResourceService {
 
         // Post store
         log.debug(SERVICE, "Post-Store: Processing file");
-        isp = instProvFac.create(loce);
+        cnt = instProvFac.create(loce);
         try {
             for (Processor<FileResource> p : processors) {
-                loce = p.onPostStore(loce, isp);
+                loce = p.onPostStore(loce, cnt);
             }
         } catch (IOException ex) {
             throw new ApplicationException(ex)

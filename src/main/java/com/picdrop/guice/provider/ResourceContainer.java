@@ -5,13 +5,19 @@
  */
 package com.picdrop.guice.provider;
 
+import com.google.inject.Provider;
+import com.google.inject.throwingproviders.CheckedProvider;
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
  *
- * @author i330120
+ * @author nvonstein
  */
-public interface InputStreamProvider {
-    InputStream get() throws IOException;
+public interface ResourceContainer extends CheckedProvider<InputStream>{
+    String getName();
+
+    @Override
+    public InputStream get() throws IOException;
+    
 }

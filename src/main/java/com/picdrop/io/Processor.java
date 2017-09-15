@@ -5,7 +5,7 @@
  */
 package com.picdrop.io;
 
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import java.io.IOException;
 
 /**
@@ -13,8 +13,8 @@ import java.io.IOException;
  * @author i330120
  */
 public interface Processor<T> {
-    T onPreStore(T entity, InputStreamProvider in) throws IOException;
-    T onPostStore(T entity, InputStreamProvider in) throws IOException;
+    T onPreStore(T entity, ResourceContainer cnt) throws IOException;
+    T onPostStore(T entity, ResourceContainer cnt) throws IOException;
     void onPreDelete(T entity) throws IOException;
     void onPostDelete(T entity) throws IOException;
 }

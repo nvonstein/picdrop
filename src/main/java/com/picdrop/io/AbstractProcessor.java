@@ -5,7 +5,7 @@
  */
 package com.picdrop.io;
 
-import com.picdrop.guice.provider.InputStreamProvider;
+import com.picdrop.guice.provider.ResourceContainer;
 import java.io.IOException;
 
 /**
@@ -15,12 +15,12 @@ import java.io.IOException;
 public class AbstractProcessor<T> implements Processor<T>{
 
     @Override
-    public T onPreStore(T entity, InputStreamProvider in) throws IOException {
+    public T onPreStore(T entity, ResourceContainer cnt) throws IOException {
         return entity;
     }
 
     @Override
-    public T onPostStore(T entity, InputStreamProvider in) throws IOException {
+    public T onPostStore(T entity, ResourceContainer cnt) throws IOException {
         return entity;
     }
 
