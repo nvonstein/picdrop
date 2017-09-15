@@ -11,6 +11,7 @@ import com.google.inject.TypeLiteral;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.guice.names.Queries;
+import com.picdrop.helper.EnvHelper;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.TokenSet;
@@ -29,7 +30,9 @@ import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
@@ -64,13 +67,20 @@ public class RepositoryModule implements Module {
     }
 
     protected Datastore bindDatastore(Binder binder) {
-        MongoClient client = new MongoClient();
+        Properties config = null;
+        try {
+            config = EnvHelper.getProperties();
+        } catch (IOException ex) {
+            return null;
+        }
+        
+        MongoClient client = new MongoClient(config.getProperty("service.db.host", "127.0.0.1:27017"));
         Morphia morphia = new Morphia();
         morphia.mapPackage("com.picdrop.model");
-        Datastore ds = morphia.createDatastore(client, "test");
+        Datastore ds = morphia.createDatastore(client, "picdrop");
         ds.ensureIndexes(true);
 
-        binder.bind(MongoDatabase.class).toInstance(client.getDatabase("test"));
+        binder.bind(MongoDatabase.class).toInstance(client.getDatabase("picdrop"));
         binder.bind(Datastore.class).toInstance(ds);
         return ds;
     }
@@ -134,7 +144,7 @@ public class RepositoryModule implements Module {
 
     protected void bindTokenSetRepo(Binder binder, Datastore ds) {
         AdvancedRepository<String, TokenSet> repo = createTokenSetRepo(ds);
-        
+
         binder.bind(new TypeLiteral<Repository<String, TokenSet>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
