@@ -18,15 +18,10 @@ import org.mongodb.morphia.annotations.Entity;
  * @author i330120
  */
 @Entity("files")
-//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include = JsonTypeInfo.As.PROPERTY)
-//@JsonSubTypes({
-//    @JsonSubTypes.Type(value = Image.class, name = "image")})
 public class FileResource extends Resource {
 
     protected String extension;
     protected String fileId;
-    @Deprecated
-    protected String fileUri;
 
     @Embedded
     ResourceDescriptor descriptor;
@@ -51,18 +46,6 @@ public class FileResource extends Resource {
         if (tmp.length > 1) {
             this.setExtension(tmp[tmp.length - 1]);
         }
-    }
-
-    @JsonView(value = Views.Public.class)
-    @Deprecated
-    public String getFileUri() {
-        return fileUri;
-    }
-
-    @JsonView(value = Views.Ignore.class)
-    @Deprecated
-    public void setFileUri(String fileUri) {
-        this.fileUri = fileUri;
     }
 
     @JsonView(value = Views.Public.class)
