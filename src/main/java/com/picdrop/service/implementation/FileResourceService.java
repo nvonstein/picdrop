@@ -60,30 +60,30 @@ import com.picdrop.guice.provider.ResourceContainer;
 @Consumes("application/json")
 @Produces("application/json")
 public class FileResourceService {
-    
+
     Logger log = LogManager.getLogger(this.getClass());
-    
+
     Repository<String, FileResource> repo;
     AwareRepository<String, Share, User> srepo;
     Repository<String, Collection.CollectionItem> cirepo;
     Repository<String, Collection> crepo;
-    
+
     FileRepository<String> fileRepo;
     List<Processor<FileResource>> processors;
-    
+
     final List<String> mimeImage = Arrays.asList("image/jpeg", "image/png", "image/tiff");
-    
+
     @Inject
     ServletFileUpload upload;
-    
+
     @Inject
     Provider<RequestContext> contextProv;
-    
+
     @Inject
     ResourceContainerFactory instProvFac;
-    
+
     Tika tika;
-    
+
     @Inject
     public FileResourceService(
             Repository<String, FileResource> repo,
@@ -96,7 +96,7 @@ public class FileResourceService {
         this.srepo = srepo;
         this.cirepo = cirepo;
         this.crepo = crepo;
-        
+
         try {
             this.fileRepo = fileRepoProv.get();
         } catch (IOException ex) {
@@ -105,34 +105,34 @@ public class FileResourceService {
         this.processors = processors;
         log.trace(SERVICE, "created with ({},{},{},{},{},{})", repo, srepo, cirepo, crepo, fileRepo, processors);
     }
-    
+
     public Tika getTika() {
         return tika;
     }
-    
+
     @Inject
     public void setTika(Tika tika) {
         this.tika = tika;
     }
-    
+
     protected List<FileItem> parseRequest(HttpServletRequest request) throws FileUploadException {
         List<FileItem> files = null;
-        
+
         files = upload.parseRequest(request);
-        
+
         return files;
     }
-    
+
     protected FileType parseMimeType(FileItem file) throws ApplicationException, IOException {
         FileType mime = FileType.forName(file.getContentType());
-        
+
         if (mime.isUnknown()) {
             throw new ApplicationException()
                     .status(400)
                     .devMessage(String.format("Invalid mime type detected '%s'", file.getContentType()))
                     .code(ErrorMessageCode.BAD_UPLOAD_MIME);
         }
-        
+
         Metadata mdata = new Metadata();
         InputStream in = file.getInputStream();
         String tikaMime = null;
@@ -141,7 +141,7 @@ public class FileResourceService {
         } finally {
             in.close();
         }
-        
+
         log.debug(SERVICE, "Mime types resolved. HTTP Header: '{}' Tika: '{}'", file.getContentType(), tikaMime);
         if (!FileType.forName(tikaMime).isCovering(mime)) {
             throw new ApplicationException()
@@ -151,7 +151,7 @@ public class FileResourceService {
         }
         return mime;
     }
-    
+
     protected FileResource processCreateUpdate(FileResource e, FileItem file) throws ApplicationException {
         log.entry(e);
         FileResource loce = e;
@@ -172,7 +172,7 @@ public class FileResourceService {
 
         // Store
         try {
-            fileId = fileRepo.write(null, cnt);
+            fileId = fileRepo.write(loce.getFileId(), cnt);
             loce.setFileId(fileId);
         } catch (IOException ex) {
             throw new ApplicationException(ex)
@@ -199,11 +199,11 @@ public class FileResourceService {
                     .code(ErrorMessageCode.ERROR_UPLOAD)
                     .devMessage("Error while post-store phase: " + ex.getMessage());
         }
-        
+
         log.traceExit(loce);
         return loce;
     }
-    
+
     protected void processDelete(FileResource e) throws ApplicationException {
         log.entry(e);
         boolean res = false;
@@ -290,7 +290,7 @@ public class FileResourceService {
         }
         log.traceExit();
     }
-    
+
     @GET
     @Path("/{id}")
     @Permission("read")
@@ -307,14 +307,14 @@ public class FileResourceService {
         log.traceExit(fr);
         return fr;
     }
-    
+
     @GET
     @Path("/")
     @Permission("read")
     public List<FileResource> listResource() {
         return this.repo.list();
     }
-    
+
     @POST
     @Path("/")
     @Permission("write")
@@ -323,7 +323,7 @@ public class FileResourceService {
         log.traceEntry();
         List<FileResource> res = new ArrayList<>();
         List<FileItem> files;
-        
+
         log.debug(SERVICE, "Parsing multipart request");
         try {
             files = parseRequest(request);
@@ -333,20 +333,20 @@ public class FileResourceService {
                     .devMessage(ex.getMessage())
                     .code(ErrorMessageCode.BAD_UPLOAD);
         }
-        
+
         log.debug(SERVICE, "Processing file items");
         for (FileItem file : files) {
             if (!file.isFormField()) {
                 FileResource r = new FileResource();
                 r.setName(file.getName());
                 r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
-                
+
                 try {
                     log.debug(SERVICE, "Validating mime type");
                     FileType mime = parseMimeType(file);
-                    
+
                     r.setDescriptor(ResourceDescriptor.get(mime));
-                    
+
                     res.add(processCreateUpdate(r, file));
                 } catch (IOException ex) {
                     throw new ApplicationException(ex)
@@ -360,7 +360,7 @@ public class FileResourceService {
         log.traceExit(res);
         return res;
     }
-    
+
     @PUT
     @Path("/{id}")
     @Permission("write")
@@ -373,7 +373,7 @@ public class FileResourceService {
                     .status(400)
                     .code(ErrorMessageCode.BAD_REQUEST_BODY);
         }
-        
+
         FileResource r = getResource(id);
         if (r == null) {
             throw new ApplicationException()
@@ -381,7 +381,7 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-        
+
         log.debug(SERVICE, "Performing object merge");
         try {
             r = r.merge(entity);
@@ -394,7 +394,7 @@ public class FileResourceService {
         log.info(SERVICE, "FileResource updated");
         return log.traceExit(repo.update(id, r));
     }
-    
+
     @PUT
     @Path("/{id}")
     @Permission("write")
@@ -409,7 +409,7 @@ public class FileResourceService {
                     .code(ErrorMessageCode.NOT_FOUND)
                     .devMessage(String.format("Object with id '%s' not found", id));
         }
-        
+
         log.debug(SERVICE, "Parsing multipart request");
         try {
             files = parseRequest(request);
@@ -419,23 +419,31 @@ public class FileResourceService {
                     .devMessage(ex.getMessage())
                     .code(ErrorMessageCode.BAD_UPLOAD);
         }
-        
+
         log.debug(SERVICE, "Processing file items");
         for (FileItem file : files) {
             if (!file.isFormField()) {
-                String mime = file.getContentType(); // TODO do content guess and dont trust client
+                try {
+                    log.debug(SERVICE, "Validating mime type");
+                    FileType mime = parseMimeType(file);
 
-                r.setDescriptor(ResourceDescriptor.get(FileType.forName(mime)));
-                
-                r = processCreateUpdate(r, file);
+                    r.setDescriptor(ResourceDescriptor.get(mime));
+
+                    r = processCreateUpdate(r, file);
+                } catch (IOException ex) {
+                    throw new ApplicationException(ex)
+                            .status(500)
+                            .devMessage(ex.getMessage())
+                            .code(ErrorMessageCode.ERROR_INTERNAL);
+                }
             }
         }
-        
+
         log.info(SERVICE, "FileResource updated");
         log.traceExit(r);
         return r;
     }
-    
+
     @DELETE
     @Permission("write")
     @Path("/{id}")
