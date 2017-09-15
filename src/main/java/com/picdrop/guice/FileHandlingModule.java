@@ -37,6 +37,9 @@ import java.io.IOException;
 import java.util.Properties;
 import com.picdrop.guice.factory.ResourceContainerFactory;
 import com.picdrop.guice.provider.ResourceContainer;
+import com.picdrop.helper.ConfigHelper;
+import com.picdrop.io.ScopedRoundRobinFileRepository;
+import java.util.Map.Entry;
 
 /**
  *
@@ -96,12 +99,16 @@ public class FileHandlingModule implements Module {
     @CheckedProvides(FileRepositoryProvider.class)
     @File
     FileRepository<String> provideFileRepository(@Config Properties config) throws IOException {
-        RoundRobinFileRepository rrFRepo = new RoundRobinFileRepository();
+        ScopedRoundRobinFileRepository rrFRepo = new ScopedRoundRobinFileRepository();
         boolean gen;
         try {
-            config.entrySet().stream()
-                    .filter(e -> ((String) e.getKey()).startsWith("service.file.stores."))
-                    .forEach(e -> rrFRepo.registerRepository(
+            List<Entry<Object, Object>> props = ConfigHelper.listChildProperties(config, "service.file.stores.active", true);
+            props.forEach(e -> rrFRepo.registerActiveRepository(
+                    ((String) e.getKey()).replace("service.file.stores.active.", ""),
+                    new MurmurFileRepository((String) e.getValue())));
+
+            props = ConfigHelper.listChildProperties(config, "service.file.stores", true);
+            props.forEach(e -> rrFRepo.registerRepository(
                     ((String) e.getKey()).replace("service.file.stores.", ""),
                     new MurmurFileRepository((String) e.getValue())));
 
