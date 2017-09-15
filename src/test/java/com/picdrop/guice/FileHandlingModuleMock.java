@@ -9,11 +9,11 @@ import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.picdrop.guice.names.File;
-import com.picdrop.io.MurmurFileRepository;
+import com.picdrop.io.repository.MurmurFileRepository;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
 import com.picdrop.model.resource.FileResource;
-import com.picdrop.io.FileRepository;
+import com.picdrop.io.repository.FileRepository;
 
 
 /**

@@ -45,7 +45,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.mock.web.MockMultipartFile;
-import com.picdrop.io.FileRepository;
+import com.picdrop.io.repository.FileRepository;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;

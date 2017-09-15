@@ -37,7 +37,7 @@ import com.picdrop.model.resource.ResourceDescriptor;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import javax.ws.rs.PUT;
-import com.picdrop.io.FileRepository;
+import com.picdrop.io.repository.FileRepository;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;

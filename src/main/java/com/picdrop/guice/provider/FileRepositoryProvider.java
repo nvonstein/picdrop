@@ -6,7 +6,7 @@
 package com.picdrop.guice.provider;
 
 import com.google.inject.throwingproviders.CheckedProvider;
-import com.picdrop.io.FileRepository;
+import com.picdrop.io.repository.FileRepository;
 import java.io.IOException;
 
 /**

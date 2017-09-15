@@ -23,7 +23,7 @@ import com.picdrop.guice.provider.implementation.FileResourceContainer;
 import com.picdrop.guice.provider.implementation.UploadHandlerProvider;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
-import com.picdrop.io.MurmurFileRepository;
+import com.picdrop.io.repository.MurmurFileRepository;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
 import com.picdrop.io.writer.MurmurFileReaderWriter;
@@ -31,14 +31,14 @@ import com.picdrop.model.resource.FileResource;
 import java.util.List;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import com.picdrop.io.FileRepository;
-import com.picdrop.io.RoundRobinFileRepository;
+import com.picdrop.io.repository.FileRepository;
+import com.picdrop.io.repository.RoundRobinFileRepository;
 import java.io.IOException;
 import java.util.Properties;
 import com.picdrop.guice.factory.ResourceContainerFactory;
 import com.picdrop.guice.provider.ResourceContainer;
 import com.picdrop.helper.ConfigHelper;
-import com.picdrop.io.ScopedRoundRobinFileRepository;
+import com.picdrop.io.repository.ScopedRoundRobinFileRepository;
 import java.util.Map.Entry;
 
 /**
