@@ -17,9 +17,9 @@ import org.mongodb.morphia.Datastore;
  */
 public class RepositoryPrototype {
     
-    ObjectMapper mapper;
-    Map<String, String> queries;
-    Datastore ds;
+    final ObjectMapper mapper;
+    final Map<String, String> queries;
+    final Datastore ds;
 
     @Inject
     public RepositoryPrototype(Datastore ds, ObjectMapper mapper, @Queries Map<String, String> queries) {
