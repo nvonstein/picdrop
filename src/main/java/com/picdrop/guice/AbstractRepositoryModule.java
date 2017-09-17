@@ -149,16 +149,16 @@ public abstract class AbstractRepositoryModule implements Module {
 
     protected abstract MongoClient provideMongoClient(@Config Properties config);
 
-    protected abstract MorphiaAdvancedRepository<TokenSet> provideTokenSetRepo(Datastore ds);
+    protected abstract AdvancedRepository<String, TokenSet> provideTokenSetRepo(Datastore ds);
 
-    protected abstract MorphiaAdvancedRepository<Collection.CollectionItem> provideCollectionItemRepo(Datastore ds);
+    protected abstract AdvancedRepository<String, Collection.CollectionItem> provideCollectionItemRepo(Datastore ds);
 
-    protected abstract PrincipalAwareMorphiaAdvancedRepository<Collection> provideCollectionRepo(Datastore ds);
+    protected abstract AdvancedRepository<String, RegisteredUser> provideRegisteredUserRepo(Datastore ds);
 
-    protected abstract PrincipalAwareMorphiaAdvancedRepository<FileResource> provideResourceRepo(Datastore ds);
+    protected abstract AwareAdvancedRepository<String, Collection, User> provideCollectionRepo(Datastore ds);
 
-    protected abstract PrincipalAwareMorphiaAdvancedRepository<Share> provideShareRepo(Datastore ds);
+    protected abstract AwareAdvancedRepository<String, FileResource, User> provideResourceRepo(Datastore ds);
 
-    protected abstract MorphiaAdvancedRepository<RegisteredUser> provideRegisteredUserRepo(Datastore ds);
+    protected abstract AwareAdvancedRepository<String, Share, User> provideShareRepo(Datastore ds);
 
 }
