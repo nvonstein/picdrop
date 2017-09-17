@@ -42,56 +42,24 @@ import org.xml.sax.SAXException;
  *
  * @author i330120
  */
-public class ApplicationModule implements Module {
+public class ApplicationModule extends AbstractApplicationModule {
 
-    @Override
-    public void configure(Binder binder) {
-        // Services
-        bindServices(binder);
-
-        // Environment
-        bindProperties(binder);
-
-        // Static ObjectMapper
-        bindStaticObjectMapper(binder);
-    }
-
-    protected void bindProperties(Binder binder) {
-        EnvHelper ehlp = EnvHelper.from("picdrop.app.properties");
-        binder.bind(EnvHelper.class).toInstance(ehlp);
-
-        Properties config = ehlp.getPropertiesWithDefault();
-        Names.bindProperties(binder, config);
-        binder.bind(Properties.class)
-                .annotatedWith(Config.class)
-                .toInstance(config);
-    }
-
-    protected void bindStaticObjectMapper(Binder binder) {
-        binder.requestStaticInjection(ApplicationExeptionMapper.class);
-        binder.requestStaticInjection(AbstractExceptionMapper.class);
-    }
-
-    protected void bindServices(Binder binder) {
-        binder.bind(FileResourceService.class).asEagerSingleton();
-        binder.bind(RegisteredUserService.class).asEagerSingleton();
-        binder.bind(AuthorizationService.class).asEagerSingleton();
-        binder.bind(CollectionService.class).asEagerSingleton();
-        binder.bind(ShareService.class).asEagerSingleton();
-    }
 
     @Provides
+    @Override
     protected ObjectMapper provideObjectMapper(EnvHelper env) {
         Properties p = env.getPropertiesWithDefault();
         return JacksonConfigProvider.createMapper(p.getProperty("service.json.view"));
     }
 
     @Provides
+    @Override
     protected ObjectWriter provideObjectWriter(ObjectMapper mapper) {
         return mapper.writer();
     }
 
     @Provides
+    @Override
     protected Tika provideTika(@Named("service.tika.config") String tikaConfigPath) throws TikaException, IOException, SAXException {
         Tika tika;
         if (Strings.isNullOrEmpty(tikaConfigPath)) {
