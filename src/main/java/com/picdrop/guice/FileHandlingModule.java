@@ -45,59 +45,12 @@ import java.util.Map.Entry;
  *
  * @author i330120
  */
-public class FileHandlingModule implements Module {
+public class FileHandlingModule extends AbstractFileHandlingModule {
 
-    @Override
-    public void configure(Binder binder) {
-        binder.install(ThrowingProviderBinder.forModule(this));
-        // Upload handeling
-        bindUploadHandler(binder);
-
-        // File writing
-        bindFileStreamProvider(binder);
-        bindFileIOProcessors(binder);
-//        bindFileRepository(binder);
-
-        // File processors
-        bindProcessorList(binder);
-
-        bindProcessors(binder);
-    }
-
-    protected void bindUploadHandler(Binder binder) {
-        binder.bind(FileItemFactory.class).toProvider(FileItemFactoryProvider.class).asEagerSingleton();
-        binder.bind(ServletFileUpload.class).toProvider(UploadHandlerProvider.class);
-    }
-
-    protected void bindFileIOProcessors(Binder binder) {
-        binder.bind(FileWriter.class).to(MurmurFileReaderWriter.class);
-        binder.bind(FileReader.class).to(MurmurFileReaderWriter.class);
-    }
-
-    protected void bindFileRepository(Binder binder) {
-        binder.bind(new TypeLiteral<FileRepository<String>>() {
-        }).annotatedWith(File.class).to(MurmurFileRepository.class).in(Singleton.class);
-    }
-
-    protected void bindFileStreamProvider(Binder binder) {
-        binder.install(new FactoryModuleBuilder()
-                .implement(ResourceContainer.class, Resource.class, FileResourceContainer.class)
-                .implement(ResourceContainer.class, File.class, FileItemResourceContainer.class)
-                .build(ResourceContainerFactory.class)
-        );
-    }
-
-    protected void bindProcessorList(Binder binder) {
-        binder.bind(new TypeLiteral<List<Processor<FileResource>>>() {
-        }).annotatedWith(File.class).toProvider(ProcessorListProviders.class);
-    }
-
-    protected void bindProcessors(Binder binder) {
-        binder.bind(ImageProcessor.class);
-    }
 
     @CheckedProvides(FileRepositoryProvider.class)
     @File
+    @Override
     FileRepository<String> provideFileRepository(@Config Properties config) throws IOException {
         ScopedRoundRobinFileRepository rrFRepo = new ScopedRoundRobinFileRepository();
         boolean gen;

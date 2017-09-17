@@ -102,7 +102,7 @@ public class FileResourceServiceTest {
                 new AuthorizationModuleMock(ctx),
                 new CryptoModule(),
                 repoModule,
-                new FileHandlingModuleMock(writer, reader, fr),
+                new FileHandlingModuleMock(fr),
                 new RequestScopeModule());
 
         this.crepo = repoModule.getCrepo();
