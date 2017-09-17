@@ -5,6 +5,7 @@
  */
 package com.picdrop.guice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Provides;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -15,6 +16,8 @@ import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import com.picdrop.repository.mongo.RepositoryPrototype;
+import java.util.Map;
 import java.util.Properties;
 import javax.enterprise.util.TypeLiteral;
 import static org.mockito.Mockito.mock;
@@ -53,37 +56,37 @@ public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
 
     @Provides
     @Override
-    protected MorphiaAdvancedRepository<RegisteredUser> provideRegisteredUserRepo(Datastore ds) {
+    protected MorphiaAdvancedRepository<RegisteredUser> provideRegisteredUserRepo(RepositoryPrototype prototype) {
         return urepo;
     }
 
     @Provides
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<Share> provideShareRepo(Datastore ds) {
+    protected PrincipalAwareMorphiaAdvancedRepository<Share> provideShareRepo(RepositoryPrototype prototype) {
         return srepo;
     }
 
     @Provides
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> provideResourceRepo(Datastore ds) {
+    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> provideResourceRepo(RepositoryPrototype prototype) {
         return rrepo;
     }
 
     @Provides
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<Collection> provideCollectionRepo(Datastore ds) {
+    protected PrincipalAwareMorphiaAdvancedRepository<Collection> provideCollectionRepo(RepositoryPrototype prototype) {
         return crepo;
     }
 
     @Provides
     @Override
-    protected MorphiaAdvancedRepository<Collection.CollectionItem> provideCollectionItemRepo(Datastore ds) {
+    protected MorphiaAdvancedRepository<Collection.CollectionItem> provideCollectionItemRepo(RepositoryPrototype prototype) {
         return cirepo;
     }
 
     @Provides
     @Override
-    protected MorphiaAdvancedRepository<TokenSet> provideTokenSetRepo(Datastore ds) {
+    protected MorphiaAdvancedRepository<TokenSet> provideTokenSetRepo(RepositoryPrototype prototype) {
         return tsrepo;
     }
 
@@ -103,6 +106,12 @@ public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
     @Override
     protected MongoDatabase provideDatabase(MongoClient client) {
         return mock(MongoDatabase.class);
+    }
+
+    @Provides
+    @Override
+    protected RepositoryPrototype provideRepositoryPrototype(Datastore ds, ObjectMapper mapper, Map<String, String> queries) {
+        return mock(RepositoryPrototype.class);
     }
 
     public MorphiaAdvancedRepository<TokenSet> getTsrepo() {

@@ -5,6 +5,7 @@
  */
 package com.picdrop.guice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
@@ -30,8 +31,10 @@ import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
+import com.picdrop.repository.mongo.MorphiaRepository;
 import com.picdrop.repository.mongo.NamedQueries;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import com.picdrop.repository.mongo.RepositoryPrototype;
 import java.util.Map;
 import java.util.Properties;
 import org.mongodb.morphia.Datastore;
@@ -148,17 +151,19 @@ public abstract class AbstractRepositoryModule implements Module {
     protected abstract Datastore provideDatastore(MongoClient client);
 
     protected abstract MongoClient provideMongoClient(@Config Properties config);
+    
+    protected abstract RepositoryPrototype provideRepositoryPrototype(Datastore ds, ObjectMapper mapper, Map<String, String> queries);
 
-    protected abstract AdvancedRepository<String, TokenSet> provideTokenSetRepo(Datastore ds);
+    protected abstract AdvancedRepository<String, TokenSet> provideTokenSetRepo(RepositoryPrototype prototype);
 
-    protected abstract AdvancedRepository<String, Collection.CollectionItem> provideCollectionItemRepo(Datastore ds);
+    protected abstract AdvancedRepository<String, Collection.CollectionItem> provideCollectionItemRepo(RepositoryPrototype prototype);
 
-    protected abstract AdvancedRepository<String, RegisteredUser> provideRegisteredUserRepo(Datastore ds);
+    protected abstract AdvancedRepository<String, RegisteredUser> provideRegisteredUserRepo(RepositoryPrototype prototype);
 
-    protected abstract AwareAdvancedRepository<String, Collection, User> provideCollectionRepo(Datastore ds);
+    protected abstract AwareAdvancedRepository<String, Collection, User> provideCollectionRepo(RepositoryPrototype prototype);
 
-    protected abstract AwareAdvancedRepository<String, FileResource, User> provideResourceRepo(Datastore ds);
+    protected abstract AwareAdvancedRepository<String, FileResource, User> provideResourceRepo(RepositoryPrototype prototype);
 
-    protected abstract AwareAdvancedRepository<String, Share, User> provideShareRepo(Datastore ds);
+    protected abstract AwareAdvancedRepository<String, Share, User> provideShareRepo(RepositoryPrototype prototype);
 
 }
