@@ -5,11 +5,15 @@
  */
 package com.picdrop.guice;
 
+import com.google.common.base.Strings;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import com.picdrop.guice.names.Config;
 import com.picdrop.guice.names.Queries;
 import com.picdrop.helper.EnvHelper;
 import com.picdrop.model.Share;
@@ -40,147 +44,73 @@ import org.mongodb.morphia.Morphia;
  *
  * @author i330120
  */
-public class RepositoryModule implements Module {
+public class RepositoryModule extends AbstractRepositoryModule {
 
-    @Override
-    public void configure(Binder binder) {
-        binder.bind(new TypeLiteral<Map<String, String>>() {
-        }).annotatedWith(Queries.class).toInstance(NamedQueries.getQueries());
 
-        Datastore ds = bindDatastore(binder);
-
-        // Registered user repo
-        bindRegisteredUserRepo(binder, ds);
-        // Resource repo
-        bindResourceRepo(binder, ds);
-        // Collections repo
-        bindCollectionsRepo(binder, ds);
-        // Collectionitem repo
-        bindCollectionItemRepo(binder, ds);
-        // Share repo
-        bindShareRepo(binder, ds);
-        // TokenSet repo
-        bindTokenSetRepo(binder, ds);
-
-        // Static bindings
-        bindStaticRepoReferences(binder, ds);
+    @Provides
+    protected MongoDatabase provideDatabase(MongoClient client) {
+        return client.getDatabase("picdrop");
     }
-
-    protected Datastore bindDatastore(Binder binder) {
-        Properties config = null;
-        try {
-            config = EnvHelper.getProperties();
-        } catch (IOException ex) {
-            return null;
-        }
-        
-        MongoClient client = new MongoClient(config.getProperty("service.db.host", "127.0.0.1:27017"));
+    
+    @Provides
+    protected Datastore provideDatastore(MongoClient client) {
         Morphia morphia = new Morphia();
         morphia.mapPackage("com.picdrop.model");
         Datastore ds = morphia.createDatastore(client, "picdrop");
         ds.ensureIndexes(true);
 
-        binder.bind(MongoDatabase.class).toInstance(client.getDatabase("picdrop"));
-        binder.bind(Datastore.class).toInstance(ds);
         return ds;
     }
 
-    protected void bindRegisteredUserRepo(Binder binder, Datastore ds) {
-        AdvancedRepository<String, RegisteredUser> repo = createRegisteredUserRepo(ds);
+    @Provides
+    protected MongoClient provideMongoClient(@Config Properties config) {
+        String host = config.getProperty("service.db.host");
+        if (Strings.isNullOrEmpty(host)) {
+            host = EnvHelper.getSystemProperty("service.db.host");
+        }
+        if (Strings.isNullOrEmpty(host)) {
+            host = EnvHelper.getSystemEnv("PICDROP_DB_HOST");
+        }
+        if (Strings.isNullOrEmpty(host)) {
+            host = "127.0.0.1:27017";
+        }
 
-        binder.bind(new TypeLiteral<AdvancedRepository<String, RegisteredUser>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
-        }).toInstance(repo);
+        return new MongoClient(host);
     }
 
-    protected void bindResourceRepo(Binder binder, Datastore ds) {
-        AwareAdvancedRepository<String, FileResource, User> repo = createResourceRepo(ds);
-
-        binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareRepository<String, FileResource, User>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, FileResource>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, FileResource, User>>() {
-        }).toInstance(repo);
-    }
-
-    protected void bindCollectionsRepo(Binder binder, Datastore ds) {
-        AwareAdvancedRepository<String, Collection, User> repo = createCollectionRepo(ds);
-
-        binder.bind(new TypeLiteral<Repository<String, Collection>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareRepository<String, Collection, User>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, Collection>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Collection, User>>() {
-        }).toInstance(repo);
-    }
-
-    protected void bindCollectionItemRepo(Binder binder, Datastore ds) {
-        AdvancedRepository<String, Collection.CollectionItem> repo = createCollectionItemRepo(ds);
-
-        binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, Collection.CollectionItem>>() {
-        }).toInstance(repo);
-    }
-
-    protected void bindShareRepo(Binder binder, Datastore ds) {
-        AwareAdvancedRepository<String, Share, User> repo = createShareRepo(ds);
-
-        binder.bind(new TypeLiteral<Repository<String, Share>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, Share>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Share, User>>() {
-        }).toInstance(repo);
-    }
-
-    protected void bindTokenSetRepo(Binder binder, Datastore ds) {
-        AdvancedRepository<String, TokenSet> repo = createTokenSetRepo(ds);
-
-        binder.bind(new TypeLiteral<Repository<String, TokenSet>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
-        }).toInstance(repo);
-    }
-
-    protected void bindStaticRepoReferences(Binder binder, Datastore ds) {
-        binder.requestStaticInjection(CollectionReference.class);
-        binder.requestStaticInjection(FileResourceReference.class);
-        binder.requestStaticInjection(ShareReference.class);
-        binder.requestStaticInjection(RegisteredUserReference.class);
-        binder.requestStaticInjection(Collection.CollectionItemReference.class);
-        binder.requestStaticInjection(TokenSetReference.class);
-    }
-
-    protected AdvancedRepository<String, TokenSet> createTokenSetRepo(Datastore ds) {
+    @Provides
+    @Override
+    protected MorphiaAdvancedRepository<TokenSet> provideTokenSetRepo(Datastore ds) {
         return new MorphiaAdvancedRepository<>(ds, TokenSet.class);
     }
 
-    protected AdvancedRepository<String, Collection.CollectionItem> createCollectionItemRepo(Datastore ds) {
+    @Provides
+    @Override
+    protected MorphiaAdvancedRepository<Collection.CollectionItem> provideCollectionItemRepo(Datastore ds) {
         return new MorphiaAdvancedRepository<>(ds, Collection.CollectionItem.class);
     }
 
-    protected AwareAdvancedRepository<String, Collection, User> createCollectionRepo(Datastore ds) {
+    @Provides
+    @Override
+    protected PrincipalAwareMorphiaAdvancedRepository<Collection> provideCollectionRepo(Datastore ds) {
         return new PrincipalAwareMorphiaAdvancedRepository<>(ds, Collection.class);
     }
 
-    protected AwareAdvancedRepository<String, FileResource, User> createResourceRepo(Datastore ds) {
+    @Provides
+    @Override
+    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> provideResourceRepo(Datastore ds) {
         return new PrincipalAwareMorphiaAdvancedRepository<>(ds, FileResource.class);
     }
 
-    protected AwareAdvancedRepository<String, Share, User> createShareRepo(Datastore ds) {
+    @Provides
+    @Override
+    protected PrincipalAwareMorphiaAdvancedRepository<Share> provideShareRepo(Datastore ds) {
         return new PrincipalAwareMorphiaAdvancedRepository<>(ds, Share.class);
     }
 
-    protected AdvancedRepository<String, RegisteredUser> createRegisteredUserRepo(Datastore ds) {
+    @Provides
+    @Override
+    protected MorphiaAdvancedRepository<RegisteredUser> provideRegisteredUserRepo(Datastore ds) {
         return new MorphiaAdvancedRepository<>(ds, RegisteredUser.class);
     }
 }

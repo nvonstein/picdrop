@@ -6,6 +6,9 @@
 package com.picdrop.guice;
 
 import com.google.inject.Binder;
+import com.google.inject.Provides;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Share;
 import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
@@ -16,6 +19,7 @@ import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import java.util.Properties;
 import javax.enterprise.util.TypeLiteral;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
@@ -25,112 +29,133 @@ import org.mongodb.morphia.Datastore;
  *
  * @author nvonstein
  */
-public class RepositoryModuleMockNoDB extends RepositoryModule {
+public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
 
-    protected AdvancedRepository<String, TokenSet> tsrepo;
-    protected AdvancedRepository<String, Collection.CollectionItem> cirepo;
-    protected AwareAdvancedRepository<String, Collection, User> crepo;
-    protected AwareAdvancedRepository<String, FileResource, User> rrepo;
-    protected AwareAdvancedRepository<String, Share, User> srepo;
-    protected AdvancedRepository<String, RegisteredUser> urepo;
+    protected MorphiaAdvancedRepository<TokenSet> tsrepo;
+    protected MorphiaAdvancedRepository<Collection.CollectionItem> cirepo;
+    protected MorphiaAdvancedRepository<RegisteredUser> urepo;
+
+    protected PrincipalAwareMorphiaAdvancedRepository<Collection> crepo;
+    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> rrepo;
+    protected PrincipalAwareMorphiaAdvancedRepository<Share> srepo;
 
     public RepositoryModuleMockNoDB() {
-        this.tsrepo = mock(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
+        this.tsrepo = mock(new TypeLiteral<MorphiaAdvancedRepository<TokenSet>>() {
         }.getRawType());
-        this.cirepo = mock(new TypeLiteral<AdvancedRepository<String, Collection.CollectionItem>>() {
+        this.cirepo = mock(new TypeLiteral<MorphiaAdvancedRepository<Collection.CollectionItem>>() {
         }.getRawType());
-        this.crepo = mock(new TypeLiteral<AwareAdvancedRepository<String, Collection, User>>() {
+        this.urepo = mock(new TypeLiteral<MorphiaAdvancedRepository<RegisteredUser>>() {
         }.getRawType());
-        this.rrepo = mock(new TypeLiteral<AwareAdvancedRepository<String, FileResource, User>>() {
+
+        this.crepo = mock(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Collection>>() {
         }.getRawType());
-        this.srepo = mock(new TypeLiteral<AwareAdvancedRepository<String, Share, User>>() {
+        this.rrepo = mock(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<FileResource>>() {
         }.getRawType());
-        this.urepo = mock(new TypeLiteral<AdvancedRepository<String, RegisteredUser>>() {
+        this.srepo = mock(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Share>>() {
         }.getRawType());
+
     }
 
+    @Provides
     @Override
-    protected Datastore bindDatastore(Binder binder) {
-        binder.bind(Datastore.class).toInstance(Mockito.mock(Datastore.class));
-        return null;
-    }
-
-    @Override
-    protected AdvancedRepository<String, RegisteredUser> createRegisteredUserRepo(Datastore ds) {
-        return this.urepo;
-    }
-
-    @Override
-    protected AwareAdvancedRepository<String, Share, User> createShareRepo(Datastore ds) {
-        return this.srepo;
-    }
-
-    @Override
-    protected AwareAdvancedRepository<String, FileResource, User> createResourceRepo(Datastore ds) {
-        return this.rrepo;
-    }
-
-    @Override
-    protected AwareAdvancedRepository<String, Collection, User> createCollectionRepo(Datastore ds) {
-        return this.crepo;
-    }
-
-    @Override
-    protected AdvancedRepository<String, Collection.CollectionItem> createCollectionItemRepo(Datastore ds) {
-        return this.cirepo;
-    }
-
-    @Override
-    protected AdvancedRepository<String, TokenSet> createTokenSetRepo(Datastore ds) {
-        return this.tsrepo;
-    }
-
-    public AdvancedRepository<String, TokenSet> getTsrepo() {
-        return tsrepo;
-    }
-
-    public AdvancedRepository<String, Collection.CollectionItem> getCirepo() {
-        return cirepo;
-    }
-
-    public AwareAdvancedRepository<String, Collection, User> getCrepo() {
-        return crepo;
-    }
-
-    public AwareAdvancedRepository<String, FileResource, User> getRrepo() {
-        return rrepo;
-    }
-
-    public AwareAdvancedRepository<String, Share, User> getSrepo() {
-        return srepo;
-    }
-
-    public AdvancedRepository<String, RegisteredUser> getUrepo() {
+    protected MorphiaAdvancedRepository<RegisteredUser> provideRegisteredUserRepo(Datastore ds) {
         return urepo;
     }
 
-    public void setTsrepo(AdvancedRepository<String, TokenSet> tsrepo) {
+    @Provides
+    @Override
+    protected PrincipalAwareMorphiaAdvancedRepository<Share> provideShareRepo(Datastore ds) {
+        return srepo;
+    }
+
+    @Provides
+    @Override
+    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> provideResourceRepo(Datastore ds) {
+        return rrepo;
+    }
+
+    @Provides
+    @Override
+    protected PrincipalAwareMorphiaAdvancedRepository<Collection> provideCollectionRepo(Datastore ds) {
+        return crepo;
+    }
+
+    @Provides
+    @Override
+    protected MorphiaAdvancedRepository<Collection.CollectionItem> provideCollectionItemRepo(Datastore ds) {
+        return cirepo;
+    }
+
+    @Provides
+    @Override
+    protected MorphiaAdvancedRepository<TokenSet> provideTokenSetRepo(Datastore ds) {
+        return tsrepo;
+    }
+
+    @Provides
+    @Override
+    protected MongoClient provideMongoClient(Properties config) {
+        return mock(MongoClient.class);
+    }
+
+    @Provides
+    @Override
+    protected Datastore provideDatastore(MongoClient client) {
+        return mock(Datastore.class);
+    }
+
+    @Provides
+    @Override
+    protected MongoDatabase provideDatabase(MongoClient client) {
+        return mock(MongoDatabase.class);
+    }
+
+    public MorphiaAdvancedRepository<TokenSet> getTsrepo() {
+        return tsrepo;
+    }
+
+    public void setTsrepo(MorphiaAdvancedRepository<TokenSet> tsrepo) {
         this.tsrepo = tsrepo;
     }
 
-    public void setCirepo(AdvancedRepository<String, Collection.CollectionItem> cirepo) {
+    public MorphiaAdvancedRepository<Collection.CollectionItem> getCirepo() {
+        return cirepo;
+    }
+
+    public void setCirepo(MorphiaAdvancedRepository<Collection.CollectionItem> cirepo) {
         this.cirepo = cirepo;
     }
 
-    public void setCrepo(AwareAdvancedRepository<String, Collection, User> crepo) {
+    public MorphiaAdvancedRepository<RegisteredUser> getUrepo() {
+        return urepo;
+    }
+
+    public void setUrepo(MorphiaAdvancedRepository<RegisteredUser> urepo) {
+        this.urepo = urepo;
+    }
+
+    public PrincipalAwareMorphiaAdvancedRepository<Collection> getCrepo() {
+        return crepo;
+    }
+
+    public void setCrepo(PrincipalAwareMorphiaAdvancedRepository<Collection> crepo) {
         this.crepo = crepo;
     }
 
-    public void setRrepo(AwareAdvancedRepository<String, FileResource, User> rrepo) {
+    public PrincipalAwareMorphiaAdvancedRepository<FileResource> getRrepo() {
+        return rrepo;
+    }
+
+    public void setRrepo(PrincipalAwareMorphiaAdvancedRepository<FileResource> rrepo) {
         this.rrepo = rrepo;
     }
 
-    public void setSrepo(AwareAdvancedRepository<String, Share, User> srepo) {
-        this.srepo = srepo;
+    public PrincipalAwareMorphiaAdvancedRepository<Share> getSrepo() {
+        return srepo;
     }
 
-    public void setUrepo(AdvancedRepository<String, RegisteredUser> urepo) {
-        this.urepo = urepo;
+    public void setSrepo(PrincipalAwareMorphiaAdvancedRepository<Share> srepo) {
+        this.srepo = srepo;
     }
 
 }
