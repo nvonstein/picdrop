@@ -53,8 +53,10 @@ import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import java.io.InputStream;
 import java.util.Arrays;
 import javax.enterprise.util.TypeLiteral;
+import org.apache.tika.metadata.Metadata;
 
 /**
  *
@@ -69,6 +71,8 @@ public class FileResourceServiceTest {
     AwareRepository<String, Share, User> srepo;
     Repository<String, Collection.CollectionItem> cirepo;
     AwareAdvancedRepository<String, Collection, User> crepo;
+    
+    ApplicationModuleMock appModule = new ApplicationModuleMock();
 
     @Mock
     FileWriter writer;
@@ -98,7 +102,7 @@ public class FileResourceServiceTest {
 
         RepositoryModuleMockNoDB repoModule = new RepositoryModuleMockNoDB();
 
-        Injector inj = Guice.createInjector(new ApplicationModuleMock(),
+        Injector inj = Guice.createInjector(appModule,
                 new AuthorizationModuleMock(ctx),
                 new CryptoModule(),
                 repoModule,
@@ -110,7 +114,7 @@ public class FileResourceServiceTest {
         this.repo = repoModule.getRrepo();
         this.srepo = repoModule.getSrepo();
 
-        this.service = spy(inj.getInstance(FileResourceService.class));
+        this.service = inj.getInstance(FileResourceService.class);
     }
 
     @After
@@ -307,6 +311,8 @@ public class FileResourceServiceTest {
     public void createTestPngValid() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture.png", "image/png", "somedata".getBytes()));
 
+        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/png");
+        
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
@@ -322,7 +328,7 @@ public class FileResourceServiceTest {
                 return arg0.getArgument(1);
             }
         });
-        doReturn(FileType.IMAGE_PNG).when(service).parseMimeType(any());
+//        doReturn(FileType.IMAGE_PNG).when(service).parseMimeType(any());
 
         List<FileResource> files = service.create(req);
 
@@ -349,6 +355,8 @@ public class FileResourceServiceTest {
     public void createTestJpegValid() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture.jpg", "image/jpeg", "somedata".getBytes()));
 
+        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/jpeg");
+        
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
@@ -364,7 +372,7 @@ public class FileResourceServiceTest {
                 return arg0.getArgument(1);
             }
         });
-        doReturn(FileType.IMAGE_JPEG).when(service).parseMimeType(any());
+//        doReturn(FileType.IMAGE_JPEG).when(service).parseMimeType(any());
 
         List<FileResource> files = service.create(req);
 
@@ -391,6 +399,8 @@ public class FileResourceServiceTest {
     public void createTestTiffValid() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture.tiff", "image/tiff", "somedata".getBytes()));
 
+        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/tiff");
+        
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
@@ -406,7 +416,7 @@ public class FileResourceServiceTest {
                 return arg0.getArgument(1);
             }
         });
-        doReturn(FileType.IMAGE_TIFF).when(service).parseMimeType(any());
+//        doReturn(FileType.IMAGE_TIFF).when(service).parseMimeType(any());
 
         List<FileResource> files = service.create(req);
 
@@ -434,6 +444,8 @@ public class FileResourceServiceTest {
     public void createTestJpegInvalidFileContent() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture", "image/jpeg", "somedata".getBytes()));
 
+        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("text/plain");
+        
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
@@ -464,9 +476,11 @@ public class FileResourceServiceTest {
     public void createTestErrorOnFileSave() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture", "image/jpeg", "somedata".getBytes()));
 
+        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/jpeg");
+        
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
         when(fr.write(any(), any())).thenThrow(new IOException("Some error occured!"));
-        doReturn(FileType.IMAGE_JPEG).when(service).parseMimeType(any());
+//        doReturn(FileType.IMAGE_JPEG).when(service).parseMimeType(any());
 
         try {
             List<FileResource> files = service.create(req);
@@ -484,6 +498,8 @@ public class FileResourceServiceTest {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture", "image/jpeg", "somedata".getBytes()));
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
+        
+        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/jpeg");
 
         when(repo.get(ID1)).thenReturn(file);
         when(repo.update(eq(ID1), any())).thenAnswer(new Answer<FileResource>() {
@@ -492,7 +508,7 @@ public class FileResourceServiceTest {
                 return arg0.getArgument(1);
             }
         });
-        when(fr.write(eq(null), any())).thenReturn(ID2);
+        when(fr.write(eq(ID1), any())).thenReturn(ID2);
 
         file = service.updateFile(ID1, req);
 
