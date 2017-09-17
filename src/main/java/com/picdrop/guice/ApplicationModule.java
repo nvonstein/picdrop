@@ -42,7 +42,7 @@ import org.xml.sax.SAXException;
  *
  * @author i330120
  */
-public class ApplicationModule extends AbstractApplicationModule {
+public final class ApplicationModule extends AbstractApplicationModule {
 
 
     @Provides
