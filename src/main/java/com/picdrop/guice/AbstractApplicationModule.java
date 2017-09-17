@@ -9,13 +9,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.picdrop.exception.AbstractExceptionMapper;
 import com.picdrop.exception.ApplicationExeptionMapper;
 import com.picdrop.guice.names.Config;
 import com.picdrop.helper.EnvHelper;
+import com.picdrop.json.JacksonConfigProvider;
 import com.picdrop.service.implementation.AuthorizationService;
 import com.picdrop.service.implementation.CollectionService;
 import com.picdrop.service.implementation.FileResourceService;
@@ -32,7 +31,7 @@ import org.xml.sax.SAXException;
  * @author nvonstein
  */
 public abstract class AbstractApplicationModule implements Module {
-
+    
     @Override
     public void configure(Binder binder) {
         // Services
@@ -40,22 +39,25 @@ public abstract class AbstractApplicationModule implements Module {
         // Environment
         bindProperties(binder);
         // Static ObjectMapper
-        bindStaticObjectMapper(binder);
+        bindStatics(binder);
     }
-
+    
     protected void bindProperties(Binder binder) {
         EnvHelper ehlp = EnvHelper.from("picdrop.app.properties");
         binder.bind(EnvHelper.class).toInstance(ehlp);
+        
         Properties config = ehlp.getPropertiesWithDefault();
         Names.bindProperties(binder, config);
         binder.bind(Properties.class).annotatedWith(Config.class).toInstance(config);
     }
-
-    protected void bindStaticObjectMapper(Binder binder) {
+    
+    protected void bindStatics(Binder binder) {
         binder.requestStaticInjection(ApplicationExeptionMapper.class);
         binder.requestStaticInjection(AbstractExceptionMapper.class);
+        
+        binder.requestStaticInjection(JacksonConfigProvider.class);
     }
-
+    
     protected void bindServices(Binder binder) {
         binder.bind(FileResourceService.class).asEagerSingleton();
         binder.bind(RegisteredUserService.class).asEagerSingleton();
@@ -63,11 +65,11 @@ public abstract class AbstractApplicationModule implements Module {
         binder.bind(CollectionService.class).asEagerSingleton();
         binder.bind(ShareService.class).asEagerSingleton();
     }
-
-    protected abstract ObjectMapper provideObjectMapper(EnvHelper env);
-
+    
+    protected abstract ObjectMapper provideObjectMapper(Properties p);
+    
     protected abstract ObjectWriter provideObjectWriter(ObjectMapper mapper);
-
+    
     protected abstract Tika provideTika(String tikaConfigPath) throws TikaException, IOException, SAXException;
-
+    
 }

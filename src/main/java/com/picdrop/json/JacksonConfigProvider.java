@@ -9,8 +9,6 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.picdrop.guice.names.Config;
-import com.picdrop.helper.EnvHelper;
-import java.io.IOException;
 import java.util.Properties;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -21,21 +19,27 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 public class JacksonConfigProvider implements ContextResolver<ObjectMapper> {
-    
-    protected Properties config;
-    
+
+    @Config
     @Inject
-    public JacksonConfigProvider(@Config Properties config) throws IOException {
-        this.config = config;
-    }    
+    protected static Properties config;
+
+//    @Inject
+//    public JacksonConfigProvider(@Config Properties config) {
+//        this.config = config;
+//    }
     
+    public ObjectMapper createMapper() {
+        return createMapper(config.getProperty("service.json.view"));
+    }
+
     public static ObjectMapper createMapper(String view) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Public.class));
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Public.class));
-        
+
         mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
-        
+
         switch (view) {
             case "public":
                 mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Public.class));
@@ -50,12 +54,12 @@ public class JacksonConfigProvider implements ContextResolver<ObjectMapper> {
                 mapper.setConfig(mapper.getSerializationConfig().withView(Views.Public.class));
                 break;
         }
-        
+
         return mapper;
     }
-    
+
     @Override
     public ObjectMapper getContext(Class<?> type) {
-        return createMapper(this.config.getProperty("service.json.view"));
+        return createMapper();
     }
 }

@@ -44,8 +44,8 @@ public class ApplicationModuleMock extends AbstractApplicationModule {
 
     @Provides
     @Override
-    protected ObjectMapper provideObjectMapper(EnvHelper env) {
-        return appModule.provideObjectMapper(env);
+    protected ObjectMapper provideObjectMapper(@Config Properties p) {
+        return appModule.provideObjectMapper(p);
     }
 
     @Provides
