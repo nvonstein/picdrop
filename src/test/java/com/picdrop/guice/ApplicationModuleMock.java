@@ -19,10 +19,16 @@ public class ApplicationModuleMock extends ApplicationModule {
     
     @Override
     protected void bindProperties(Binder binder) {
-        Names.bindProperties(binder, EnvHelper.getPropertiesTest());
+        EnvHelper ehlp = new EnvHelper("");
+        ehlp.setConfig(ehlp.getPropertiesTest());
+        
+        binder.bind(EnvHelper.class).toInstance(ehlp);
+        
+        Names.bindProperties(binder, ehlp.getPropertiesTest());
         binder.bind(Properties.class)
                 .annotatedWith(Config.class)
-                .toInstance(EnvHelper.getPropertiesTest());
+                .toInstance(ehlp.getPropertiesTest());
     }
+    
     
 }

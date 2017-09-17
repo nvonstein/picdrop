@@ -7,9 +7,10 @@ package com.picdrop.json;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
+import com.picdrop.guice.names.Config;
 import com.picdrop.helper.EnvHelper;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -23,8 +24,9 @@ public class JacksonConfigProvider implements ContextResolver<ObjectMapper> {
     
     protected Properties config;
     
-    public JacksonConfigProvider() throws IOException {
-        this.config = EnvHelper.getProperties();
+    @Inject
+    public JacksonConfigProvider(@Config Properties config) throws IOException {
+        this.config = config;
     }    
     
     public static ObjectMapper createMapper(String view) {

@@ -17,15 +17,31 @@ import java.util.Properties;
  *
  * @author i330120
  */
-public abstract class EnvHelper {
+public class EnvHelper {
 
-    protected static Properties config;
+    protected Properties config;
+    protected final String name;
 
-    protected static String getEnv(String name) {
+    public EnvHelper(String name) {
+        this.name = name;
+    }
+
+    public static String getSystemEnv(String name) {
+        return System.getenv(name);
+    }
+
+    public static String getSystemProperty(String name) {
         return System.getProperty(name);
     }
 
-    protected static Properties parsePropertyFile(String path) throws FileNotFoundException, IOException {
+    public static String getSystemAny(String name) {
+        String env = System.getProperty(name);
+        return (env == null)
+                ? System.getenv(name)
+                : env;
+    }
+
+    protected Properties parsePropertyFile(String path) throws FileNotFoundException, IOException {
         FileReader reader = null;
         File f = new File(path);
 
@@ -39,11 +55,11 @@ public abstract class EnvHelper {
         return p;
     }
 
-    public static void setConfig(Properties config) {
-        EnvHelper.config = config;
+    public void setConfig(Properties config) {
+        this.config = config;
     }
 
-    protected static Properties getDefaultProperties() {
+    public Properties getDefaultProperties() {
         Properties p = new Properties();
 
         p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
@@ -80,19 +96,26 @@ public abstract class EnvHelper {
         return p;
     }
 
-    public static Properties getProperties() throws IOException {
+    public Properties getProperties() throws IOException {
         if (config == null) {
-            String env = getEnv("picdrop.app.properties");
-            if (!Strings.isNullOrEmpty(env)) {
-                config = parsePropertyFile(env);
-            } else {
-                config = getDefaultProperties();
+            String env = getSystemAny(this.name);
+            if (Strings.isNullOrEmpty(env)) {
+                throw new IOException(String.format("No env set for '%s'", this.name));
             }
+            config = parsePropertyFile(env);
         }
         return config;
     }
 
-    public static Properties getPropertiesTest() {
+    public Properties getPropertiesWithDefault() {
+        try {
+            return getProperties();
+        } catch (IOException ex) {
+            return getDefaultProperties();
+        }
+    }
+
+    public Properties getPropertiesTest() {
         Properties p = new Properties();
 
         p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
@@ -127,5 +150,9 @@ public abstract class EnvHelper {
         p.put("service.tika.config", "");
 
         return p;
+    }
+
+    public static EnvHelper from(String env) {
+        return new EnvHelper(env);
     }
 }

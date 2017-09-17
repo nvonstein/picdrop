@@ -96,11 +96,9 @@ public class FileResourceServiceTest {
     @Before
     public void setUp() throws IOException {
 
-        EnvHelper.setConfig(EnvHelper.getPropertiesTest());
-
         RepositoryModuleMockNoDB repoModule = new RepositoryModuleMockNoDB();
 
-        Injector inj = Guice.createInjector(new ApplicationModule(),
+        Injector inj = Guice.createInjector(new ApplicationModuleMock(),
                 new AuthorizationModuleMock(ctx),
                 new CryptoModule(),
                 repoModule,

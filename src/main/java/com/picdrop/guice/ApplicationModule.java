@@ -44,52 +44,27 @@ import org.xml.sax.SAXException;
  */
 public class ApplicationModule implements Module {
 
-    Logger log = LogManager.getLogger();
-
     @Override
     public void configure(Binder binder) {
         // Services
         bindServices(binder);
 
-        try {
-            // Environment
-            bindProperties(binder);
-        } catch (FileNotFoundException ex) {
-            log.fatal(String.format("Config file not found: %s", ex.getMessage()), ex);
-            return;
-        } catch (IOException ex) {
-            log.fatal("Unable to load config with following error: " + ex.getMessage(), ex);
-            return;
-        }
-
-        try {
-            // Json
-            bindObjectMapper(binder);
-        } catch (IOException ex) {
-            log.error("Unable to bind ObjectMapper", ex);
-        }
+        // Environment
+        bindProperties(binder);
 
         // Static ObjectMapper
         bindStaticObjectMapper(binder);
     }
 
-    protected void bindProperties(Binder binder) throws IOException {
-        Properties config = EnvHelper.getProperties();
+    protected void bindProperties(Binder binder) {
+        EnvHelper ehlp = EnvHelper.from("picdrop.app.properties");
+        binder.bind(EnvHelper.class).toInstance(ehlp);
+
+        Properties config = ehlp.getPropertiesWithDefault();
         Names.bindProperties(binder, config);
         binder.bind(Properties.class)
                 .annotatedWith(Config.class)
                 .toInstance(config);
-    }
-
-    protected void bindObjectMapper(Binder binder) throws IOException {
-        Properties p = EnvHelper.getProperties();
-        if (p == null) {
-            return;
-        }
-        ObjectMapper mapper = JacksonConfigProvider.createMapper(p.getProperty("service.json.view"));
-
-        binder.bind(ObjectMapper.class).toInstance(mapper);
-        binder.bind(ObjectWriter.class).toInstance(mapper.writer());
     }
 
     protected void bindStaticObjectMapper(Binder binder) {
@@ -103,6 +78,17 @@ public class ApplicationModule implements Module {
         binder.bind(AuthorizationService.class).asEagerSingleton();
         binder.bind(CollectionService.class).asEagerSingleton();
         binder.bind(ShareService.class).asEagerSingleton();
+    }
+
+    @Provides
+    protected ObjectMapper provideObjectMapper(EnvHelper env) {
+        Properties p = env.getPropertiesWithDefault();
+        return JacksonConfigProvider.createMapper(p.getProperty("service.json.view"));
+    }
+
+    @Provides
+    protected ObjectWriter provideObjectWriter(ObjectMapper mapper) {
+        return mapper.writer();
     }
 
     @Provides
