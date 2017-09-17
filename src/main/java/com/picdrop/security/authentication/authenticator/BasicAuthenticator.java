@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +54,7 @@ public class BasicAuthenticator implements Authenticator<RegisteredUser> {
             }
             
             return users.get(0);
-        } catch (Exception e) {
+        } catch (IOException e) {
             return null;
         }
     }
