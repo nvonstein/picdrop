@@ -6,3 +6,12 @@ SecureStore.jar
 createdFiles.lst
 inputFiles.lst
 securestore/target
+docker/webapp/picdrop.war
+logs/catalina.2017-09-15.log
+logs/catalina.2017-09-16.log
+logs/host-manager.2017-09-15.log
+logs/localhost.2017-09-15.log
+logs/localhost_access_log.2017-09-15.txt
+logs/localhost_access_log.2017-09-16.txt
+logs/manager.2017-09-15.log
+logs/picdrop.main.out
