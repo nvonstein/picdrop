@@ -11,6 +11,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.picdrop.exception.ApplicationException;
+import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.guice.factory.CookieProviderFactory;
 import com.picdrop.guice.names.AuthorizationToken;
 import com.picdrop.guice.names.Credentials;
@@ -176,7 +177,8 @@ public class AuthorizationService {
         RegisteredUser user = basicAuthenticator.authenticate(request);
         if (user == null) {
             throw new ApplicationException()
-                    .status(403);
+                    .devMessage("Invalid login recieved")
+                    .status(401);
         }
         log.debug(SERVICE, "User successfully authenticated by credentials");
 
