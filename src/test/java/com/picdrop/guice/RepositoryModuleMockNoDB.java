@@ -5,7 +5,6 @@
  */
 package com.picdrop.guice;
 
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -14,14 +13,10 @@ import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
-import com.picdrop.model.user.User;
-import com.picdrop.repository.AdvancedRepository;
-import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
 import java.util.Properties;
 import javax.enterprise.util.TypeLiteral;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
 import org.mongodb.morphia.Datastore;
 
