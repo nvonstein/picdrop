@@ -273,4 +273,21 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         log.traceExit();
         return query.asList();
     }
+
+    public static <K> IntermediateStateBuilder<MorphiaRepository.TypedRepositoryBuilder<K>> forType(Class<K> clazz) {
+        return new IntermediateStateBuilder<>(new MorphiaRepository.TypedRepositoryBuilder<>(clazz));
+    }
+
+    public static class TypedRepositoryBuilder<K> extends MorphiaRepository.TypedRepositoryBuilder<K> {
+
+        TypedRepositoryBuilder(Class<K> clazz) {
+            super(clazz);
+        }
+
+        @Override
+        public PrincipalAwareMorphiaRepository<K> build() {
+            return setFields(new PrincipalAwareMorphiaRepository<>(this.ds, this.clazz));
+        }
+
+    }
 }

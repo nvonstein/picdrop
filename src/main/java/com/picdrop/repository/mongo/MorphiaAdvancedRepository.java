@@ -54,4 +54,20 @@ public class MorphiaAdvancedRepository<T> extends MorphiaRepository<T> implement
         return Arrays.asList();
     }
 
+    public static <K> IntermediateStateBuilder<MorphiaRepository.TypedRepositoryBuilder<K>> forType(Class<K> clazz) {
+        return new IntermediateStateBuilder<>(new MorphiaRepository.TypedRepositoryBuilder<>(clazz));
+    }
+
+    public static class TypedRepositoryBuilder<K> extends MorphiaRepository.TypedRepositoryBuilder<K> {
+
+        TypedRepositoryBuilder(Class<K> clazz) {
+            super(clazz);
+        }
+
+        @Override
+        public MorphiaAdvancedRepository<K> build() {
+            return setFields(new MorphiaAdvancedRepository<>(this.ds, this.clazz));
+        }
+
+    }
 }

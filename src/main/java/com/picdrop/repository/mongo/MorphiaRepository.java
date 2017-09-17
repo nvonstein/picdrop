@@ -141,4 +141,61 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         return query.asList();
     }
 
+    public static <K> IntermediateStateBuilder<TypedRepositoryBuilder<K>> forType(Class<K> clazz) {
+        return new IntermediateStateBuilder<>(new TypedRepositoryBuilder<>(clazz));
+    }
+
+    public static class TypedRepositoryBuilder<K> {
+
+        Class<K> clazz;
+
+        ObjectMapper mapper;
+        Map<String, String> queries;
+        Datastore ds;
+
+        TypedRepositoryBuilder(Class<K> clazz) {
+            this.clazz = clazz;
+        }
+
+        protected <U extends MorphiaRepository<K>> U setFields(U repo) {
+            repo.setMapper(this.mapper);
+            repo.setNamedQueries(this.queries);
+            return repo;
+        }
+
+        public MorphiaRepository<K> build() {
+            return setFields(new MorphiaRepository<>(this.ds, this.clazz));
+        }
+    }
+
+    public static class IntermediateStateBuilder<BUILDER extends TypedRepositoryBuilder<?>> {
+
+        private final BUILDER builder;
+
+        public IntermediateStateBuilder(BUILDER builder) {
+            this.builder = builder;
+        }
+
+        public IntermediateStateBuilder<BUILDER> withMapper(ObjectMapper mapper) {
+            this.builder.mapper = mapper;
+            return this;
+        }
+
+        public IntermediateStateBuilder<BUILDER> withQueries(Map<String, String> queries) {
+            this.builder.queries = queries;
+            return this;
+        }
+
+        public BUILDER withDatastore(Datastore ds) {
+            builder.ds = ds;
+            return builder;
+        }
+
+        public BUILDER from(RepositoryPrototype prototype) {
+            builder.ds = prototype.ds;
+            builder.mapper = prototype.mapper;
+            builder.queries = prototype.queries;
+            return builder;
+        }
+    }
 }
