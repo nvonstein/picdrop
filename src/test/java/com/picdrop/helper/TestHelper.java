@@ -9,6 +9,7 @@ import com.picdrop.model.Identifiable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import org.bouncycastle.util.Arrays;
 import static org.junit.Assert.*;
@@ -65,7 +66,7 @@ public class TestHelper {
     public static String readMockJson(String name) throws IOException {
         File f = new File("./test/json", name.concat(".json"));
 
-        return new String(Files.readAllBytes(f.toPath()));      
+        return new String(Files.readAllBytes(f.toPath()));
     }
 
     public static String[] quote(String[] in) {
@@ -89,5 +90,22 @@ public class TestHelper {
         for (String s : fields) {
             assertFalse(String.format("Contains '%s'; Actual: %s", s, json), json.contains(s));
         }
+    }
+
+    public static Properties getTestConfig() {
+        EnvHelper ehlp = new EnvHelper("");
+        Properties p = new Properties(ehlp.getDefaultProperties());
+
+        p.put("token.signer.alg", "HS256");
+        p.put("token.cipher.alg", "dir");
+        p.put("token.cipher.meth", "A128CBC-HS256");
+
+        p.put("service.file.stores.active.test1", com.google.common.io.Files.createTempDir().getAbsolutePath());
+
+        p.put("service.upload.store", com.google.common.io.Files.createTempDir().getAbsolutePath());
+
+        p.put("service.tika.config", "");
+
+        return p;
     }
 }
