@@ -90,14 +90,34 @@ public class PrincipalAwareMorphiaAdvancedRepository<T> extends PrincipalAwareMo
         return Arrays.asList();
     }
 
-    public static <K> IntermediateStateBuilder<MorphiaRepository.TypedRepositoryBuilder<K>> forType(Class<K> clazz) {
-        return new IntermediateStateBuilder<>(new MorphiaRepository.TypedRepositoryBuilder<>(clazz));
+    public static <K> IntermediateStateBuilder<K> forType(Class<K> clazz) {
+        return new IntermediateStateBuilder<>(clazz);
+    }
+
+    public static class IntermediateStateBuilder<K> extends PrincipalAwareMorphiaRepository.IntermediateStateBuilder<K> {
+
+        IntermediateStateBuilder(Class<K> clazz) {
+            super(clazz);
+        }
+
+        @Override
+        public TypedRepositoryBuilder<K> from(RepositoryPrototype prototype) {
+            super.from(prototype);
+            return new TypedRepositoryBuilder<>(this);
+        }
+
+        @Override
+        public TypedRepositoryBuilder<K> withDatastore(Datastore ds) {
+            super.withDatastore(ds);
+            return new TypedRepositoryBuilder<>(this);
+        }
+
     }
 
     public static class TypedRepositoryBuilder<K> extends PrincipalAwareMorphiaRepository.TypedRepositoryBuilder<K> {
 
-        TypedRepositoryBuilder(Class<K> clazz) {
-            super(clazz);
+        public TypedRepositoryBuilder(IntermediateStateBuilder<K> state) {
+            super(state);
         }
 
         @Override
