@@ -85,7 +85,7 @@ public class EnvHelper {
         p.put("service.file.store", "/Users/nvonstein/picdrop/store");
 
         p.put("service.upload.store", "/Users/nvonstein/picdrop/uploads");
-        p.put("service.upload.maxmemory", "100000000"); // 100 MB
+        p.put("service.upload.maxmemory", "2000000"); // 2 MB
         p.put("service.upload.maxfilesize", "10000000"); // 10 MB
         p.put("service.upload.maxrequestsize", "100000000"); // 100 MB
 
