@@ -16,13 +16,15 @@ import com.picdrop.guice.factory.ResourceContainerFactory;
 import com.picdrop.guice.names.Config;
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.names.Resource;
+import com.picdrop.guice.provider.FileItemFactoryProvider;
 import com.picdrop.guice.provider.FileRepositoryProvider;
 import com.picdrop.guice.provider.ResourceContainer;
-import com.picdrop.guice.provider.implementation.FileItemFactoryProvider;
+import com.picdrop.guice.provider.UploadHandlerProvider;
+import com.picdrop.guice.provider.implementation.FileItemFactoryProviderImpl;
 import com.picdrop.guice.provider.implementation.FileItemResourceContainer;
 import com.picdrop.guice.provider.implementation.FileResourceContainer;
 import com.picdrop.guice.provider.implementation.ProcessorListProviders;
-import com.picdrop.guice.provider.implementation.UploadHandlerProvider;
+import com.picdrop.guice.provider.implementation.UploadHandlerProviderImpl;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
 import com.picdrop.io.repository.FileRepository;
@@ -42,7 +44,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
  * @author nvonstein
  */
 public abstract class AbstractFileHandlingModule implements Module {
-    
+
     @Override
     public void configure(Binder binder) {
         binder.install(ThrowingProviderBinder.forModule(this));
@@ -58,8 +60,15 @@ public abstract class AbstractFileHandlingModule implements Module {
     }
 
     protected void bindUploadHandler(Binder binder) {
-        binder.bind(FileItemFactory.class).toProvider(FileItemFactoryProvider.class).asEagerSingleton();
-        binder.bind(ServletFileUpload.class).toProvider(UploadHandlerProvider.class);
+        ThrowingProviderBinder.create(binder)
+                .bind(FileItemFactoryProvider.class, FileItemFactory.class)
+                .to(FileItemFactoryProviderImpl.class)
+                .in(Singleton.class);
+        
+        ThrowingProviderBinder.create(binder)
+                .bind(UploadHandlerProvider.class, ServletFileUpload.class)
+                .to(UploadHandlerProviderImpl.class)
+                .in(Singleton.class);
     }
 
     protected void bindFileIOProcessors(Binder binder) {
@@ -68,7 +77,10 @@ public abstract class AbstractFileHandlingModule implements Module {
     }
 
     protected void bindFileStreamProvider(Binder binder) {
-        binder.install(new FactoryModuleBuilder().implement(ResourceContainer.class, Resource.class, FileResourceContainer.class).implement(ResourceContainer.class, File.class, FileItemResourceContainer.class).build(ResourceContainerFactory.class));
+        binder.install(new FactoryModuleBuilder()
+                .implement(ResourceContainer.class, Resource.class, FileResourceContainer.class)
+                .implement(ResourceContainer.class, File.class, FileItemResourceContainer.class)
+                .build(ResourceContainerFactory.class));
     }
 
     protected void bindProcessorList(Binder binder) {
@@ -81,5 +93,5 @@ public abstract class AbstractFileHandlingModule implements Module {
     }
 
     abstract FileRepository<String> provideFileRepository(Properties config) throws IOException;
-    
+
 }
