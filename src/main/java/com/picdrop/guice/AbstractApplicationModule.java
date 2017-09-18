@@ -9,7 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.picdrop.ApplicationMode;
 import com.picdrop.exception.AbstractExceptionMapper;
 import com.picdrop.exception.ApplicationExeptionMapper;
 import com.picdrop.guice.names.Config;
@@ -64,6 +68,12 @@ public abstract class AbstractApplicationModule implements Module {
         binder.bind(AuthorizationService.class).asEagerSingleton();
         binder.bind(CollectionService.class).asEagerSingleton();
         binder.bind(ShareService.class).asEagerSingleton();
+    }
+    
+    @Provides
+    @Singleton
+    protected ApplicationMode provideApplicationMode(@Named("service.environment") String mode) {
+        return ApplicationMode.forName(mode);
     }
     
     protected abstract ObjectMapper provideObjectMapper(Properties p);

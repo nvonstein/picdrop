@@ -9,6 +9,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.picdrop.ApplicationMode;
+import com.picdrop.guice.names.Config;
+import java.util.Properties;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,6 +31,8 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
 
     @Inject
     protected static ObjectWriter writer;
+    @Inject
+    static ApplicationMode appMode;
 
     protected void log(ErrorMessage msg, Throwable e) {
         Level lvl = msg.lvl;
@@ -48,7 +54,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
 
         try {
             return Response.status(msg.status)
-                    .entity(writer.writeValueAsString(msg.maskFields(true)))
+                    .entity(writer.writeValueAsString(msg.maskFields(appMode.isDebug())))
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         } catch (JsonProcessingException ex) {

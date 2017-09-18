@@ -63,6 +63,8 @@ public class EnvHelper {
         Properties p = new Properties();
 
         p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
+        
+        p.put("service.environment", "prod");
 
         p.put("service.cookie.enabled", "true");
         p.put("service.cookie.domain", "localhost");
