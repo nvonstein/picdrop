@@ -35,6 +35,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
 
     Class<T> entityType;
 
+    // Must use field injection as Mockito disturbes any other type of injection
     @Inject
     @Queries
     Map<String, String> namedQueries;
@@ -76,10 +77,8 @@ public class MorphiaRepository<T> implements Repository<String, T> {
     public T save(T entity) {
         log.traceEntry();
         log.debug(REPO_SAVE, "Saving entity of type '{}'", this.entityType.toString());
-        Key<T> k = ds.save(entity);
-        T e = ds.getByKey(entityType, k);
-        log.traceExit();
-        return e;
+        Key<T> k = ds.save(entity, ds.getDefaultWriteConcern());
+        return entity;
     }
 
     @Override
