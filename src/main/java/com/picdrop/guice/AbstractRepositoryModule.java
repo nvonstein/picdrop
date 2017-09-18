@@ -5,7 +5,6 @@
  */
 package com.picdrop.guice;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
@@ -30,11 +29,7 @@ import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
-import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
-import com.picdrop.repository.mongo.MorphiaRepository;
 import com.picdrop.repository.mongo.NamedQueries;
-import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
-import com.picdrop.repository.mongo.RepositoryPrototype;
 import java.util.Map;
 import java.util.Properties;
 import org.mongodb.morphia.Datastore;
@@ -47,8 +42,8 @@ public abstract class AbstractRepositoryModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(new TypeLiteral<Map<String, String>>() {
-        }).annotatedWith(Queries.class).toInstance(NamedQueries.getQueries());
+//        binder.bind(new TypeLiteral<Map<String, String>>() {
+//        }).annotatedWith(Queries.class).toInstance(NamedQueries.getQueries());
         // Registered user repo
         bindRegisteredUserRepo(binder);
         // Resource repo
@@ -64,77 +59,78 @@ public abstract class AbstractRepositoryModule implements Module {
         // Static bindings
         bindStaticRepoReferences(binder);
     }
+    
+    @Provides
+    @Queries
+    @Singleton
+    protected Map<String,String> provideNamedQueries() {
+        return NamedQueries.getQueries();
+    }
 
     protected void bindRegisteredUserRepo(Binder binder) {
+        AdvancedRepository<String, RegisteredUser> repo = provideRegisteredUserRepo();
+
         binder.bind(new TypeLiteral<AdvancedRepository<String, RegisteredUser>>() {
-        }).to(new TypeLiteral<MorphiaAdvancedRepository<RegisteredUser>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
-        }).to(new TypeLiteral<MorphiaAdvancedRepository<RegisteredUser>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
     }
 
     protected void bindResourceRepo(Binder binder) {
+        AwareAdvancedRepository<String, FileResource, User> repo = provideResourceRepo();
+
         binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<FileResource>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, FileResource, User>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<FileResource>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, FileResource>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<FileResource>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareAdvancedRepository<String, FileResource, User>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<FileResource>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
     }
 
     protected void bindCollectionsRepo(Binder binder) {
+        AwareAdvancedRepository<String, Collection, User> repo = provideCollectionRepo();
+
         binder.bind(new TypeLiteral<Repository<String, Collection>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Collection>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, Collection, User>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Collection>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, Collection>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Collection>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Collection, User>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Collection>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
     }
 
     protected void bindCollectionItemRepo(Binder binder) {
+        AdvancedRepository<String, Collection.CollectionItem> repo = provideCollectionItemRepo();
+
         binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
-        }).to(new TypeLiteral<MorphiaAdvancedRepository<Collection.CollectionItem>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, Collection.CollectionItem>>() {
-        }).to(new TypeLiteral<MorphiaAdvancedRepository<Collection.CollectionItem>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
     }
 
     protected void bindShareRepo(Binder binder) {
+        AwareAdvancedRepository<String, Share, User> repo = provideShareRepo();
+
         binder.bind(new TypeLiteral<Repository<String, Share>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Share>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Share>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, Share>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Share>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Share, User>>() {
-        }).to(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Share>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
     }
 
     protected void bindTokenSetRepo(Binder binder) {
+        AdvancedRepository<String, TokenSet> repo = provideTokenSetRepo();
+
         binder.bind(new TypeLiteral<Repository<String, TokenSet>>() {
-        }).to(new TypeLiteral<MorphiaAdvancedRepository<TokenSet>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
         binder.bind(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
-        }).to(new TypeLiteral<MorphiaAdvancedRepository<TokenSet>>() {
-        }).in(Singleton.class);
+        }).toInstance(repo);
     }
 
     protected void bindStaticRepoReferences(Binder binder) {
@@ -151,19 +147,17 @@ public abstract class AbstractRepositoryModule implements Module {
     protected abstract Datastore provideDatastore(MongoClient client);
 
     protected abstract MongoClient provideMongoClient(@Config Properties config);
-    
-    protected abstract RepositoryPrototype provideRepositoryPrototype(Datastore ds, ObjectMapper mapper, Map<String, String> queries);
 
-    protected abstract AdvancedRepository<String, TokenSet> provideTokenSetRepo(RepositoryPrototype prototype);
+    protected abstract AdvancedRepository<String, TokenSet> provideTokenSetRepo();
 
-    protected abstract AdvancedRepository<String, Collection.CollectionItem> provideCollectionItemRepo(RepositoryPrototype prototype);
+    protected abstract AdvancedRepository<String, Collection.CollectionItem> provideCollectionItemRepo();
 
-    protected abstract AdvancedRepository<String, RegisteredUser> provideRegisteredUserRepo(RepositoryPrototype prototype);
+    protected abstract AdvancedRepository<String, RegisteredUser> provideRegisteredUserRepo();
 
-    protected abstract AwareAdvancedRepository<String, Collection, User> provideCollectionRepo(RepositoryPrototype prototype);
+    protected abstract AwareAdvancedRepository<String, Collection, User> provideCollectionRepo();
 
-    protected abstract AwareAdvancedRepository<String, FileResource, User> provideResourceRepo(RepositoryPrototype prototype);
+    protected abstract AwareAdvancedRepository<String, FileResource, User> provideResourceRepo();
 
-    protected abstract AwareAdvancedRepository<String, Share, User> provideShareRepo(RepositoryPrototype prototype);
+    protected abstract AwareAdvancedRepository<String, Share, User> provideShareRepo();
 
 }
