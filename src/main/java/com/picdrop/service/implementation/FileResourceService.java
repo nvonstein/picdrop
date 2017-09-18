@@ -76,6 +76,7 @@ public class FileResourceService {
 
     ServletFileUpload upload;
 
+    @Inject
     Provider<RequestContext> contextProv;
 
     ResourceContainerFactory instProvFac;
@@ -115,11 +116,6 @@ public class FileResourceService {
         } catch (IOException ex) {
             this.log.fatal("Unable to initialize upload handler", ex);
         }
-    }
-
-    @Inject
-    public void setContextProvider(Provider<RequestContext> contextProv) {
-        this.contextProv = contextProv;
     }
 
     @Inject
