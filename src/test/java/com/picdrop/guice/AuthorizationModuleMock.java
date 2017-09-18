@@ -38,7 +38,7 @@ public class AuthorizationModuleMock extends AbstractAuthorizationModule {
     @Singleton
     @AuthorizationToken
     @Override
-    Authenticator<RegisteredUser> provideAuthTokenAuthenticator(WebTokenFactory tfactory, String authCookieName, ClaimSetFactory<RegisteredUser> f) {
+    Authenticator<RegisteredUser> provideAuthTokenAuthenticator(WebTokenFactory tfactory, String authCookieName, @AuthorizationToken ClaimSetFactory<RegisteredUser> f) {
         return authModule.provideAuthTokenAuthenticator(tfactory, authCookieName, f);
     }
 
@@ -46,7 +46,7 @@ public class AuthorizationModuleMock extends AbstractAuthorizationModule {
     @Singleton
     @RefreshToken
     @Override
-    Authenticator<RegisteredUser> provideRefreshTokenAuthenticator(WebTokenFactory tfactory, String authCookieName, ClaimSetFactory<RegisteredUser> f) {
+    Authenticator<RegisteredUser> provideRefreshTokenAuthenticator(WebTokenFactory tfactory, String authCookieName, @RefreshToken ClaimSetFactory<RegisteredUser> f) {
         return authModule.provideRefreshTokenAuthenticator(tfactory, authCookieName, f);
     }
 
