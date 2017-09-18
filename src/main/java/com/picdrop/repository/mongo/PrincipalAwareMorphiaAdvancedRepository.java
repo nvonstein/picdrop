@@ -23,6 +23,10 @@ import org.mongodb.morphia.query.UpdateResults;
  */
 public class PrincipalAwareMorphiaAdvancedRepository<T> extends PrincipalAwareMorphiaRepository<T> implements AwareAdvancedRepository<String, T, User> {
 
+    PrincipalAwareMorphiaAdvancedRepository(Class<T> entityType) {
+        super(entityType);
+    }
+
     public PrincipalAwareMorphiaAdvancedRepository(Datastore ds, Class<T> entityType) {
         super(ds, entityType);
         this.log = LogManager.getLogger();
@@ -104,6 +108,11 @@ public class PrincipalAwareMorphiaAdvancedRepository<T> extends PrincipalAwareMo
         public TypedRepositoryBuilder<K> from(RepositoryPrototype prototype) {
             super.from(prototype);
             return new TypedRepositoryBuilder<>(this);
+        }
+
+        @Override
+        public PrincipalAwareMorphiaAdvancedRepository<K> uninitialized() {
+            return new PrincipalAwareMorphiaAdvancedRepository<>(this.clazz);
         }
 
         @Override

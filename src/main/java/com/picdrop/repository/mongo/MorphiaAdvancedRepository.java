@@ -22,6 +22,10 @@ import org.mongodb.morphia.query.UpdateResults;
  */
 public class MorphiaAdvancedRepository<T> extends MorphiaRepository<T> implements AdvancedRepository<String, T> {
 
+    MorphiaAdvancedRepository(Class<T> entityType) {
+        super(entityType);
+    }
+
     public MorphiaAdvancedRepository(Datastore ds, Class<T> entityType) {
         super(ds, entityType);
         this.log = LogManager.getLogger();
@@ -68,6 +72,11 @@ public class MorphiaAdvancedRepository<T> extends MorphiaRepository<T> implement
         public TypedRepositoryBuilder<K> from(RepositoryPrototype prototype) {
             super.from(prototype);
             return new TypedRepositoryBuilder<>(this);
+        }
+
+        @Override
+        public MorphiaAdvancedRepository<K> uninitialized() {
+            return new MorphiaAdvancedRepository<>(this.clazz);
         }
 
         @Override

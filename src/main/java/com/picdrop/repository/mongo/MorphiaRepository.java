@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.picdrop.guice.names.Queries;
 import com.picdrop.repository.Repository;
@@ -32,13 +33,21 @@ import org.mongodb.morphia.query.Query;
  */
 public class MorphiaRepository<T> implements Repository<String, T> {
 
-    Datastore ds;
     Class<T> entityType;
 
+    @Inject
+    @Queries
     Map<String, String> namedQueries;
+    @Inject
     ObjectMapper mapper;
+    @Inject
+    Datastore ds;
 
     Logger log;
+
+    MorphiaRepository(Class<T> entityType) {
+        this.entityType = entityType;
+    }
 
     public MorphiaRepository(Datastore ds, Class<T> entityType) {
         this.ds = ds;
@@ -46,12 +55,14 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         this.log = LogManager.getLogger();
     }
 
-    @Inject
-    public void setNamedQueries(@Queries Map<String, String> namedQueries) {
+    public void setDatastore(Datastore ds) {
+        this.ds = ds;
+    }
+
+    public void setNamedQueries(Map<String, String> namedQueries) {
         this.namedQueries = namedQueries;
     }
 
-    @Inject
     public void setMapper(ObjectMapper mapper) {
         this.mapper = mapper;
     }
@@ -179,10 +190,14 @@ public class MorphiaRepository<T> implements Repository<String, T> {
             return new TypedRepositoryBuilder<>(this);
         }
 
+        public MorphiaRepository<K> uninitialized() {
+            return new MorphiaRepository<>(this.clazz);
+        }
+
         public TypedRepositoryBuilder<K> from(RepositoryPrototype prototype) {
             return new TypedRepositoryBuilder<>(unwrapPrototype(prototype));
         }
-        
+
     }
 
     public static class TypedRepositoryBuilder<K> extends IntermediateStateBuilder<K> {

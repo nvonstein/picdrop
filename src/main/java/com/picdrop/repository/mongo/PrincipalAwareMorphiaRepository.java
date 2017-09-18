@@ -30,6 +30,10 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
     @Inject
     Provider<RequestContext> contextProv;
 
+    PrincipalAwareMorphiaRepository(Class<T> entityType) {
+        super(entityType);
+    }
+
     @Inject
     public PrincipalAwareMorphiaRepository(Datastore ds, Class<T> entityType) {
         super(ds, entityType);
@@ -288,6 +292,11 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         public TypedRepositoryBuilder<K> from(RepositoryPrototype prototype) {
             super.from(prototype);
             return new TypedRepositoryBuilder<>(this);
+        }
+
+        @Override
+        public PrincipalAwareMorphiaRepository<K> uninitialized() {
+            return new PrincipalAwareMorphiaRepository<>(this.clazz);
         }
 
         @Override
