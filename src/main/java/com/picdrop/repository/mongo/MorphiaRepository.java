@@ -47,6 +47,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
 
     MorphiaRepository(Class<T> entityType) {
         this.entityType = entityType;
+        this.log = LogManager.getLogger();
     }
 
     public MorphiaRepository(Datastore ds, Class<T> entityType) {

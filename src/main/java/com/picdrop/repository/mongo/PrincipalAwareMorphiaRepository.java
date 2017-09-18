@@ -32,6 +32,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
 
     PrincipalAwareMorphiaRepository(Class<T> entityType) {
         super(entityType);
+        this.log = LogManager.getLogger();
     }
 
     @Inject

@@ -24,6 +24,7 @@ public class MorphiaAdvancedRepository<T> extends MorphiaRepository<T> implement
 
     MorphiaAdvancedRepository(Class<T> entityType) {
         super(entityType);
+        this.log = LogManager.getLogger();
     }
 
     public MorphiaAdvancedRepository(Datastore ds, Class<T> entityType) {

@@ -25,6 +25,7 @@ public class PrincipalAwareMorphiaAdvancedRepository<T> extends PrincipalAwareMo
 
     PrincipalAwareMorphiaAdvancedRepository(Class<T> entityType) {
         super(entityType);
+        this.log = LogManager.getLogger();
     }
 
     public PrincipalAwareMorphiaAdvancedRepository(Datastore ds, Class<T> entityType) {
