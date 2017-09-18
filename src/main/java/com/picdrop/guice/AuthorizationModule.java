@@ -20,7 +20,7 @@ import com.picdrop.security.token.WebTokenFactory;
  *
  * @author i330120
  */
-public final class AuthorizationModule extends AbstractAuthorizationModule {
+public class AuthorizationModule extends AbstractAuthorizationModule {
 
 
     @Provides

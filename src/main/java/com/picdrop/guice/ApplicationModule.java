@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
  *
  * @author i330120
  */
-public final class ApplicationModule extends AbstractApplicationModule {
+public class ApplicationModule extends AbstractApplicationModule {
 
     @Provides
     @Singleton

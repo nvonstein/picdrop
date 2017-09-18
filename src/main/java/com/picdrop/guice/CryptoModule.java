@@ -29,7 +29,7 @@ import com.picdrop.guice.provider.JWSSignatureProvider;
  *
  * @author nvonstein
  */
-public final class CryptoModule extends AbstractCryptoModule {
+public class CryptoModule extends AbstractCryptoModule {
 
 
     @Singleton
