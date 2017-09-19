@@ -11,8 +11,10 @@ RUN mkdir -p /tmp/app/upload
 
 ENV CATALINA_OPTS="-Dpicdrop.app.properties=/usr/local/picdrop/config/picdrop.config.docker.properties"
 
+
 RUN rm -r  /usr/local/tomcat/webapps/*
 COPY ./target/picdrop.war /usr/local/tomcat/webapps
+
 
 RUN ln -sf /dev/stderr /usr/local/tomcat/logs/picdrop.error.out
 

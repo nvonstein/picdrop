@@ -18,7 +18,7 @@
             </PatternLayout>
         </File>
         
-        <RollingFile name="rollingfile.log.error" fileName="${basedir}/picdrop.error.out"
+<!--        <RollingFile name="rollingfile.log.error" fileName="${basedir}/picdrop.error.out"
                      filePattern="${basedir}/$${date:yyyy-MM}/picdrop.error-%d{MM-dd-yyyy}-%i.out.gz">
             <PatternLayout alwaysWriteExceptions="false">
                 <Pattern>${pattern.highlight}</Pattern>
@@ -33,14 +33,14 @@
                 <TimeBasedTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="200 MB"/>
             </Policies>
-        </RollingFile>
+        </RollingFile>-->
         
         <!-- DEBUG Appenders-->
-        <File name="file.log.debug" fileName="${basedir}/picdrop.debug.out" append="false">
+<!--        <File name="file.log.debug" fileName="${basedir}/picdrop.debug.out" append="false">
             <PatternLayout alwaysWriteExceptions="false">
                 <pattern>${pattern.highlight}</pattern>
             </PatternLayout>
-        </File>
+        </File>-->
         
         <RollingFile name="rollingfile.log.debug" fileName="${basedir}/picdrop.debug.out"
                      filePattern="${basedir}/$${date:yyyy-MM}/picdrop.debug-%d{MM-dd-yyyy}-%i.out.gz">
