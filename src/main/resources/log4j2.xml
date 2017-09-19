@@ -2,7 +2,8 @@
 <Configuration status="debug">
     <Properties>
         <Property name="basedir">${sys:catalina.base}/logs</Property>
-        <Property name="pattern.highlight">%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%level [%t] %c{-5} %L} - %msg%replace{%n%ex{7}%n}{[\r\n]+$}{}%n</Property>
+        <Property name="pattern.highlight">%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%level [%t] %c{-5} %L} - %msg%replace{%n%ex{10}%n}{[\r\n]+$}{}%n</Property>
+        <Property name="pattern.highlight.deeptrace">%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%level [%t] %c{-5} %L} - %msg%replace{%n%ex{15}%n}{[\r\n]+$}{}%n</Property>
     </Properties>
     <Appenders>
         <Console name="stdout">
@@ -18,7 +19,7 @@
             </PatternLayout>
         </File>
         
-<!--        <RollingFile name="rollingfile.log.error" fileName="${basedir}/picdrop.error.out"
+        <!--        <RollingFile name="rollingfile.log.error" fileName="${basedir}/picdrop.error.out"
                      filePattern="${basedir}/$${date:yyyy-MM}/picdrop.error-%d{MM-dd-yyyy}-%i.out.gz">
             <PatternLayout alwaysWriteExceptions="false">
                 <Pattern>${pattern.highlight}</Pattern>
@@ -36,7 +37,7 @@
         </RollingFile>-->
         
         <!-- DEBUG Appenders-->
-<!--        <File name="file.log.debug" fileName="${basedir}/picdrop.debug.out" append="false">
+        <!--        <File name="file.log.debug" fileName="${basedir}/picdrop.debug.out" append="false">
             <PatternLayout alwaysWriteExceptions="false">
                 <pattern>${pattern.highlight}</pattern>
             </PatternLayout>
@@ -45,7 +46,7 @@
         <RollingFile name="rollingfile.log.debug" fileName="${basedir}/picdrop.debug.out"
                      filePattern="${basedir}/$${date:yyyy-MM}/picdrop.debug-%d{MM-dd-yyyy}-%i.out.gz">
             <PatternLayout alwaysWriteExceptions="false">
-                <Pattern>${pattern.highlight}</Pattern>
+                <Pattern>${pattern.highlight.deeptrace}</Pattern>
             </PatternLayout>
             <DefaulRolloverStrategy max="10" compressionLevel="5">
                 <Delete basePath="${basedir}" maxDepth="1000">
