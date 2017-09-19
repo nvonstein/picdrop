@@ -105,6 +105,15 @@ public class RegisteredUserService {
         }
         if (Strings.isNullOrEmpty(entity.getName())) {
             entity.setName("PicdropUser");
+        } else if (entity.getName().length() > 256) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_NAME_TOO_LONG);
+        }
+        if (!Strings.isNullOrEmpty(entity.getLastname()) && entity.getLastname().length() > 256) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_NAME_TOO_LONG);
         }
 
         entity = repo.save(entity);

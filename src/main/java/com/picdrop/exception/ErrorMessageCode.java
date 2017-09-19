@@ -29,7 +29,8 @@ public enum ErrorMessageCode {
     BAD_JSON("ec000016","Bad Request: Invalid JSON"),
     BAD_REQUEST("ec000017","Bad Request: Invalid request performed."), 
     BAD_UPLOAD_MIME("ec000018","Bad Request: Unprocessable mime type."),
-    BAD_RESOURCE_NAME("ec000019","Bad request: Resource file name is too long.");
+    BAD_RESOURCE_NAME("ec000019","Bad request: Resource file name is too long."), 
+    BAD_NAME_TOO_LONG("ec000019","Bad request: Name exceeds limit of 256 characters.");
 
     private String code;
     private String defaultMessage;
