@@ -112,6 +112,7 @@ public class ErrorMessage {
     }
     
     public ErrorMessage trace(Throwable ex) {
+        this.trace.add(ex.toString());
         Arrays.stream(ex.getStackTrace()).limit(10).map(e -> e.toString()).forEach(e -> this.trace.add(e));
         return this;
     }

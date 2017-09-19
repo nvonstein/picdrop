@@ -83,7 +83,7 @@ public class ApplicationException extends Exception {
 
         if (debug) {
             msg.devMessage = devMessage;
-            msg.trace(this);
+            msg.trace((this.getCause() == null) ? this : this.getCause());
         }
 
         return msg;
