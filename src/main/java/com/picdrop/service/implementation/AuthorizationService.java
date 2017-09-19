@@ -212,6 +212,7 @@ public class AuthorizationService {
         RegisteredUser user = refreshAuthenticator.authenticate(request);
         if (user == null) {
             throw new ApplicationException()
+                    .devMessage("Invalid refresh attempt recieved")
                     .status(403);
         }
         log.debug(SERVICE, "User successfully authenticated by refresh token");
