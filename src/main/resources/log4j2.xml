@@ -1,20 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="debug">
+    <Properties>
+        <Property name="basedir">${sys:catalina.base}/logs</Property>
+        <Property name="pattern.highlight">%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%level [%t] %c{-5} %L} - %msg%replace{%n%ex{7}%n}{[\r\n]+$}{}%n</Property>
+    </Properties>
     <Appenders>
         <Console name="stdout">
             <PatternLayout>
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{-5} - %msg%n%xEx{7}</pattern>
             </PatternLayout>
         </Console>
-        <File name="file.log.main" fileName="${sys:catalina.base}/logs/picdrop.main.out" append="false">
+
+        <!-- ERROR Appenders-->
+        <File name="file.log.error" fileName="${basedir}/picdrop.error.out" append="false">
             <PatternLayout alwaysWriteExceptions="false">
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%level [%t] %c{-5} %L} - %msg%replace{%n%ex{7}%n}{[\r\n]+$}{}%n</pattern>
+                <pattern>${pattern.highlight}</pattern>
             </PatternLayout>
         </File>
+        
+        <RollingFile name="rollingfile.log.error" fileName="${basedir}/picdrop.error.out"
+                     filePattern="${basedir}/$${date:yyyy-MM}/picdrop.error-%d{MM-dd-yyyy}-%i.out.gz">
+            <PatternLayout alwaysWriteExceptions="false">
+                <Pattern>${pattern.highlight}</Pattern>
+            </PatternLayout>
+            <DefaulRolloverStrategy max="10" compressionLevel="5">
+                <Delete basePath="${basedir}" maxDepth="1000">
+                    <IfFileName glob="*/picdrop.error-*.out.gz" />
+                    <IfLastModified age="7d" />
+                </Delete>
+            </DefaulRolloverStrategy>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="200 MB"/>
+            </Policies>
+        </RollingFile>
+        
+        <!-- DEBUG Appenders-->
+        <File name="file.log.debug" fileName="${basedir}/picdrop.debug.out" append="false">
+            <PatternLayout alwaysWriteExceptions="false">
+                <pattern>${pattern.highlight}</pattern>
+            </PatternLayout>
+        </File>
+        
+        <RollingFile name="rollingfile.log.debug" fileName="${basedir}/picdrop.debug.out"
+                     filePattern="${basedir}/$${date:yyyy-MM}/picdrop.debug-%d{MM-dd-yyyy}-%i.out.gz">
+            <PatternLayout alwaysWriteExceptions="false">
+                <Pattern>${pattern.highlight}</Pattern>
+            </PatternLayout>
+            <DefaulRolloverStrategy max="10" compressionLevel="5">
+                <Delete basePath="${basedir}" maxDepth="1000">
+                    <IfFileName glob="*/picdrop.debug-*.out.gz" />
+                    <IfLastModified age="7d" />
+                </Delete>
+            </DefaulRolloverStrategy>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="200 MB"/>
+            </Policies>
+        </RollingFile>
     </Appenders>
+    
     <Loggers>
+        <Logger name="org.mongodb.driver" level="debug" additivity="false">
+            <appender-ref ref="rollingfile.log.debug" level="info"/>
+        </Logger>
         <Logger name="com.picdrop" level="debug" additivity="false">
-            <appender-ref ref="file.log.main" level="debug"/>
+            <appender-ref ref="file.log.error" level="error"/>
+            <appender-ref ref="rollingfile.log.debug" level="debug"/>
         </Logger>
         <Root level="trace">
             <appender-ref ref="stdout" level="error"/>
