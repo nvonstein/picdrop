@@ -62,11 +62,11 @@ public class EnvHelper {
     public Properties getDefaultProperties() {
         Properties p = new Properties();
 
-        p.put("picdrop.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
+        p.put("service.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
         
         p.put("service.environment", "prod");
 
-        p.put("service.cookie.enabled", "true");
+        p.put("service.cookie.enabled", "false");
         p.put("service.cookie.domain", "localhost");
         p.put("service.cookie.maxage", "900");
         p.put("service.cookie.http", "true");
@@ -84,9 +84,9 @@ public class EnvHelper {
         p.put("token.cipher.alg", "dir");
         p.put("token.cipher.meth", "A128CBC-HS256");
 
-        p.put("service.file.store", "/Users/nvonstein/picdrop/store");
+        p.put("service.file.store", "");
 
-        p.put("service.upload.store", "/Users/nvonstein/picdrop/uploads");
+        p.put("service.upload.store", "");
         p.put("service.upload.maxmemory", "2000000"); // 2 MB
         p.put("service.upload.maxfilesize", "10000000"); // 10 MB
         p.put("service.upload.maxrequestsize", "100000000"); // 100 MB

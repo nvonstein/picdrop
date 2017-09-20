@@ -75,7 +75,7 @@ public class RegisteredUserService {
     }
 
     @Inject
-    public void setEmailPattern(@Named("picdrop.validation.email.regex") String pattern) {
+    public void setEmailPattern(@Named("service.validation.email.regex") String pattern) {
         emailPattern = Pattern.compile(pattern);
     }
 
