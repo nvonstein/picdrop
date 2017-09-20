@@ -192,16 +192,20 @@ public class AuthorizationService {
         user.setLastLogin();
         userRepo.update(user.getId(), user);
 
-        log.debug(SERVICE, "Generating cookies");
-        NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
-        NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
+        NewCookie refreshC;
+        NewCookie authC;
+        Response.ResponseBuilder builder = Response
+                .ok(tokens, MediaType.APPLICATION_JSON);
+        if (cookieEnabled) {
+            log.debug(SERVICE, "Generating cookies");
+            authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
+            refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
+            builder = builder.cookie(authC, refreshC);
+        }
 
         log.info(SERVICE, "User logged in");
         log.traceExit();
-        return Response
-                .ok(tokens, MediaType.APPLICATION_JSON)
-                .cookie(authC, refreshC)
-                .build();
+        return builder.build();
     }
 
     @POST
@@ -227,22 +231,26 @@ public class AuthorizationService {
         user.setLastLogin();
         userRepo.update(user.getId(), user);
 
-        log.debug(SERVICE, "Generating cookies");
-        NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
-        NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
+        NewCookie refreshC;
+        NewCookie authC;
+        Response.ResponseBuilder builder = Response
+                .ok(tokens, MediaType.APPLICATION_JSON);
+        if (cookieEnabled) {
+            log.debug(SERVICE, "Generating cookies");
+            authC = cookieProvFactory.getSessionCookieProvider(authCookieName, tokens.getAuth()).get();
+            refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, tokens.getRefresh()).get();
+            builder = builder.cookie(authC, refreshC);
+        }
 
         log.info(SERVICE, "User token's refreshed");
         log.traceExit();
-        return Response
-                .ok(tokens, MediaType.APPLICATION_JSON)
-                .cookie(authC, refreshC)
-                .build();
+        return builder.build();
     }
 
     @POST
     @Path("/logout")
     @Permission("logout")
-    public Response logoutUser() { // TODO rework login/logout
+    public Response logoutUser() {
         log.traceEntry();
         User user = contextProv.get().getPrincipal();
         if (user == null) {
@@ -253,17 +261,19 @@ public class AuthorizationService {
         RegisteredUser ru = user.to(RegisteredUser.class);
         tsRepo.delete(ru.getActiveToken().getId());
 
-        log.debug(SERVICE, "Generating kill cookies");
-        NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, "").get();
-        NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, "").get();
+        Response.ResponseBuilder builder = Response.ok();
+        if (cookieEnabled) {
+            log.debug(SERVICE, "Generating kill cookies");
+            NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, "").get();
+            NewCookie refreshC = cookieProvFactory.getSessionCookieProvider(refreshCookieName, "").get();
 
-        NewCookie killcookie1 = new NewCookie(authC, authC.getComment(), 0, authC.isSecure());
-        NewCookie killcookie2 = new NewCookie(refreshC, refreshC.getComment(), 0, refreshC.isSecure());
+            NewCookie killcookie1 = new NewCookie(authC, authC.getComment(), 0, authC.isSecure());
+            NewCookie killcookie2 = new NewCookie(refreshC, refreshC.getComment(), 0, refreshC.isSecure());
+            builder = builder.cookie(killcookie1, killcookie2);
+        }
 
         log.info(SERVICE, "User logged out");
         log.traceExit();
-        return Response.ok()
-                .cookie(killcookie1, killcookie2)
-                .build();
+        return builder.build();
     }
 }
