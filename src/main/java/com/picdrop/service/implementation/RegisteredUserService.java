@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import com.picdrop.security.authentication.Permission;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,6 +54,8 @@ public class RegisteredUserService {
     AdvancedRepository<String, Share> srepo;
     AdvancedRepository<String, Collection.CollectionItem> cirepo;
 
+    FileResourceService fileService;
+
     @Inject
     Provider<RequestContext> contextProv;
 
@@ -64,7 +67,8 @@ public class RegisteredUserService {
             AdvancedRepository<String, FileResource> frepo,
             AdvancedRepository<String, Collection> crepo,
             AdvancedRepository<String, Collection.CollectionItem> cirepo,
-            AdvancedRepository<String, Share> srepo) {
+            AdvancedRepository<String, Share> srepo
+    ) {
         this.repo = repo;
         this.tsrepo = tsrepo;
         this.frepo = frepo;
@@ -77,6 +81,11 @@ public class RegisteredUserService {
     @Inject
     public void setEmailPattern(@Named("service.validation.email.regex") String pattern) {
         emailPattern = Pattern.compile(pattern);
+    }
+
+    @Inject
+    public void setFileService(FileResourceService fileService) {
+        this.fileService = fileService;
     }
 
     @POST
@@ -143,10 +152,17 @@ public class RegisteredUserService {
                 tsrepo.deleteNamed("with.owner", me.getId());
                 cirepo.deleteNamed("with.owner", me.getId());
                 crepo.deleteNamed("with.owner", me.getId());
-                frepo.deleteNamed("with.owner", me.getId()); // TODO remove files
+                List<FileResource> fres = frepo.queryNamed("with.owner", me.getId());
+                for (FileResource fr : fres) {
+                    try {
+                        this.fileService.processDelete(fr);
+                    } catch (ApplicationException ex) {
+                        log.warn(SERVICE, "Error during removal of owned file resources: " + ex.getMessage(), ex.getCause());
+                    }
+                }
                 srepo.deleteNamed("with.owner", me.getId());
             } catch (IOException ex) {
-                log.warn("Error during removal of owned resources and tokens", ex);
+                log.warn(SERVICE, "Error during removal of owned resources and tokens", ex);
             }
         }
         log.info(SERVICE, "User deleted");
