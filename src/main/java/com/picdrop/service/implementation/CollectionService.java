@@ -8,6 +8,7 @@ package com.picdrop.service.implementation;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import com.picdrop.model.RequestContext;
@@ -26,6 +27,7 @@ import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -57,6 +59,13 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Inject
     Provider<RequestContext> context;
 
+    Pattern collNamePattern = Pattern.compile("^([\\w]|-)+$");
+    int collNameLengthLimit = 256;
+
+    Pattern userNamePattern = Pattern.compile("^([\\w]|-)+$");
+    int userNameLengthLimit = 256;
+    int commentTextLengthLimit = 5000;
+
     @Inject
     public CollectionService(Repository<String, Collection> repo,
             Repository<String, Collection.CollectionItem> ciRepo,
@@ -70,13 +79,72 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.trace(SERVICE, "created with ({},{},{})", ciRepo, fRepo, sRepo);
     }
 
-    private boolean verifyName(NameOnlyUserReference entity) throws ApplicationException {
-        if ((entity != null) && (entity.getName().length() > 100)) {
+    @Inject
+    public void setCollectionNamePattern(@Named("service.validation.collection.name.regex") String pattern) {
+        this.collNamePattern = Pattern.compile(pattern);
+    }
+
+    @Inject
+    public void setCollectionNameLengthLimit(@Named("service.validation.collection.name.length") int limit) {
+        this.collNameLengthLimit = limit;
+    }
+
+    @Inject
+    public void setUserNamePattern(@Named("service.validation.user.name.regex") String pattern) {
+        this.userNamePattern = Pattern.compile(pattern);
+    }
+
+    @Inject
+    public void setUserNameLengthLimit(@Named("service.validation.user.name.length") int limit) {
+        this.userNameLengthLimit = limit;
+    }
+
+    @Inject
+    public void setCommentTextLengthLimit(@Named("service.validation.comment.text.length") int limit) {
+        this.commentTextLengthLimit = limit;
+    }
+
+    private boolean verifyName(String name, Pattern pattern, int length) throws ApplicationException {
+        if ((name == null) || Strings.isNullOrEmpty(name)) {
             throw new ApplicationException()
-                    .status(404)
-                    .code(ErrorMessageCode.BAD_NAME);
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_NAME_EMPTY);
+        }
+        if (name.length() > length) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_NAME_TOO_LONG);
+        }
+        if (!pattern.matcher(name).matches()) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_NAME_ILLEGAL_FORMAT);
         }
         return true;
+    }
+
+    private void checkResourceExistence(Collection entity) throws ApplicationException {
+        for (Collection.CollectionItemReference ciref : entity.getItems()) {
+
+            FileResource fr = ciref.getResource().resolve(false);
+            if (fr == null) {
+                throw new ApplicationException()
+                        .status(400)
+                        .code(ErrorMessageCode.BAD_CITEM_NOT_FOUND)
+                        .devMessage(String.format("Collection item's resource not found for id '%s'", ciref.getResource().getId()));
+            }
+        }
+    }
+
+    private void checkCollectionItemsValidity(Collection entity) throws ApplicationException {
+        for (Collection.CollectionItemReference ci : entity.getItems()) {
+            if ((ci.getResource() == null) || Strings.isNullOrEmpty(ci.getResource().getId())) {
+                throw new ApplicationException()
+                        .status(400)
+                        .code(ErrorMessageCode.BAD_CITEM)
+                        .devMessage("Collection item's resource was null");
+            }
+        }
     }
 
     @PUT
@@ -134,17 +202,26 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.entry(id);
         Collection c = this.get(id);
 
+        if (!repo.delete(id)) {
+            throw new ApplicationException()
+                    .code(ErrorMessageCode.ERROR_DELETE)
+                    .status(500);
+        }
+
         log.debug(SERVICE, "Deleting shares of collection");
         for (ShareReference sref : c.getShares()) {
-            sRepo.delete(sref.getId());
+            if (!sRepo.delete(sref.getId())) {
+                log.warn(SERVICE, "Unable to delete share ({}) of successfully deleted collection ({})", sref.getId(), id);
+            }
         }
 
         log.debug(SERVICE, "Deleting collection items of collection");
         for (Collection.CollectionItemReference ciref : c.getItems()) {
-            ciRepo.delete(ciref.getId());
+            if (!ciRepo.delete(ciref.getId())) {
+                log.warn(SERVICE, "Unable to delete collection item ({}) of successfully deleted collection ({})", ciref.getId(), id);
+            }
         }
 
-        repo.delete(id);
         log.info(SERVICE, "Collection deleted");
         log.traceExit();
     }
@@ -170,10 +247,14 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
         RegisteredUser user = context.get().getPrincipal().to(RegisteredUser.class);
 
-        entity.setCreated(DateTime.now(DateTimeZone.UTC).getMillis());
-        entity.setOwner(user);
+        Collection col = new Collection();
+        col.setOwner(user);
+        // Set name
         if (Strings.isNullOrEmpty(entity.getName())) {
-            entity.setName("Collection");
+            col.setName("Collection");
+        } else {
+            verifyName(entity.getName(), collNamePattern, collNameLengthLimit);
+            col.setName(entity.getName());
         }
 
         // Optionally create CollectionItems
@@ -181,48 +262,32 @@ public class CollectionService extends CrudService<String, Collection, Repositor
 
             // Validity check of CollectionItem (to reject invalid requests faster)
             log.debug(SERVICE, "Checking validity of collection items");
-            for (Collection.CollectionItemReference ci : entity.getItems()) {
-                if ((ci.getResource() == null) || Strings.isNullOrEmpty(ci.getResource().getId())) {
-                    throw new ApplicationException()
-                            .status(400)
-                            .code(ErrorMessageCode.BAD_CITEM)
-                            .devMessage("Collection item's resource was null");
-                }
-            }
+            checkCollectionItemsValidity(entity);
 
             // Existence check of Resource
             log.debug(SERVICE, "Checking existence of collection item's resource reference");
-            List<Collection.CollectionItem> items = new ArrayList<>();
+            checkResourceExistence(entity);
+
+            col = super.create(col);
             for (Collection.CollectionItemReference ciref : entity.getItems()) {
+                Collection.CollectionItem ci = new Collection.CollectionItem();
+                ci.setOwner(user);
+                ci.setParentCollection(col);
 
                 FileResource fr = ciref.getResource().resolve(false);
-                if (fr == null) {
-                    throw new ApplicationException()
-                            .status(400)
-                            .code(ErrorMessageCode.BAD_CITEM_NOT_FOUND)
-                            .devMessage(String.format("Collection item's resource not found for id '%s'", ciref.getResource().getId()));
-                }
-
-                Collection.CollectionItem ci = new Collection.CollectionItem();
                 ci.setResource(fr);
-                ci.setOwner(user);
-                items.add(ci);
-            }
 
-            entity = super.create(entity);
-            for (Collection.CollectionItem ci : items) {
-                ci.setParentCollection(entity);
                 ci = this.ciRepo.save(ci);
-                entity.addItem(ci);
+                col.addItem(ci);
             }
 
-            entity = this.repo.update(entity.getId(), entity);
+            col = this.repo.update(col.getId(), col);
         } else {
-            entity = super.create(entity);
+            col = super.create(col);
         }
         log.info(SERVICE, "Collection created");
-        log.traceExit(entity);
-        return entity;
+        log.traceExit(col);
+        return col;
     }
 
     @GET
@@ -291,6 +356,11 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Permission("write")
     public Collection.CollectionItem addElement(@PathParam("id") String id, Collection.CollectionItem entity) throws ApplicationException {
         log.entry(id, entity);
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
         Collection c = this.get(id);
 
         log.debug(SERVICE, "Validating collection item's attributes");
@@ -331,6 +401,11 @@ public class CollectionService extends CrudService<String, Collection, Repositor
             @PathParam("eid") String eid,
             Collection.Comment entity) throws ApplicationException {
         log.entry(id, eid, entity);
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
         Collection.CollectionItem ci = this.getElement(id, eid);
 
         log.debug(SERVICE, "Validating comment's attributes");
@@ -345,15 +420,21 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                 if (Strings.isNullOrEmpty(name)) {
                     throw new ApplicationException()
                             .status(400)
-                            .code(ErrorMessageCode.BAD_COMMENT)
+                            .code(ErrorMessageCode.BAD_NAME_EMPTY)
                             .devMessage("Unable to resolve a name");
                 }
                 entity.setName(name);
             }
         } else {
-            verifyName(entity);
+            verifyName(entity.getName(), userNamePattern, userNameLengthLimit);
         }
 
+        if (Strings.isNullOrEmpty(entity.getComment()) || (entity.getComment().length() > commentTextLengthLimit)) {
+            throw new ApplicationException()
+                            .status(400)
+                            .code(ErrorMessageCode.BAD_COMMENT);
+        }
+        
         ci.addComment(entity);
 
         ci = this.ciRepo.update(ci.getId(), ci);
@@ -369,6 +450,11 @@ public class CollectionService extends CrudService<String, Collection, Repositor
             @PathParam("eid") String eid,
             Collection.Rating entity) throws ApplicationException {
         log.entry(id, eid, entity);
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
         Collection.CollectionItem ci = this.getElement(id, eid);
 
         log.debug(SERVICE, "Validating rating's attributes");
@@ -383,13 +469,13 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                 if (Strings.isNullOrEmpty(name)) {
                     throw new ApplicationException()
                             .status(400)
-                            .code(ErrorMessageCode.BAD_COMMENT)
+                            .code(ErrorMessageCode.BAD_NAME_EMPTY)
                             .devMessage("Unable to resolve a name");
                 }
                 entity.setName(name);
             }
         } else {
-            verifyName(entity);
+            verifyName(entity.getName(), userNamePattern, userNameLengthLimit);
         }
 
         ci.addRating(entity);

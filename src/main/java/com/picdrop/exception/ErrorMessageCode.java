@@ -19,18 +19,22 @@ public enum ErrorMessageCode {
     BAD_PHASH("ec00006","Bad request: No password provided."),
     BAD_EMAIL("ec00007","Bad request: No or invalid email provided."),
     BAD_OPERATION("ec00008","Bad request: This operation is not possible on this entity type."),
+    @Deprecated
     BAD_NAME("ec00009","Bad request: Name has not a valid format or is too long."), 
     BAD_RESOURCE("ec000010","Bad request: Resource is not set or invalid."), 
     BAD_REQUEST_BODY("ec000011","Bad request: No request body."), 
     BAD_CITEM("ec000012","Bad request: Collection item is not set or invalid."), 
     BAD_CITEM_NOT_FOUND("ec000013","Bad request: Collection item's resource could not be resolved given id."),
-    BAD_COMMENT("ec000014","Bad request: Invalid comment or unable to find/resolve a name."),
+    BAD_COMMENT("ec000014","Bad request: Comment text too long or empty."),
     ERROR_INTERNAL("ec000015","An internal server error occured. Please try again later."),
     BAD_JSON("ec000016","Bad Request: Invalid JSON"),
     BAD_REQUEST("ec000017","Bad Request: Invalid request performed."), 
     BAD_UPLOAD_MIME("ec000018","Bad Request: Unprocessable mime type."),
+    @Deprecated
     BAD_RESOURCE_NAME("ec000019","Bad request: Resource file name is too long."), 
-    BAD_NAME_TOO_LONG("ec000019","Bad request: Name exceeds limit of 256 characters.");
+    BAD_NAME_TOO_LONG("ec000020","Bad request: Name exceeds length limit."), 
+    BAD_NAME_ILLEGAL_FORMAT("ec000021","Bad request: Name has not a legal format."), 
+    BAD_NAME_EMPTY("ec000022","Bad request: Name is empty.");
 
     private String code;
     private String defaultMessage;
