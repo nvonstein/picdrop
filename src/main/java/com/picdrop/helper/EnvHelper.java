@@ -62,7 +62,7 @@ public class EnvHelper {
     public Properties getDefaultProperties() {
         Properties p = new Properties();
 
-        p.put("service.validation.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
+        p.put("service.validation.user.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
         
         p.put("service.environment", "prod");
 
