@@ -7,9 +7,11 @@ package com.picdrop.service.implementation;
 
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.helper.TestHelper;
+import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import java.io.IOException;
+import java.util.Arrays;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -153,6 +155,13 @@ public class RegisteredUserServiceTest extends ServiceTestBase {
         RegisteredUser user = new RegisteredUser(ID1);
         when(ctx.getPrincipal()).thenReturn(user);
 
+        FileResource fr = new FileResource(ID2);
+        fr.setFileId("SOME_ID");
+        when(fileResourceRepo.queryNamed(any(), eq(ID1))).thenReturn(Arrays.asList(fr));
+        when(fileResourceRepo.delete(ID2)).thenReturn(true);
+
+        when(fileHandlingRepo.delete(eq("SOME_ID"))).thenReturn(true);
+
         service.deleteMe();
 
         verify(registeredUserRepo, times(0)).get(any());
@@ -160,7 +169,6 @@ public class RegisteredUserServiceTest extends ServiceTestBase {
         verify(tokenSetRepo, times(1)).deleteNamed(any(), eq(ID1));
         verify(collectionItemRepo, times(1)).deleteNamed(any(), eq(ID1));
         verify(collectionRepo, times(1)).deleteNamed(any(), eq(ID1));
-        verify(fileResourceRepo, times(1)).deleteNamed(any(), eq(ID1));
         verify(shareRepo, times(1)).deleteNamed(any(), eq(ID1));
         verify(registeredUserRepo, times(1)).delete(eq(ID1));
     }

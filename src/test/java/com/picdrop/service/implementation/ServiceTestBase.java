@@ -45,7 +45,7 @@ public abstract class ServiceTestBase {
     @Mock
     RequestContext ctx;
     @Mock
-    FileRepository<String> fr;
+    FileRepository<String> fileHandlingRepo;
 
     ApplicationModuleMock appModule = new ApplicationModuleMock();
     RepositoryModuleMockNoDB repoModule = new RepositoryModuleMockNoDB();
@@ -59,7 +59,7 @@ public abstract class ServiceTestBase {
                 new AuthorizationModuleMock(ctx),
                 new CryptoModule(),
                 repoModule,
-                new FileHandlingModuleMock(fr),
+                new FileHandlingModuleMock(fileHandlingRepo),
                 new RequestScopeModule());
 
         this.collectionRepo = repoModule.getCrepo();
