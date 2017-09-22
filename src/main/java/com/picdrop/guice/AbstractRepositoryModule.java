@@ -25,8 +25,8 @@ import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.model.user.User;
-import com.picdrop.repository.AdvancedRepository;
-import com.picdrop.repository.AwareAdvancedRepository;
+import com.picdrop.repository.Repository;
+import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.NamedQueries;
@@ -68,68 +68,50 @@ public abstract class AbstractRepositoryModule implements Module {
     }
 
     protected void bindRegisteredUserRepo(Binder binder) {
-        AdvancedRepository<String, RegisteredUser> repo = provideRegisteredUserRepo();
+        Repository<String, RegisteredUser> repo = provideRegisteredUserRepo();
 
-        binder.bind(new TypeLiteral<AdvancedRepository<String, RegisteredUser>>() {
-        }).toInstance(repo);
         binder.bind(new TypeLiteral<Repository<String, RegisteredUser>>() {
         }).toInstance(repo);
     }
 
     protected void bindResourceRepo(Binder binder) {
-        AwareAdvancedRepository<String, FileResource, User> repo = provideResourceRepo();
+        AwareRepository<String, FileResource, User> repo = provideResourceRepo();
 
         binder.bind(new TypeLiteral<Repository<String, FileResource>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, FileResource, User>>() {
         }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, FileResource>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, FileResource, User>>() {
-        }).toInstance(repo);
     }
 
     protected void bindCollectionsRepo(Binder binder) {
-        AwareAdvancedRepository<String, Collection, User> repo = provideCollectionRepo();
+        AwareRepository<String, Collection, User> repo = provideCollectionRepo();
 
         binder.bind(new TypeLiteral<Repository<String, Collection>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, Collection, User>>() {
         }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, Collection>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Collection, User>>() {
-        }).toInstance(repo);
     }
 
     protected void bindCollectionItemRepo(Binder binder) {
-        AdvancedRepository<String, Collection.CollectionItem> repo = provideCollectionItemRepo();
+        Repository<String, Collection.CollectionItem> repo = provideCollectionItemRepo();
 
         binder.bind(new TypeLiteral<Repository<String, Collection.CollectionItem>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, Collection.CollectionItem>>() {
         }).toInstance(repo);
     }
 
     protected void bindShareRepo(Binder binder) {
-        AwareAdvancedRepository<String, Share, User> repo = provideShareRepo();
+        AwareRepository<String, Share, User> repo = provideShareRepo();
 
         binder.bind(new TypeLiteral<Repository<String, Share>>() {
         }).toInstance(repo);
         binder.bind(new TypeLiteral<AwareRepository<String, Share, User>>() {
         }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, Share>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AwareAdvancedRepository<String, Share, User>>() {
-        }).toInstance(repo);
     }
 
     protected void bindTokenSetRepo(Binder binder) {
-        AdvancedRepository<String, TokenSet> repo = provideTokenSetRepo();
+        Repository<String, TokenSet> repo = provideTokenSetRepo();
 
         binder.bind(new TypeLiteral<Repository<String, TokenSet>>() {
-        }).toInstance(repo);
-        binder.bind(new TypeLiteral<AdvancedRepository<String, TokenSet>>() {
         }).toInstance(repo);
     }
 
@@ -148,16 +130,16 @@ public abstract class AbstractRepositoryModule implements Module {
 
     protected abstract MongoClient provideMongoClient(@Config Properties config);
 
-    protected abstract AdvancedRepository<String, TokenSet> provideTokenSetRepo();
+    protected abstract Repository<String, TokenSet> provideTokenSetRepo();
 
-    protected abstract AdvancedRepository<String, Collection.CollectionItem> provideCollectionItemRepo();
+    protected abstract Repository<String, Collection.CollectionItem> provideCollectionItemRepo();
 
-    protected abstract AdvancedRepository<String, RegisteredUser> provideRegisteredUserRepo();
+    protected abstract Repository<String, RegisteredUser> provideRegisteredUserRepo();
 
-    protected abstract AwareAdvancedRepository<String, Collection, User> provideCollectionRepo();
+    protected abstract AwareRepository<String, Collection, User> provideCollectionRepo();
 
-    protected abstract AwareAdvancedRepository<String, FileResource, User> provideResourceRepo();
+    protected abstract AwareRepository<String, FileResource, User> provideResourceRepo();
 
-    protected abstract AwareAdvancedRepository<String, Share, User> provideShareRepo();
+    protected abstract AwareRepository<String, Share, User> provideShareRepo();
 
 }

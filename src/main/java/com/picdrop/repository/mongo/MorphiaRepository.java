@@ -17,6 +17,7 @@ import com.picdrop.guice.names.Queries;
 import com.picdrop.repository.Repository;
 import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -26,6 +27,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateResults;
 
 /**
  *
@@ -150,6 +152,33 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
         log.traceExit();
         return query.asList();
+    }
+    
+     @Override
+    public int deleteNamed(String qname, Object... params) throws IOException {
+        log.traceEntry();
+        log.debug(REPO_DELETE, "Deleting entity of type '{}' with query '{}'", this.entityType.toString(), qname);
+        DBObject dbObj = compileQuery(qname, params);
+
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+
+        log.traceExit();
+        return ds.delete(query).getN();
+    }
+
+    @Override
+    public List<T> updateNamed(T entity, String qname, Object... params) throws IOException {
+        log.traceEntry();
+        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
+        DBObject dbObj = compileQuery(qname, params);
+
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+
+        // TODO This must be changed if multi-update is desired on named queries
+        UpdateResults ur = ds.updateFirst(query, entity, false);
+
+        log.traceExit();
+        return Arrays.asList();
     }
 
     public static <K> IntermediateStateBuilder<K> forType(Class<K> clazz) {

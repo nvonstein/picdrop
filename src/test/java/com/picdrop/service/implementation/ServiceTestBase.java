@@ -20,13 +20,11 @@ import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
-import com.picdrop.repository.AdvancedRepository;
-import com.picdrop.repository.AwareAdvancedRepository;
+import com.picdrop.repository.Repository;
+import com.picdrop.repository.AwareRepository;
 import org.jboss.resteasy.plugins.guice.ext.RequestScopeModule;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  *
@@ -34,13 +32,13 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 public abstract class ServiceTestBase {
 
-    AdvancedRepository<String, TokenSet> tokenSetRepo;
-    AdvancedRepository<String, Collection.CollectionItem> collectionItemRepo;
-    AdvancedRepository<String, RegisteredUser> registeredUserRepo;
+    Repository<String, TokenSet> tokenSetRepo;
+    Repository<String, Collection.CollectionItem> collectionItemRepo;
+    Repository<String, RegisteredUser> registeredUserRepo;
 
-    AwareAdvancedRepository<String, FileResource, User> fileResourceRepo;
-    AwareAdvancedRepository<String, Share, User> shareRepo;
-    AwareAdvancedRepository<String, Collection, User> collectionRepo;
+    AwareRepository<String, FileResource, User> fileResourceRepo;
+    AwareRepository<String, Share, User> shareRepo;
+    AwareRepository<String, Collection, User> collectionRepo;
 
     @Mock
     RequestContext ctx;

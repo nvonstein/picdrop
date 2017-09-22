@@ -13,8 +13,8 @@ import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
-import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
-import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import com.picdrop.repository.mongo.MorphiaRepository;
+import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
 import java.util.Properties;
 import javax.enterprise.util.TypeLiteral;
 import static org.mockito.Mockito.mock;
@@ -26,58 +26,58 @@ import org.mongodb.morphia.Datastore;
  */
 public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
 
-    protected MorphiaAdvancedRepository<TokenSet> tsrepo;
-    protected MorphiaAdvancedRepository<Collection.CollectionItem> cirepo;
-    protected MorphiaAdvancedRepository<RegisteredUser> urepo;
+    protected MorphiaRepository<TokenSet> tsrepo;
+    protected MorphiaRepository<Collection.CollectionItem> cirepo;
+    protected MorphiaRepository<RegisteredUser> urepo;
 
-    protected PrincipalAwareMorphiaAdvancedRepository<Collection> crepo;
-    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> rrepo;
-    protected PrincipalAwareMorphiaAdvancedRepository<Share> srepo;
+    protected PrincipalAwareMorphiaRepository<Collection> crepo;
+    protected PrincipalAwareMorphiaRepository<FileResource> rrepo;
+    protected PrincipalAwareMorphiaRepository<Share> srepo;
 
     public RepositoryModuleMockNoDB() {
-        this.tsrepo = mock(new TypeLiteral<MorphiaAdvancedRepository<TokenSet>>() {
+        this.tsrepo = mock(new TypeLiteral<MorphiaRepository<TokenSet>>() {
         }.getRawType());
-        this.cirepo = mock(new TypeLiteral<MorphiaAdvancedRepository<Collection.CollectionItem>>() {
+        this.cirepo = mock(new TypeLiteral<MorphiaRepository<Collection.CollectionItem>>() {
         }.getRawType());
-        this.urepo = mock(new TypeLiteral<MorphiaAdvancedRepository<RegisteredUser>>() {
+        this.urepo = mock(new TypeLiteral<MorphiaRepository<RegisteredUser>>() {
         }.getRawType());
 
-        this.crepo = mock(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Collection>>() {
+        this.crepo = mock(new TypeLiteral<PrincipalAwareMorphiaRepository<Collection>>() {
         }.getRawType());
-        this.rrepo = mock(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<FileResource>>() {
+        this.rrepo = mock(new TypeLiteral<PrincipalAwareMorphiaRepository<FileResource>>() {
         }.getRawType());
-        this.srepo = mock(new TypeLiteral<PrincipalAwareMorphiaAdvancedRepository<Share>>() {
+        this.srepo = mock(new TypeLiteral<PrincipalAwareMorphiaRepository<Share>>() {
         }.getRawType());
 
     }
 
     @Override
-    protected MorphiaAdvancedRepository<RegisteredUser> provideRegisteredUserRepo() {
+    protected MorphiaRepository<RegisteredUser> provideRegisteredUserRepo() {
         return urepo;
     }
 
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<Share> provideShareRepo() {
+    protected PrincipalAwareMorphiaRepository<Share> provideShareRepo() {
         return srepo;
     }
 
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> provideResourceRepo() {
+    protected PrincipalAwareMorphiaRepository<FileResource> provideResourceRepo() {
         return rrepo;
     }
 
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<Collection> provideCollectionRepo() {
+    protected PrincipalAwareMorphiaRepository<Collection> provideCollectionRepo() {
         return crepo;
     }
 
     @Override
-    protected MorphiaAdvancedRepository<Collection.CollectionItem> provideCollectionItemRepo() {
+    protected MorphiaRepository<Collection.CollectionItem> provideCollectionItemRepo() {
         return cirepo;
     }
 
     @Override
-    protected MorphiaAdvancedRepository<TokenSet> provideTokenSetRepo() {
+    protected MorphiaRepository<TokenSet> provideTokenSetRepo() {
         return tsrepo;
     }
 
@@ -99,51 +99,51 @@ public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
         return mock(MongoDatabase.class);
     }
 
-    public MorphiaAdvancedRepository<TokenSet> getTsrepo() {
+    public MorphiaRepository<TokenSet> getTsrepo() {
         return tsrepo;
     }
 
-    public void setTsrepo(MorphiaAdvancedRepository<TokenSet> tsrepo) {
+    public void setTsrepo(MorphiaRepository<TokenSet> tsrepo) {
         this.tsrepo = tsrepo;
     }
 
-    public MorphiaAdvancedRepository<Collection.CollectionItem> getCirepo() {
+    public MorphiaRepository<Collection.CollectionItem> getCirepo() {
         return cirepo;
     }
 
-    public void setCirepo(MorphiaAdvancedRepository<Collection.CollectionItem> cirepo) {
+    public void setCirepo(MorphiaRepository<Collection.CollectionItem> cirepo) {
         this.cirepo = cirepo;
     }
 
-    public MorphiaAdvancedRepository<RegisteredUser> getUrepo() {
+    public MorphiaRepository<RegisteredUser> getUrepo() {
         return urepo;
     }
 
-    public void setUrepo(MorphiaAdvancedRepository<RegisteredUser> urepo) {
+    public void setUrepo(MorphiaRepository<RegisteredUser> urepo) {
         this.urepo = urepo;
     }
 
-    public PrincipalAwareMorphiaAdvancedRepository<Collection> getCrepo() {
+    public PrincipalAwareMorphiaRepository<Collection> getCrepo() {
         return crepo;
     }
 
-    public void setCrepo(PrincipalAwareMorphiaAdvancedRepository<Collection> crepo) {
+    public void setCrepo(PrincipalAwareMorphiaRepository<Collection> crepo) {
         this.crepo = crepo;
     }
 
-    public PrincipalAwareMorphiaAdvancedRepository<FileResource> getRrepo() {
+    public PrincipalAwareMorphiaRepository<FileResource> getRrepo() {
         return rrepo;
     }
 
-    public void setRrepo(PrincipalAwareMorphiaAdvancedRepository<FileResource> rrepo) {
+    public void setRrepo(PrincipalAwareMorphiaRepository<FileResource> rrepo) {
         this.rrepo = rrepo;
     }
 
-    public PrincipalAwareMorphiaAdvancedRepository<Share> getSrepo() {
+    public PrincipalAwareMorphiaRepository<Share> getSrepo() {
         return srepo;
     }
 
-    public void setSrepo(PrincipalAwareMorphiaAdvancedRepository<Share> srepo) {
+    public void setSrepo(PrincipalAwareMorphiaRepository<Share> srepo) {
         this.srepo = srepo;
     }
 

@@ -17,8 +17,8 @@ import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
-import com.picdrop.repository.mongo.MorphiaAdvancedRepository;
-import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
+import com.picdrop.repository.mongo.MorphiaRepository;
+import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
 import java.util.Properties;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
@@ -67,33 +67,33 @@ public class RepositoryModule extends AbstractRepositoryModule {
     }
 
     @Override
-    protected MorphiaAdvancedRepository<TokenSet> provideTokenSetRepo() {
-        return MorphiaAdvancedRepository.forType(TokenSet.class).uninitialized();
+    protected MorphiaRepository<TokenSet> provideTokenSetRepo() {
+        return MorphiaRepository.forType(TokenSet.class).uninitialized();
     }
 
     @Override
-    protected MorphiaAdvancedRepository<Collection.CollectionItem> provideCollectionItemRepo() {
-        return MorphiaAdvancedRepository.forType(Collection.CollectionItem.class).uninitialized();
+    protected MorphiaRepository<Collection.CollectionItem> provideCollectionItemRepo() {
+        return MorphiaRepository.forType(Collection.CollectionItem.class).uninitialized();
     }
 
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<Collection> provideCollectionRepo() {
-        return PrincipalAwareMorphiaAdvancedRepository.forType(Collection.class).uninitialized();
+    protected PrincipalAwareMorphiaRepository<Collection> provideCollectionRepo() {
+        return PrincipalAwareMorphiaRepository.forType(Collection.class).uninitialized();
     }
 
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<FileResource> provideResourceRepo() {
-        return PrincipalAwareMorphiaAdvancedRepository.forType(FileResource.class).uninitialized();
+    protected PrincipalAwareMorphiaRepository<FileResource> provideResourceRepo() {
+        return PrincipalAwareMorphiaRepository.forType(FileResource.class).uninitialized();
     }
 
     @Override
-    protected PrincipalAwareMorphiaAdvancedRepository<Share> provideShareRepo() {
-        return PrincipalAwareMorphiaAdvancedRepository.forType(Share.class).uninitialized();
+    protected PrincipalAwareMorphiaRepository<Share> provideShareRepo() {
+        return PrincipalAwareMorphiaRepository.forType(Share.class).uninitialized();
     }
 
     @Override
-    protected MorphiaAdvancedRepository<RegisteredUser> provideRegisteredUserRepo() {
-        return MorphiaAdvancedRepository.forType(RegisteredUser.class).uninitialized();
+    protected MorphiaRepository<RegisteredUser> provideRegisteredUserRepo() {
+        return MorphiaRepository.forType(RegisteredUser.class).uninitialized();
     }
 
 }

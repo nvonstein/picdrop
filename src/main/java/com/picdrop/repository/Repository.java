@@ -25,4 +25,8 @@ public interface Repository<ID, T> {
     List<T> list();
 
     List<T> queryNamed(String qname, Object... params) throws IOException;
+
+    int deleteNamed(String qname, Object... params) throws IOException;
+
+    List<T> updateNamed(T entity, String qname, Object... params) throws IOException;
 }

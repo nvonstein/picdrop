@@ -9,13 +9,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
-import com.picdrop.guice.ApplicationModule;
 import com.picdrop.guice.ApplicationModuleMock;
 import com.picdrop.guice.AuthorizationModuleMock;
 import com.picdrop.guice.CryptoModule;
 import com.picdrop.guice.FileHandlingModuleMock;
 import com.picdrop.guice.RepositoryModuleMockNoDB;
-import com.picdrop.helper.EnvHelper;
 import com.picdrop.helper.TestHelper;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
@@ -28,7 +26,6 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.repository.Repository;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.jboss.resteasy.plugins.guice.ext.RequestScopeModule;
 import org.junit.After;
@@ -50,12 +47,9 @@ import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.user.User;
-import com.picdrop.repository.AwareAdvancedRepository;
 import com.picdrop.repository.AwareRepository;
-import com.picdrop.repository.mongo.PrincipalAwareMorphiaAdvancedRepository;
 import java.io.InputStream;
 import java.util.Arrays;
-import javax.enterprise.util.TypeLiteral;
 import org.apache.tika.metadata.Metadata;
 
 /**
@@ -70,7 +64,7 @@ public class FileResourceServiceTest {
     Repository<String, FileResource> repo;
     AwareRepository<String, Share, User> srepo;
     Repository<String, Collection.CollectionItem> cirepo;
-    AwareAdvancedRepository<String, Collection, User> crepo;
+    AwareRepository<String, Collection, User> crepo;
     
     ApplicationModuleMock appModule = new ApplicationModuleMock();
 

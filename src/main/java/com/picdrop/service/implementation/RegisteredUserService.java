@@ -18,7 +18,6 @@ import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
-import com.picdrop.repository.AdvancedRepository;
 import com.picdrop.repository.Repository;
 import static com.picdrop.helper.LogHelper.*;
 import java.util.regex.Pattern;
@@ -32,7 +31,6 @@ import javax.ws.rs.Produces;
 import com.picdrop.security.authentication.Permission;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,11 +46,11 @@ public class RegisteredUserService {
     Logger log = LogManager.getLogger(this.getClass());
 
     Repository<String, RegisteredUser> repo;
-    AdvancedRepository<String, TokenSet> tsrepo;
-    AdvancedRepository<String, FileResource> frepo;
-    AdvancedRepository<String, Collection> crepo;
-    AdvancedRepository<String, Share> srepo;
-    AdvancedRepository<String, Collection.CollectionItem> cirepo;
+    Repository<String, TokenSet> tsrepo;
+    Repository<String, FileResource> frepo;
+    Repository<String, Collection> crepo;
+    Repository<String, Share> srepo;
+    Repository<String, Collection.CollectionItem> cirepo;
 
     FileResourceService fileService;
 
@@ -63,11 +61,11 @@ public class RegisteredUserService {
 
     @Inject
     public RegisteredUserService(Repository<String, RegisteredUser> repo,
-            AdvancedRepository<String, TokenSet> tsrepo,
-            AdvancedRepository<String, FileResource> frepo,
-            AdvancedRepository<String, Collection> crepo,
-            AdvancedRepository<String, Collection.CollectionItem> cirepo,
-            AdvancedRepository<String, Share> srepo
+            Repository<String, TokenSet> tsrepo,
+            Repository<String, FileResource> frepo,
+            Repository<String, Collection> crepo,
+            Repository<String, Collection.CollectionItem> cirepo,
+            Repository<String, Share> srepo
     ) {
         this.repo = repo;
         this.tsrepo = tsrepo;

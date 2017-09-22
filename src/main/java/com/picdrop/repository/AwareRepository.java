@@ -25,4 +25,8 @@ public interface AwareRepository<ID, T, K> extends Repository<ID, T> {
     List<T> list(K context);
     
     List<T> queryNamed(String qname, K context, Object... params) throws IOException;
+    
+    int deleteNamed(String qname, K context, Object... params) throws IOException;
+
+    List<T> updateNamed(T entity, String qname, K context, Object... params) throws IOException;
 }
