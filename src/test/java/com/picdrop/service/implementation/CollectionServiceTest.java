@@ -10,6 +10,7 @@ import com.picdrop.helper.TestHelper;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.Collection.CollectionItem;
+import com.picdrop.model.resource.Collection.Comment;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.RegisteredUser;
@@ -413,63 +414,10 @@ public class CollectionServiceTest extends ServiceTestBase {
         }
     }
 
-    @Test(expected = ApplicationException.class)
-    public void testRateInvalidName1() throws ApplicationException {
-        CollectionItem ci = spy(new CollectionItem(ID1));
-        when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
-
-        Collection col = new Collection(ID2);
-        col.addItem(ci);
-        when(collectionRepo.get(ID2)).thenReturn(col);
-
-        Collection.Rating rate = new Collection.Rating();
-        rate.setRate(3);
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        sb.append("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        sb.append("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        sb.append("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        sb.append("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // >256
-
-        rate.setName(sb.toString());
-        try {
-            service.rate(ID2, ID1, rate);
-        } catch (ApplicationException ex) {
-            assertEquals("wrong http status", 400, ex.getStatus());
-            throw ex;
-        } finally {
-            verify(collectionItemRepo, times(0)).update(any(), any());
-        }
-    }
-
-    @Test(expected = ApplicationException.class)
-    public void testRateInvalidName2() throws ApplicationException {
-        CollectionItem ci = spy(new CollectionItem(ID1));
-        when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
-
-        Collection col = new Collection(ID2);
-        col.addItem(ci);
-        when(collectionRepo.get(ID2)).thenReturn(col);
-
-        Collection.Rating rate = new Collection.Rating();
-        rate.setRate(3);
-
-        rate.setName("abc%$&xyz");
-        try {
-            service.rate(ID2, ID1, rate);
-        } catch (ApplicationException ex) {
-            assertEquals("wrong http status", 400, ex.getStatus());
-            throw ex;
-        } finally {
-            verify(collectionItemRepo, times(0)).update(any(), any());
-        }
-    }
-
     @Test
     public void testCommentValid() throws ApplicationException {
         RegisteredUser user = new RegisteredUser(ID2);
+        user.setName("name");
         when(ctx.getPrincipal()).thenReturn(user);
 
         CollectionItem ci = spy(new CollectionItem(ID1));
@@ -482,7 +430,79 @@ public class CollectionServiceTest extends ServiceTestBase {
 
         Collection.Comment comment = new Collection.Comment();
         comment.setComment("example");
-        service.comment(ID2, ID1, comment);
+
+        CollectionItem actualCi = service.comment(ID2, ID1, comment);
+
+        assertNotNull("comments null", actualCi.getComments());
+        assertEquals("wrong number of elements", actualCi.getComments().size(), 1);
+
+        Comment actual = actualCi.getComments().get(0);
+        assertNotNull("text is null", actual.getComment());
+
+        assertEquals("wrong name", "name", actual.getName());
+
+        verify(ci, atLeastOnce()).addComment(any());
+    }
+
+    @Test
+    public void testCommentValidDifferingNames() throws ApplicationException {
+        RegisteredUser user = new RegisteredUser(ID2);
+        user.setName("name");
+        when(ctx.getPrincipal()).thenReturn(user);
+
+        CollectionItem ci = spy(new CollectionItem(ID1));
+        when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
+        when(collectionItemRepo.update(eq(ID1), any())).thenAnswer(TestHelper.reflect(1));
+
+        Collection col = new Collection(ID2);
+        col.addItem(ci);
+        when(collectionRepo.get(ID2)).thenReturn(col);
+
+        Collection.Comment comment = new Collection.Comment();
+        comment.setName("other name");
+        comment.setComment("example");
+
+        CollectionItem actualCi = service.comment(ID2, ID1, comment);
+
+        assertNotNull("comments null", actualCi.getComments());
+        assertEquals("wrong number of elements", actualCi.getComments().size(), 1);
+
+        Comment actual = actualCi.getComments().get(0);
+        assertNotNull("text is null", actual.getComment());
+
+        assertEquals("wrong name", "name", actual.getName());
+
+        verify(ci, atLeastOnce()).addComment(any());
+    }
+
+    @Test
+    public void testCommentValidNameFromComment() throws ApplicationException {
+        RegisteredUser user = spy(new RegisteredUser(ID2));
+        user.setName(null);
+        when(user.isRegistered()).thenReturn(false);
+        when(ctx.getPrincipal()).thenReturn(user);
+
+        CollectionItem ci = spy(new CollectionItem(ID1));
+        when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
+        when(collectionItemRepo.update(eq(ID1), any())).thenAnswer(TestHelper.reflect(1));
+
+        Collection col = new Collection(ID2);
+        col.addItem(ci);
+        when(collectionRepo.get(ID2)).thenReturn(col);
+
+        Collection.Comment comment = new Collection.Comment();
+        comment.setName("name");
+        comment.setComment("example");
+
+        CollectionItem actualCi = service.comment(ID2, ID1, comment);
+
+        assertNotNull("comments null", actualCi.getComments());
+        assertEquals("wrong number of elements", actualCi.getComments().size(), 1);
+
+        Comment actual = actualCi.getComments().get(0);
+        assertNotNull("text is null", actual.getComment());
+
+        assertEquals("wrong name", "name", actual.getName());
 
         verify(ci, atLeastOnce()).addComment(any());
     }
@@ -501,6 +521,10 @@ public class CollectionServiceTest extends ServiceTestBase {
 
     @Test(expected = ApplicationException.class)
     public void testCommentInvalidName1() throws ApplicationException {
+        RegisteredUser user = spy(new RegisteredUser(ID2));
+        when(user.isRegistered()).thenReturn(false);
+        when(ctx.getPrincipal()).thenReturn(user);
+
         CollectionItem ci = spy(new CollectionItem(ID1));
         when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
 
@@ -532,6 +556,10 @@ public class CollectionServiceTest extends ServiceTestBase {
 
     @Test(expected = ApplicationException.class)
     public void testCommentInvalidName2() throws ApplicationException {
+        RegisteredUser user = spy(new RegisteredUser(ID2));
+        when(user.isRegistered()).thenReturn(false);
+        when(ctx.getPrincipal()).thenReturn(user);
+
         CollectionItem ci = spy(new CollectionItem(ID1));
         when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
 
@@ -554,7 +582,38 @@ public class CollectionServiceTest extends ServiceTestBase {
     }
 
     @Test(expected = ApplicationException.class)
+    public void testCommentInvalidName3() throws ApplicationException {
+        RegisteredUser user = spy(new RegisteredUser(ID2));
+        when(user.isRegistered()).thenReturn(false);
+        when(ctx.getPrincipal()).thenReturn(user);
+
+        CollectionItem ci = spy(new CollectionItem(ID1));
+        when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
+
+        Collection col = new Collection(ID2);
+        col.addItem(ci);
+        when(collectionRepo.get(ID2)).thenReturn(col);
+
+        Collection.Comment comment = new Collection.Comment();
+        comment.setComment("example");
+        comment.setName(null);
+
+        try {
+            service.comment(ID2, ID1, comment);
+        } catch (ApplicationException ex) {
+            assertEquals("wrong http status", 400, ex.getStatus());
+            throw ex;
+        } finally {
+            verify(collectionItemRepo, times(0)).update(any(), any());
+        }
+    }
+
+    @Test(expected = ApplicationException.class)
     public void testCommentInvalidComment() throws ApplicationException {
+        RegisteredUser user = spy(new RegisteredUser(ID2));
+        when(user.isRegistered()).thenReturn(false);
+        when(ctx.getPrincipal()).thenReturn(user);
+
         CollectionItem ci = spy(new CollectionItem(ID1));
         when(collectionItemRepo.get(eq(ID1))).thenReturn(ci);
 
@@ -575,7 +634,4 @@ public class CollectionServiceTest extends ServiceTestBase {
             verify(collectionItemRepo, times(0)).update(any(), any());
         }
     }
-
-
-    // TODO check name resolving on unregistered/registered principle
 }
