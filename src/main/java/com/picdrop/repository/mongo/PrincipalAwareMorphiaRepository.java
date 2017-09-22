@@ -7,6 +7,7 @@ package com.picdrop.repository.mongo;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import static com.picdrop.helper.LogHelper.*;
@@ -162,7 +163,7 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         log.traceExit();
         return query.asList();
     }
-    
+
     @Override
     public int deleteNamed(String qname, User context, Object... params) throws IOException {
         log.traceEntry();
@@ -343,44 +344,24 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         return query.asList();
     }
 
-    public static <K> IntermediateStateBuilder<K> forType(Class<K> clazz) {
-        return new IntermediateStateBuilder<>(clazz);
-    }
+    public static class Builder<TYPE> extends AbstractRepositoryBuilder<Builder<TYPE>, PrincipalAwareMorphiaRepository<TYPE>, TYPE> {
 
-    public static class IntermediateStateBuilder<K> extends MorphiaRepository.IntermediateStateBuilder<K> {
-
-        IntermediateStateBuilder(Class<K> clazz) {
+        Builder(Class<TYPE> clazz) {
             super(clazz);
         }
 
-        @Override
-        public TypedRepositoryBuilder<K> from(RepositoryPrototype prototype) {
-            super.from(prototype);
-            return new TypedRepositoryBuilder<>(this);
+        public static <TYPE> BuildState<Builder<TYPE>> forType(Class<TYPE> clazz) {
+            return new BuildState<>(new Builder<>(clazz));
         }
 
         @Override
-        public PrincipalAwareMorphiaRepository<K> uninitialized() {
-            return new PrincipalAwareMorphiaRepository<>(this.clazz);
-        }
+        public PrincipalAwareMorphiaRepository<TYPE> build() {
+            PrincipalAwareMorphiaRepository<TYPE> repo = new PrincipalAwareMorphiaRepository<>(this.ds, this.clazz);
+            repo.setDatastore(this.ds);
+            repo.setMapper(this.mapper);
+            repo.setNamedQueries(this.queries);
 
-        @Override
-        public TypedRepositoryBuilder<K> withDatastore(Datastore ds) {
-            super.withDatastore(ds);
-            return new TypedRepositoryBuilder<>(this);
-        }
-
-    }
-
-    public static class TypedRepositoryBuilder<K> extends MorphiaRepository.TypedRepositoryBuilder<K> {
-
-        public TypedRepositoryBuilder(IntermediateStateBuilder<K> state) {
-            super(state);
-        }
-
-        @Override
-        public PrincipalAwareMorphiaRepository<K> build() {
-            return setFields(new PrincipalAwareMorphiaRepository<>(this.ds, this.clazz));
+            return repo;
         }
 
     }

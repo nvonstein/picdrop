@@ -68,32 +68,32 @@ public class RepositoryModule extends AbstractRepositoryModule {
 
     @Override
     protected MorphiaRepository<TokenSet> provideTokenSetRepo() {
-        return MorphiaRepository.forType(TokenSet.class).uninitialized();
+        return MorphiaRepository.Builder.forType(TokenSet.class).withDatastore(null).build();
     }
 
     @Override
     protected MorphiaRepository<Collection.CollectionItem> provideCollectionItemRepo() {
-        return MorphiaRepository.forType(Collection.CollectionItem.class).uninitialized();
+        return MorphiaRepository.Builder.forType(Collection.CollectionItem.class).withDatastore(null).build();
     }
 
     @Override
     protected PrincipalAwareMorphiaRepository<Collection> provideCollectionRepo() {
-        return PrincipalAwareMorphiaRepository.forType(Collection.class).uninitialized();
+        return PrincipalAwareMorphiaRepository.Builder.forType(Collection.class).withDatastore(null).build();
     }
 
     @Override
     protected PrincipalAwareMorphiaRepository<FileResource> provideResourceRepo() {
-        return PrincipalAwareMorphiaRepository.forType(FileResource.class).uninitialized();
+        return PrincipalAwareMorphiaRepository.Builder.forType(FileResource.class).withDatastore(null).build();
     }
 
     @Override
     protected PrincipalAwareMorphiaRepository<Share> provideShareRepo() {
-        return PrincipalAwareMorphiaRepository.forType(Share.class).uninitialized();
+        return PrincipalAwareMorphiaRepository.Builder.forType(Share.class).withDatastore(null).build();
     }
 
     @Override
     protected MorphiaRepository<RegisteredUser> provideRegisteredUserRepo() {
-        return MorphiaRepository.forType(RegisteredUser.class).uninitialized();
+        return MorphiaRepository.Builder.forType(RegisteredUser.class).withDatastore(null).build();
     }
 
 }

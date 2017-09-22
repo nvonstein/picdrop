@@ -8,8 +8,10 @@ package com.picdrop.repository.mongo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.TypeLiteral;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.picdrop.guice.names.Queries;
 import static com.picdrop.helper.LogHelper.*;
@@ -43,6 +45,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
     ObjectMapper mapper;
     @Inject
     Datastore ds;
+    WriteConcern wc;
 
     Logger log;
 
@@ -67,6 +70,10 @@ public class MorphiaRepository<T> implements Repository<String, T> {
 
     public void setMapper(ObjectMapper mapper) {
         this.mapper = mapper;
+    }
+
+    public void setWriteConcern(WriteConcern wc) {
+        this.wc = wc;
     }
 
     protected boolean isValidIdentifier(String in) {
@@ -151,8 +158,8 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         log.traceExit();
         return query.asList();
     }
-    
-     @Override
+
+    @Override
     public int deleteNamed(String qname, Object... params) throws IOException {
         log.traceEntry();
         log.debug(REPO_DELETE, "Deleting entity of type '{}' with query '{}'", this.entityType.toString(), qname);
@@ -179,76 +186,98 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         return Arrays.asList();
     }
 
-    public static <K> IntermediateStateBuilder<K> forType(Class<K> clazz) {
-        return new IntermediateStateBuilder<>(clazz);
+    public static class BuildState<BUILDER extends AbstractRepositoryBuilder> {
+
+        BUILDER builder;
+
+        BuildState(BUILDER builder) {
+            this.builder = builder;
+        }
+
+        public BuildState<BUILDER> withMapper(ObjectMapper mapper) {
+            this.builder.withMapper(mapper);
+            return this;
+        }
+
+        public BuildState<BUILDER> withQueries(Map<String, String> queries) {
+            this.builder.withQueries(queries);
+            return this;
+        }
+
+        public BuildState<BUILDER> withWriteConcern(WriteConcern wc) {
+            this.builder.withWriteConcern(wc);
+            return this;
+        }
+
+        public BUILDER withDatastore(Datastore ds) {
+            this.builder.withDatastore(ds);
+            return builder;
+        }
     }
 
-    public static class IntermediateStateBuilder<K> {
+    protected static abstract class AbstractRepositoryBuilder<BUILDER extends AbstractRepositoryBuilder<BUILDER, TARGET, TYPE>, TARGET extends MorphiaRepository<TYPE>, TYPE> {
 
-        Class<K> clazz;
+        protected final Class<TYPE> clazz;
+        private final Class<BUILDER> builderType;
 
-        ObjectMapper mapper;
-        Map<String, String> queries;
-        Datastore ds;
+        protected ObjectMapper mapper;
+        protected Map<String, String> queries;
+        protected WriteConcern wc;
+        protected Datastore ds;
 
-        IntermediateStateBuilder(Class<K> clazz) {
+        protected AbstractRepositoryBuilder(Class<TYPE> clazz) {
             this.clazz = clazz;
+            this.builderType = (Class) new TypeLiteral<BUILDER>(){}.getRawType();
         }
 
-        private IntermediateStateBuilder<K> unwrapPrototype(RepositoryPrototype proto) {
-            this.withQueries(proto.queries)
-                    .withMapper(proto.mapper)
-                    .withDatastore(proto.ds);
-            return this;
+        protected BUILDER doReturn() {
+            return builderType.cast(this);
         }
 
-        public IntermediateStateBuilder<K> withMapper(ObjectMapper mapper) {
+        public BUILDER withMapper(ObjectMapper mapper) {
             this.mapper = mapper;
-            return this;
+            return doReturn();
         }
 
-        public IntermediateStateBuilder<K> withQueries(Map<String, String> queries) {
+        public BUILDER withQueries(Map<String, String> queries) {
             this.queries = queries;
-            return this;
+            return doReturn();
         }
 
-        public TypedRepositoryBuilder<K> withDatastore(Datastore ds) {
+        public BUILDER withWriteConcern(WriteConcern wc) {
+            this.wc = wc;
+            return doReturn();
+        }
+
+        public BUILDER withDatastore(Datastore ds) {
             this.ds = ds;
-            return new TypedRepositoryBuilder<>(this);
+            return doReturn();
         }
 
-        public MorphiaRepository<K> uninitialized() {
-            return new MorphiaRepository<>(this.clazz);
-        }
-
-        public TypedRepositoryBuilder<K> from(RepositoryPrototype prototype) {
-            return new TypedRepositoryBuilder<>(unwrapPrototype(prototype));
-        }
+        public abstract TARGET build();
 
     }
 
-    public static class TypedRepositoryBuilder<K> extends IntermediateStateBuilder<K> {
+    public static class Builder<TYPE> extends AbstractRepositoryBuilder<Builder<TYPE>, MorphiaRepository<TYPE>, TYPE> {
 
-        private TypedRepositoryBuilder(Class<K> clazz) {
+        Builder(Class<TYPE> clazz) {
             super(clazz);
         }
 
-        TypedRepositoryBuilder(IntermediateStateBuilder<K> state) {
-            this(state.clazz);
-            this.ds = state.ds;
-            this.mapper = state.mapper;
-            this.queries = state.queries;
+        public static <TYPE> BuildState<Builder<TYPE>> forType(Class<TYPE> clazz) {
+            return new BuildState<>(new Builder<>(clazz));
         }
 
-        protected <U extends MorphiaRepository<K>> U setFields(U repo) {
+        @Override
+        public MorphiaRepository<TYPE> build() {
+            MorphiaRepository<TYPE> repo = new MorphiaRepository<>(this.ds, this.clazz);
+            repo.setDatastore(this.ds);
             repo.setMapper(this.mapper);
             repo.setNamedQueries(this.queries);
+
             return repo;
         }
 
-        public MorphiaRepository<K> build() {
-            return setFields(new MorphiaRepository<>(this.ds, this.clazz));
-        }
     }
 
 }
