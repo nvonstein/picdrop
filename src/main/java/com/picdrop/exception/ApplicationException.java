@@ -5,9 +5,6 @@
  */
 package com.picdrop.exception;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 /**
  *
  * @author nvonstein

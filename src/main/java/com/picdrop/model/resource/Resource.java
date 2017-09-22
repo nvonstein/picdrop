@@ -6,12 +6,7 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.picdrop.exception.ApplicationException;
 import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;

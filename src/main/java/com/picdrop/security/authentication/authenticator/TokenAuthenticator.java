@@ -11,15 +11,12 @@ import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.picdrop.helper.HttpHelper;
 import com.picdrop.model.user.RegisteredUser;
-import com.picdrop.model.user.User;
-import com.picdrop.repository.Repository;
 import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
 import java.text.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
-import org.joda.time.DateTime;
 
 /**
  *

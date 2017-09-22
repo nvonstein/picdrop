@@ -25,8 +25,6 @@ import com.picdrop.model.resource.FileResourceReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.model.user.User;
-import com.picdrop.repository.Repository;
-import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.AwareRepository;
 import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.NamedQueries;

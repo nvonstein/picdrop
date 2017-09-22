@@ -9,14 +9,14 @@ import com.google.inject.throwingproviders.CheckedProvides;
 import com.picdrop.guice.names.Config;
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.provider.FileRepositoryProvider;
-import com.picdrop.io.repository.MurmurFileRepository;
-import java.util.List;
-import com.picdrop.io.repository.FileRepository;
-import java.io.IOException;
-import java.util.Properties;
 import com.picdrop.helper.ConfigHelper;
+import com.picdrop.io.repository.FileRepository;
+import com.picdrop.io.repository.MurmurFileRepository;
 import com.picdrop.io.repository.ScopedRoundRobinFileRepository;
+import java.io.IOException;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 /**
  *

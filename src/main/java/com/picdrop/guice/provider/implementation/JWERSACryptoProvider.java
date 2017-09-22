@@ -12,12 +12,12 @@ import com.nimbusds.jose.JWEProvider;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.picdrop.guice.names.Encryption;
+import com.picdrop.guice.provider.JWECryptoProvider;
 import com.picdrop.guice.provider.PKIXProvider;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
-import com.picdrop.guice.provider.JWECryptoProvider;
 
 /**
  *

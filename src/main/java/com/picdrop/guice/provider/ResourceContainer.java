@@ -5,7 +5,6 @@
  */
 package com.picdrop.guice.provider;
 
-import com.google.inject.Provider;
 import com.google.inject.throwingproviders.CheckedProvider;
 import java.io.IOException;
 import java.io.InputStream;

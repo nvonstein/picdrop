@@ -13,7 +13,6 @@ import com.picdrop.model.resource.FileResource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.picdrop.io.repository.FileRepository;
 
 /**
  *

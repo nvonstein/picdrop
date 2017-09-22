@@ -6,8 +6,6 @@
 package com.picdrop.security.token;
 
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

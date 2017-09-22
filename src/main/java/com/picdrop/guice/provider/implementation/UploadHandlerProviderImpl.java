@@ -7,7 +7,6 @@ package com.picdrop.guice.provider.implementation;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.google.inject.throwingproviders.CheckedProvider;
 import com.picdrop.guice.provider.UploadHandlerProvider;
 import java.io.IOException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;

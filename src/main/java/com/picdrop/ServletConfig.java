@@ -5,8 +5,8 @@
  */
 package com.picdrop;
 
-import com.picdrop.guice.ApplicationModule;
 import com.google.inject.Module;
+import com.picdrop.guice.ApplicationModule;
 import com.picdrop.guice.AuthorizationModule;
 import com.picdrop.guice.CryptoModule;
 import com.picdrop.guice.FileHandlingModule;

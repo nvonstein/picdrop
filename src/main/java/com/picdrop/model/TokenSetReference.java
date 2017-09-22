@@ -6,7 +6,6 @@
 package com.picdrop.model;
 
 import com.google.inject.Inject;
-import static com.picdrop.model.ShareReference.repo;
 import com.picdrop.repository.Repository;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.NotSaved;

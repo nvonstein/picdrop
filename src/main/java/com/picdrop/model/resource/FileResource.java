@@ -5,7 +5,6 @@
  */
 package com.picdrop.model.resource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.picdrop.json.Views;
 import java.io.IOException;

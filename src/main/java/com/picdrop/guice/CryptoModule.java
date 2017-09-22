@@ -15,6 +15,8 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
+import com.picdrop.guice.provider.JWECryptoProvider;
+import com.picdrop.guice.provider.JWSSignatureProvider;
 import com.picdrop.guice.provider.TokenCipherProvider;
 import com.picdrop.guice.provider.TokenSignerProvider;
 import com.picdrop.security.token.cipher.TokenCipher;
@@ -22,8 +24,6 @@ import com.picdrop.security.token.cipher.TokenCipherImpl;
 import com.picdrop.security.token.signer.TokenSigner;
 import com.picdrop.security.token.signer.TokenSignerImpl;
 import java.io.IOException;
-import com.picdrop.guice.provider.JWECryptoProvider;
-import com.picdrop.guice.provider.JWSSignatureProvider;
 
 /**
  *

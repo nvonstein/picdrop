@@ -10,16 +10,12 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Strings;
 import com.picdrop.json.Views;
 import com.picdrop.model.TokenSet;
-import com.picdrop.model.TokenSetReference;
+import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.NotSaved;
 
 /**

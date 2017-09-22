@@ -7,10 +7,6 @@ package com.picdrop.guice.provider.implementation;
 
 import com.picdrop.guice.provider.SymmetricKeyProvider;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-import java.security.Security;
-import java.util.logging.Level;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import org.apache.logging.log4j.LogManager;

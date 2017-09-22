@@ -6,15 +6,14 @@
 package com.picdrop.service.filter;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.picdrop.guice.names.AuthorizationToken;
+import static com.picdrop.helper.LogHelper.*;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.security.authentication.Permission;
 import com.picdrop.security.authentication.PermissionResolver;
 import com.picdrop.security.authentication.authenticator.Authenticator;
-import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;

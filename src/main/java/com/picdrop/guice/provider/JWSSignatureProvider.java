@@ -7,8 +7,6 @@ package com.picdrop.guice.provider;
 
 import com.google.inject.Provider;
 import com.google.inject.throwingproviders.CheckedProvider;
-import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
 import java.io.IOException;

@@ -6,13 +6,13 @@
 package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.picdrop.model.user.NameOnlyUserReference;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.inject.Inject;
 import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Referable;
 import com.picdrop.model.Resolvable;
+import com.picdrop.model.user.NameOnlyUserReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.repository.Repository;

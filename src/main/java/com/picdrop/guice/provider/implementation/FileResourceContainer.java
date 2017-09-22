@@ -10,8 +10,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.provider.FileRepositoryProvider;
 import com.picdrop.guice.provider.ResourceContainer;
-import com.picdrop.io.repository.FileRepository;
-import com.picdrop.io.writer.FileReader;
 import com.picdrop.model.resource.FileResource;
 import java.io.IOException;
 import java.io.InputStream;

@@ -7,10 +7,8 @@ package com.picdrop.guice;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.google.inject.name.Named;
 import com.picdrop.guice.factory.CookieProviderFactory;
 import com.picdrop.guice.names.AuthorizationToken;
 import com.picdrop.guice.names.Credentials;

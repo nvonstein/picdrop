@@ -5,7 +5,6 @@
  */
 package com.picdrop.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Resolvable;
 import org.bson.types.ObjectId;

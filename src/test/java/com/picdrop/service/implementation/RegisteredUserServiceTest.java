@@ -12,10 +12,10 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import java.io.IOException;
 import java.util.Arrays;
-import org.junit.Test;
-import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import static org.mockito.Mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**

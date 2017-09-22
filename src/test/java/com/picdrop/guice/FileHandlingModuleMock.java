@@ -5,16 +5,9 @@
  */
 package com.picdrop.guice;
 
-import com.google.inject.Binder;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 import com.google.inject.throwingproviders.CheckedProvides;
 import com.picdrop.guice.names.File;
 import com.picdrop.guice.provider.FileRepositoryProvider;
-import com.picdrop.io.repository.MurmurFileRepository;
-import com.picdrop.io.writer.FileReader;
-import com.picdrop.io.writer.FileWriter;
-import com.picdrop.model.resource.FileResource;
 import com.picdrop.io.repository.FileRepository;
 import java.io.IOException;
 import java.util.Properties;

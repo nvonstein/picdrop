@@ -6,7 +6,6 @@
 package com.picdrop.guice.provider.implementation;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
@@ -14,12 +13,12 @@ import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.picdrop.guice.names.Signature;
+import com.picdrop.guice.provider.JWSSignatureProvider;
 import com.picdrop.guice.provider.SymmetricKeyProvider;
 import java.io.IOException;
 import javax.crypto.SecretKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.picdrop.guice.provider.JWSSignatureProvider;
 
 /**
  *

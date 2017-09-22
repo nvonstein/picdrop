@@ -5,8 +5,6 @@
  */
 package com.picdrop.security.token;
 
-import com.picdrop.security.token.cipher.TokenCipher;
-import com.picdrop.security.token.signer.TokenSigner;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.nimbusds.jose.JWEObject;
@@ -15,6 +13,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.picdrop.guice.provider.TokenCipherProvider;
 import com.picdrop.guice.provider.TokenSignerProvider;
+import com.picdrop.security.token.cipher.TokenCipher;
+import com.picdrop.security.token.signer.TokenSigner;
 import java.io.IOException;
 import java.text.ParseException;
 

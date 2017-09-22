@@ -5,12 +5,8 @@
  */
 package com.picdrop.exception;
 
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotAllowedException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Provider;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 /**

@@ -11,6 +11,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
+import static com.picdrop.helper.LogHelper.*;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
@@ -23,7 +24,6 @@ import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Permission;
 import com.picdrop.service.CrudService;
-import static com.picdrop.helper.LogHelper.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +38,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 /**
  *

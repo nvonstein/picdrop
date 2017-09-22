@@ -6,7 +6,6 @@
 package com.picdrop.helper;
 
 import com.google.common.base.Strings;
-import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;

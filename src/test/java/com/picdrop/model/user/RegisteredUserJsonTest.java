@@ -7,18 +7,18 @@ package com.picdrop.model.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.picdrop.helper.TestHelper;
+import static com.picdrop.helper.TestHelper.*;
 import com.picdrop.json.JacksonConfigProvider;
 import com.picdrop.json.Views;
 import java.util.Arrays;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import static com.picdrop.helper.TestHelper.*;
 
 /**
  *

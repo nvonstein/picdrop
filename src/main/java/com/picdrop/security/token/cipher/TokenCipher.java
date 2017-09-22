@@ -7,7 +7,6 @@ package com.picdrop.security.token.cipher;
 
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
-import com.nimbusds.jwt.SignedJWT;
 import java.io.IOException;
 import java.text.ParseException;
 
