@@ -409,38 +409,43 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         Collection.CollectionItem ci = this.getElement(id, eid);
 
         log.debug(SERVICE, "Validating comment's attributes");
-        if (Strings.isNullOrEmpty(entity.getName())) {
-            User user = this.context.get().getPrincipal();
-
-            if (user.isRegistered()) {
-                entity.setUser(user);
-            } else {
-                String name = user.getFullName();
-
-                if (Strings.isNullOrEmpty(name)) {
-                    throw new ApplicationException()
-                            .status(400)
-                            .code(ErrorMessageCode.BAD_NAME_EMPTY)
-                            .devMessage("Unable to resolve a name");
-                }
-                entity.setName(name);
-            }
-        } else {
-            verifyName(entity.getName(), userNamePattern, userNameLengthLimit);
-        }
+        entity = setName(entity);
 
         if (Strings.isNullOrEmpty(entity.getComment()) || (entity.getComment().length() > commentTextLengthLimit)) {
             throw new ApplicationException()
-                            .status(400)
-                            .code(ErrorMessageCode.BAD_COMMENT);
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_COMMENT);
         }
-        
+
         ci.addComment(entity);
 
         ci = this.ciRepo.update(ci.getId(), ci);
         log.info(SERVICE, "Comment created");
         log.traceExit();
         return ci;
+    }
+
+    private <T extends NameOnlyUserReference> T setName(T entity) throws ApplicationException {
+        User user = this.context.get().getPrincipal();
+
+        if (user.isRegistered()) { // 1. Principle name to save user ref in comment
+            entity.setUser(user);
+            return entity;
+        }
+        if (!Strings.isNullOrEmpty(user.getFullName())) { // 2. Could be delegate so just take name
+            entity.setName(user.getFullName());
+            return entity;
+        }
+        if (!Strings.isNullOrEmpty(entity.getName())) { // 3. Name set on comment itself
+            if (verifyName(entity.getName(), userNamePattern, userNameLengthLimit)) {
+                return entity;
+            }
+        }
+
+        throw new ApplicationException()
+                .status(400)
+                .code(ErrorMessageCode.BAD_NAME_EMPTY)
+                .devMessage("Unable to resolve a name");
     }
 
     @POST
@@ -458,25 +463,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         Collection.CollectionItem ci = this.getElement(id, eid);
 
         log.debug(SERVICE, "Validating rating's attributes");
-        if (Strings.isNullOrEmpty(entity.getName())) {
-            User user = this.context.get().getPrincipal();
-
-            if (user.isRegistered()) {
-                entity.setUser(user);
-            } else {
-                String name = user.getFullName();
-
-                if (Strings.isNullOrEmpty(name)) {
-                    throw new ApplicationException()
-                            .status(400)
-                            .code(ErrorMessageCode.BAD_NAME_EMPTY)
-                            .devMessage("Unable to resolve a name");
-                }
-                entity.setName(name);
-            }
-        } else {
-            verifyName(entity.getName(), userNamePattern, userNameLengthLimit);
-        }
+        entity = setName(entity);
 
         ci.addRating(entity);
 

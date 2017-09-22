@@ -90,7 +90,8 @@ public class RegisteredUser extends User {
 
     @Override
     public String getFullName() {
-        return this.name + " " + this.lastname;
+        String sep = Strings.isNullOrEmpty(this.lastname) ? "" : " ";
+        return String.format("%s%s%s", Strings.nullToEmpty(this.name), sep, Strings.nullToEmpty(this.lastname));
     }
 
     @JsonView(value = Views.Public.class)
