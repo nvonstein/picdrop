@@ -45,7 +45,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
     ObjectMapper mapper;
     @Inject
     Datastore ds;
-    WriteConcern wc;
+    WriteConcern wc = WriteConcern.ACKNOWLEDGED;
 
     Logger log;
 
@@ -84,7 +84,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
     public T save(T entity) {
         log.traceEntry();
         log.debug(REPO_SAVE, "Saving entity of type '{}'", this.entityType.toString());
-        Key<T> k = ds.save(entity, ds.getDefaultWriteConcern());
+        Key<T> k = ds.save(entity, this.wc);
         return entity;
     }
 
@@ -107,7 +107,8 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         if (!isValidIdentifier(id)) {
             return false;
         }
-        WriteResult wr = ds.delete(entityType, new ObjectId(id));
+        Query<T> q = ds.createQuery(entityType).field("_id").equal(new ObjectId(id));
+        WriteResult wr = ds.delete(q, wc);
         log.traceExit();
         return wr.getN() > 0;
     }
@@ -168,7 +169,7 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
 
         log.traceExit();
-        return ds.delete(query).getN();
+        return ds.delete(query, wc).getN();
     }
 
     @Override
@@ -227,7 +228,8 @@ public class MorphiaRepository<T> implements Repository<String, T> {
 
         protected AbstractRepositoryBuilder(Class<TYPE> clazz) {
             this.clazz = clazz;
-            this.builderType = (Class) new TypeLiteral<BUILDER>(){}.getRawType();
+            this.builderType = (Class) new TypeLiteral<BUILDER>() {
+            }.getRawType();
         }
 
         protected BUILDER doReturn() {

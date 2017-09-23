@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.mongodb.MongoClient;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.picdrop.guice.names.Config;
 import com.picdrop.helper.EnvHelper;
@@ -28,14 +29,14 @@ import org.mongodb.morphia.Morphia;
  * @author i330120
  */
 public class RepositoryModule extends AbstractRepositoryModule {
-
+    
     @Provides
     @Singleton
     @Override
     protected MongoDatabase provideDatabase(MongoClient client) {
         return client.getDatabase("picdrop");
     }
-
+    
     @Provides
     @Singleton
     @Override
@@ -44,10 +45,10 @@ public class RepositoryModule extends AbstractRepositoryModule {
         morphia.mapPackage("com.picdrop.model");
         Datastore ds = morphia.createDatastore(client, "picdrop");
         ds.ensureIndexes(true);
-
+        
         return ds;
     }
-
+    
     @Provides
     @Singleton
     @Override
@@ -62,38 +63,56 @@ public class RepositoryModule extends AbstractRepositoryModule {
         if (Strings.isNullOrEmpty(host)) {
             host = "127.0.0.1:27017";
         }
-
+        
         return new MongoClient(host);
     }
-
+    
     @Override
     protected MorphiaRepository<TokenSet> provideTokenSetRepo() {
-        return MorphiaRepository.Builder.forType(TokenSet.class).withDatastore(null).build();
+        return MorphiaRepository.Builder.forType(TokenSet.class)
+                .withWriteConcern(WriteConcern.MAJORITY.withJournal(true))
+                .withDatastore(null)
+                .build();
     }
-
+    
     @Override
     protected MorphiaRepository<Collection.CollectionItem> provideCollectionItemRepo() {
-        return MorphiaRepository.Builder.forType(Collection.CollectionItem.class).withDatastore(null).build();
+        return MorphiaRepository.Builder.forType(Collection.CollectionItem.class)
+                .withWriteConcern(WriteConcern.ACKNOWLEDGED)
+                .withDatastore(null)
+                .build();
     }
-
+    
     @Override
     protected PrincipalAwareMorphiaRepository<Collection> provideCollectionRepo() {
-        return PrincipalAwareMorphiaRepository.Builder.forType(Collection.class).withDatastore(null).build();
+        return PrincipalAwareMorphiaRepository.Builder.forType(Collection.class)
+                .withWriteConcern(WriteConcern.ACKNOWLEDGED)
+                .withDatastore(null)
+                .build();
     }
-
+    
     @Override
     protected PrincipalAwareMorphiaRepository<FileResource> provideResourceRepo() {
-        return PrincipalAwareMorphiaRepository.Builder.forType(FileResource.class).withDatastore(null).build();
+        return PrincipalAwareMorphiaRepository.Builder.forType(FileResource.class)
+                .withWriteConcern(WriteConcern.ACKNOWLEDGED)
+                .withDatastore(null)
+                .build();
     }
-
+    
     @Override
     protected PrincipalAwareMorphiaRepository<Share> provideShareRepo() {
-        return PrincipalAwareMorphiaRepository.Builder.forType(Share.class).withDatastore(null).build();
+        return PrincipalAwareMorphiaRepository.Builder.forType(Share.class)
+                .withWriteConcern(WriteConcern.ACKNOWLEDGED)
+                .withDatastore(null)
+                .build();
     }
-
+    
     @Override
     protected MorphiaRepository<RegisteredUser> provideRegisteredUserRepo() {
-        return MorphiaRepository.Builder.forType(RegisteredUser.class).withDatastore(null).build();
+        return MorphiaRepository.Builder.forType(RegisteredUser.class)
+                .withWriteConcern(WriteConcern.MAJORITY.withJournal(true))
+                .withDatastore(null)
+                .build();
     }
-
+    
 }
