@@ -18,9 +18,9 @@ public abstract class NamedQueries {
     public static Map<String, String> getQueries() {
         Map<String, String> m = new HashMap<>();
 
-
         m.put("with.owner", "{ owner: { _id: ObjectId(?0) } }");
         m.put("with.parent", "{ parent: { _id: ObjectId(?0) } }");
+        m.put("with.user", "{ user: { _id: ObjectId(?0) } }");
 
         m.put("users.with.email", "{ email: ?0 }");
         m.put("shares.with.uri", "{ uri: ?0 }");

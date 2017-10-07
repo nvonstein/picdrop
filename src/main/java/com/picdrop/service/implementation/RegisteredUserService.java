@@ -16,13 +16,18 @@ import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
+import com.picdrop.model.resource.Comment;
 import com.picdrop.model.resource.FileResource;
+import com.picdrop.model.resource.Rating;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
 import com.picdrop.security.authentication.Permission;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -51,6 +56,8 @@ public class RegisteredUserService {
     Repository<String, Collection> crepo;
     Repository<String, Share> srepo;
     Repository<String, Collection.CollectionItem> cirepo;
+    Repository<String, Comment> commentRepo;
+    Repository<String, Rating> ratingRepo;
 
     FileResourceService fileService;
 
@@ -65,7 +72,9 @@ public class RegisteredUserService {
             Repository<String, FileResource> frepo,
             Repository<String, Collection> crepo,
             Repository<String, Collection.CollectionItem> cirepo,
-            Repository<String, Share> srepo
+            Repository<String, Share> srepo,
+            Repository<String, Comment> commentRepo,
+            Repository<String, Rating> ratingRepo
     ) {
         this.repo = repo;
         this.tsrepo = tsrepo;
@@ -73,7 +82,10 @@ public class RegisteredUserService {
         this.crepo = crepo;
         this.cirepo = cirepo;
         this.srepo = srepo;
-        log.trace(SERVICE, "created with ({},{},{},{},{},{})", repo, tsrepo, frepo, crepo, cirepo, srepo);
+        this.commentRepo = commentRepo;
+        this.ratingRepo = ratingRepo;
+
+        log.trace(SERVICE, "created with ({},{},{},{},{},{},{},{})", repo, tsrepo, frepo, crepo, cirepo, srepo, commentRepo, ratingRepo);
     }
 
     @Inject
@@ -171,6 +183,8 @@ public class RegisteredUserService {
     @Path("/me")
     @Permission("write")
     public RegisteredUser updateMe(RegisteredUser entity) throws ApplicationException {
+        boolean nameChanged = false;
+
         log.entry(entity);
         RegisteredUser me = contextProv.get().getPrincipal().to(RegisteredUser.class);
         if (me == null) {
@@ -182,6 +196,8 @@ public class RegisteredUserService {
 
         log.debug(SERVICE, "Performing object merge");
         try {
+            nameChanged = (!Strings.isNullOrEmpty(entity.getName()) && !me.getName().equals(entity.getName()))
+                    || (!Strings.isNullOrEmpty(entity.getLastname()) && !me.getLastname().equals(entity.getLastname()));
             me = me.merge(entity);
         } catch (IOException ex) {
             throw new ApplicationException(ex)
@@ -189,6 +205,22 @@ public class RegisteredUserService {
                     .code(ErrorMessageCode.ERROR_OBJ_MERGE)
                     .devMessage(ex.getMessage());
         }
+
+        if (nameChanged) {
+            Map<String, Object> flist = new HashMap<>();
+            flist.put("name", me.getFullName());
+
+            try {
+                commentRepo.updateNamed(flist, "with.user", me.getId());
+                ratingRepo.updateNamed(flist, "with.user", me.getId());
+            } catch (IOException ex) {
+                throw new ApplicationException(ex)
+                        .devMessage("Error while updating interaction referring this user")
+                        .status(500)
+                        .code(ErrorMessageCode.ERROR_INTERNAL);
+            }
+        }
+
         me = repo.update(me.getId(), me);
 
         log.info(SERVICE, "User updated");

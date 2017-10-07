@@ -12,6 +12,7 @@ import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -187,6 +188,10 @@ public class RegisteredUserServiceTest extends ServiceTestBase {
         verify(registeredUserRepo, times(0)).get(any());
         verify(registeredUserRepo, times(1)).update(eq(ID1), eq(user));
 
+        verify(commentRepo, times(1)).updateNamed(any(Map.class), any(), any());
+         verify(ratingRepo, times(1)).updateNamed(any(Map.class), any(), any());
+
         assertEquals("field not updated", "Foo", actual.getName());
     }
+
 }
