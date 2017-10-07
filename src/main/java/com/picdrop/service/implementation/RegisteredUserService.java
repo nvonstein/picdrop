@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
@@ -64,6 +65,8 @@ public class RegisteredUserService {
     @Inject
     Provider<RequestContext> contextProv;
 
+    long defaultSizeLimit;
+
     Pattern emailPattern = Pattern.compile("^[^@]+[@][^@]+[.][^@]+$");
 
     @Inject
@@ -96,6 +99,11 @@ public class RegisteredUserService {
     @Inject
     public void setFileService(FileResourceService fileService) {
         this.fileService = fileService;
+    }
+
+    @Inject
+    public void setDefaultSizeLimit(@Named("service.limit.user.size")long defaultSizeLimit) {
+        this.defaultSizeLimit = defaultSizeLimit;
     }
 
     @POST
@@ -134,6 +142,8 @@ public class RegisteredUserService {
                     .status(400)
                     .code(ErrorMessageCode.BAD_NAME_TOO_LONG);
         }
+        
+        entity.setSizeLimit(defaultSizeLimit);
 
         entity = repo.save(entity);
 

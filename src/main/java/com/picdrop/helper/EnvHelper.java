@@ -60,6 +60,8 @@ public class EnvHelper {
 
     public Properties getDefaultProperties() {
         Properties p = new Properties();
+        
+        p.put("service.limit.user.size", "10000000000"); // 10 GB
 
         p.put("service.validation.user.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
 
