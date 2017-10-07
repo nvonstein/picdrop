@@ -46,7 +46,9 @@ public class Identifiable {
     @JsonProperty("id")
     @JsonView(value = Views.Public.class)
     public void setId(String _id) {
-        this._id = new ObjectId(_id);
+        this._id = _id != null
+                ? new ObjectId(_id)
+                : null;
     }
 
     @Override
