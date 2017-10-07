@@ -7,7 +7,6 @@ package com.picdrop.repository.mongo;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import static com.picdrop.helper.LogHelper.*;
@@ -148,21 +147,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
     }
 
     @Override
-    public List<T> queryNamed(String qname, Object... params) throws IOException {
-        log.traceEntry();
-        DBObject dbObj = compileQuery(qname, params);
-
-        dbObj = addPrincipalClause(dbObj);
-
-        if (dbObj == null) {
-            return new ArrayList<>();
-            // TODO log
-        }
-
-        log.debug(REPO_GET, "Querying entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
-        log.traceExit();
-        return query.asList();
+    protected List<T> queryNamedInternal(DBObject dbObj) {
+        DBObject awareDbObj = addPrincipalClause(dbObj);
+        return super.queryNamedInternal(awareDbObj);
     }
 
     @Override
@@ -199,32 +186,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
     }
 
     @Override
-    public int deleteNamed(String qname, Object... params) throws IOException {
-        log.traceEntry();
-        DBObject dbObj = compileQuery(qname, params);
-
-        dbObj = addPrincipalClause(dbObj);
-
-        log.debug(REPO_DELETE, "Deleting entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
-
-        log.traceExit();
-        return ds.delete(query).getN();
-    }
-
-    @Override
-    public List<T> updateNamed(T entity, String qname, Object... params) throws IOException {
-        log.traceEntry();
-        DBObject dbObj = compileQuery(qname, params);
-
-        dbObj = addPrincipalClause(dbObj);
-
-        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
-
-        UpdateResults ur = ds.updateFirst(query, entity, false);
-        log.traceExit();
-        return Arrays.asList();
+    protected int deleteNamedInternal(DBObject dbObj) {
+        DBObject awareDbObj = addPrincipalClause(dbObj);
+        return super.deleteNamedInternal(awareDbObj);
     }
 
     @Override
@@ -238,7 +202,10 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         log.traceEntry();
         log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         DBObject dbObj = compileQuery(qname, params);
-        dbObj = addPrincipalClause(dbObj, context);
+
+        if (context != null) {
+            dbObj = addPrincipalClause(dbObj, context);
+        }
 
         int n = super.updateNamedInternal(flist, dbObj);
 
@@ -360,9 +327,10 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         }
 
         log.debug(REPO_GET, "Querying entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        List<T> result = super.queryNamedInternal(dbObj);
+
         log.traceExit();
-        return query.asList();
+        return result;
     }
 
     public static class Builder<TYPE> extends AbstractRepositoryBuilder<Builder<TYPE>, PrincipalAwareMorphiaRepository<TYPE>, TYPE> {
