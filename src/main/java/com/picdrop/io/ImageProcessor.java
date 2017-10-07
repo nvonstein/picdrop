@@ -6,6 +6,7 @@
 package com.picdrop.io;
 
 import com.google.inject.Inject;
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.guice.provider.ResourceContainer;
 import com.picdrop.model.FileType;
 import com.picdrop.model.resource.FileResource;
@@ -27,7 +28,7 @@ public class ImageProcessor extends AbstractUpdateProcessor<FileResource> {
     }
 
     @Override
-    public FileResource onPostStore(FileResource entity, ResourceContainer cnt) throws IOException {
+    public FileResource onPostStore(FileResource entity, ResourceContainer cnt) throws IOException, ApplicationException {
         ResourceDescriptor rdes = entity.getDescriptor();
         if ((rdes != null) && (rdes.getType().isCoveredBy(FileType.IMAGE_WILDTYPE))) {
             ImageDescriptor ides = rdes.to(ImageDescriptor.class);

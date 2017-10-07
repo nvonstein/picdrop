@@ -5,6 +5,7 @@
  */
 package com.picdrop.io;
 
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.guice.provider.ResourceContainer;
 import com.picdrop.model.Identifiable;
 import com.picdrop.repository.Repository;
@@ -14,8 +15,8 @@ import java.io.IOException;
  *
  * @author i330120
  */
-public abstract class AbstractUpdateProcessor<T extends Identifiable> extends AbstractProcessor<T>{
-    
+public abstract class AbstractUpdateProcessor<T extends Identifiable> extends AbstractProcessor<T> {
+
     Repository<String, T> repo;
 
     AbstractUpdateProcessor(Repository<String, T> repo) {
@@ -23,7 +24,7 @@ public abstract class AbstractUpdateProcessor<T extends Identifiable> extends Ab
     }
 
     @Override
-    public T onPostStore(T entity, ResourceContainer cnt) throws IOException {
+    public T onPostStore(T entity, ResourceContainer cnt) throws IOException, ApplicationException {
         return repo.update(entity.getId(), entity);
     }
 }

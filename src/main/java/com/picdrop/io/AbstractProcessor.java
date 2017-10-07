@@ -5,6 +5,7 @@
  */
 package com.picdrop.io;
 
+import com.picdrop.exception.ApplicationException;
 import com.picdrop.guice.provider.ResourceContainer;
 import java.io.IOException;
 
@@ -12,26 +13,26 @@ import java.io.IOException;
  *
  * @author i330120
  */
-public class AbstractProcessor<T> implements Processor<T>{
+public class AbstractProcessor<T> implements Processor<T> {
 
     @Override
-    public T onPreStore(T entity, ResourceContainer cnt) throws IOException {
+    public T onPreStore(T entity, ResourceContainer cnt) throws IOException, ApplicationException {
         return entity;
     }
 
     @Override
-    public T onPostStore(T entity, ResourceContainer cnt) throws IOException {
+    public T onPostStore(T entity, ResourceContainer cnt) throws IOException, ApplicationException {
         return entity;
     }
 
     @Override
-    public void onPreDelete(T entity) throws IOException {
+    public void onPreDelete(T entity) throws IOException, ApplicationException {
         // NOOP
     }
 
     @Override
-    public void onPostDelete(T entity) throws IOException {
+    public void onPostDelete(T entity) throws IOException, ApplicationException {
         // NOOP
     }
-    
+
 }
