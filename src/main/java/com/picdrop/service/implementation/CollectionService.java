@@ -485,6 +485,34 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         return entity;
     }
 
+    @GET
+    @Permission("read")
+    @Path("/{id}/elements/{eid}/comments")
+    public List<Comment> listComments(@PathParam("id") String id,
+            @PathParam("eid") String eid) throws ApplicationException, IOException {
+        log.entry(id, eid);
+
+        Collection.CollectionItem ci = this.getElement(id, eid);
+
+        List<Comment> result = commentRepo.queryNamed("with.parent", ci.getId());
+
+        log.traceExit();
+        return result;
+    }
+
+    @GET
+    @Permission("read")
+    @Path("/{id}/elements/{eid}/ratings")
+    public List<Rating> listRatings(@PathParam("id") String id,
+            @PathParam("eid") String eid) throws ApplicationException, IOException {
+        log.entry(id, eid);
+
+        Collection.CollectionItem ci = this.getElement(id, eid);
+
+        List<Rating> result = ratingRepo.queryNamed("with.parent", ci.getId());
+
+        log.traceExit();
+        return result;
     }
 
 }
