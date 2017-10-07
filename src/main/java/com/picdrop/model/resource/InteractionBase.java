@@ -3,38 +3,42 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.picdrop.model.user;
+package com.picdrop.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.picdrop.json.Views;
-import java.util.Objects;
+import com.picdrop.model.Identifiable;
+import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.model.user.RegisteredUserReference;
+import com.picdrop.model.user.UserReference;
 
 /**
  *
  * @author i330120
  */
-public class NameOnlyUserReference {
+public abstract class InteractionBase extends Identifiable {
 
-    String user;
+    RegisteredUserReference user;
+    ResourceReference parent;
     String name;
 
-    public NameOnlyUserReference() {
+    public InteractionBase() {
     }
 
     @JsonView(value = Views.Detailed.class)
-    public String getUser() {
+    public UserReference getUser() {
         return user;
     }
 
     @JsonView(value = Views.Ignore.class)
-    public void setUser(String userId) {
-        this.user = userId;
+    public void setUser(RegisteredUserReference user) {
+        this.user = user;
     }
-    
+
     @JsonIgnore
-    public void setUser(User user) {
-        this.user = user.getId();
+    public void setUser(RegisteredUser user) {
+        this.user = user.refer();
         this.name = user.getFullName();
     }
 
@@ -48,25 +52,19 @@ public class NameOnlyUserReference {
         this.name = name;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!getClass().isInstance(obj)) {
-            return false;
-        }
-        final NameOnlyUserReference other = (NameOnlyUserReference) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if ((this.user != null) && !this.user.equals(other.getUser())) {
-            return false;
-        }
-        return true;
+    @JsonView(value = Views.Ignore.class)
+    public ResourceReference getParent() {
+        return parent;
+    }
+
+    @JsonView(value = Views.Ignore.class)
+    public void setParent(ResourceReference parent) {
+        this.parent = parent;
+    }
+
+    @JsonIgnore
+    public void setParent(Resource res) {
+        this.parent = res.refer();
     }
 
 }

@@ -20,6 +20,7 @@ public abstract class NamedQueries {
 
 
         m.put("with.owner", "{ owner: { _id: ObjectId(?0) } }");
+        m.put("with.parent", "{ parent: { _id: ObjectId(?0) } }");
 
         m.put("users.with.email", "{ email: ?0 }");
         m.put("shares.with.uri", "{ uri: ?0 }");

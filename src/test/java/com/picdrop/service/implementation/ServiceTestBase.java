@@ -17,7 +17,9 @@ import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
+import com.picdrop.model.resource.Comment;
 import com.picdrop.model.resource.FileResource;
+import com.picdrop.model.resource.Rating;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
@@ -35,6 +37,8 @@ public abstract class ServiceTestBase {
     Repository<String, TokenSet> tokenSetRepo;
     Repository<String, Collection.CollectionItem> collectionItemRepo;
     Repository<String, RegisteredUser> registeredUserRepo;
+    Repository<String, Comment> commentRepo;
+    Repository<String, Rating> ratingRepo;
 
     AwareRepository<String, FileResource, User> fileResourceRepo;
     AwareRepository<String, Share, User> shareRepo;
@@ -66,5 +70,7 @@ public abstract class ServiceTestBase {
         this.shareRepo = repoModule.getSrepo();
         this.tokenSetRepo = repoModule.getTsrepo();
         this.registeredUserRepo = repoModule.getUrepo();
+        this.commentRepo = repoModule.getComrepo();
+        this.ratingRepo = repoModule.getRatrepo();
     }
 }

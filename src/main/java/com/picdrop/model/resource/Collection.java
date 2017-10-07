@@ -12,7 +12,6 @@ import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Referable;
 import com.picdrop.model.Resolvable;
-import com.picdrop.model.user.NameOnlyUserReference;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.repository.Repository;
@@ -121,13 +120,18 @@ public class Collection extends Resource {
         @Embedded
         CollectionReference parentCollection;
         @Embedded
-        List<Comment> comments = new ArrayList<>();
+        List<String> comments = new ArrayList<>();
         @Embedded
-        List<Rating> ratings = new ArrayList<>();
+        List<String> ratings = new ArrayList<>();
+
         @Embedded
-        List<NameOnlyUserReference> blockings = new ArrayList<>();
+        List<InteractionBase> blockings = new ArrayList<>();
+
         @Embedded
         RegisteredUserReference owner;
+
+        int numComments = 0;
+        double avgRating = 0;
 
         public CollectionItem() {
         }
@@ -176,44 +180,67 @@ public class Collection extends Resource {
         }
 
         @JsonView(value = Views.Public.class)
-        public List<Rating> getRatings() {
+        public List<String> getRatings() {
             return ratings;
         }
 
         @JsonView(value = Views.Ignore.class)
-        public void setRatings(List<Rating> ratings) {
+        public void setRatings(List<String> ratings) {
             this.ratings = ratings;
         }
 
         @JsonView(value = Views.Public.class)
-        public List<NameOnlyUserReference> getBlockings() {
+        public List<InteractionBase> getBlockings() {
             return blockings;
         }
 
         @JsonView(value = Views.Ignore.class)
-        public void setBlockings(List<NameOnlyUserReference> blockings) {
+        public void setBlockings(List<InteractionBase> blockings) {
             this.blockings = blockings;
         }
 
         @JsonView(value = Views.Public.class)
-        public List<Comment> getComments() {
+        public List<String> getComments() {
             return comments;
         }
 
         @JsonView(value = Views.Ignore.class)
-        public void setComments(List<Comment> comments) {
+        public void setComments(List<String> comments) {
             this.comments = comments;
+        }
+
+        @JsonView(value = Views.Public.class)
+        public int getNumComments() {
+            return numComments;
+        }
+
+        @JsonView(value = Views.Ignore.class)
+        public void setNumComments(int numComments) {
+            this.numComments = numComments;
+        }
+
+        @JsonView(value = Views.Public.class)
+        public double getAvgRating() {
+            return avgRating;
+        }
+
+        @JsonView(value = Views.Ignore.class)
+        public void setAvgRating(double avgRating) {
+            this.avgRating = avgRating;
         }
 
         @JsonIgnore
         public CollectionItem addRating(Rating r) {
-            this.ratings.add(r);
+            double tmp = ((this.avgRating * this.ratings.size()) + r.getRate()) / (this.ratings.size() + 1);
+            this.avgRating = Math.round(tmp * 100) / 100.0;
+            this.ratings.add(r.getId());
             return this;
         }
 
         @JsonIgnore
         public CollectionItem addComment(Comment c) {
-            this.comments.add(c);
+            this.comments.add(c.getId());
+            this.numComments++;
             return this;
         }
 
@@ -290,58 +317,6 @@ public class Collection extends Resource {
             this.resource = resource;
         }
 
-    }
-
-    public static class Rating extends NameOnlyUserReference {
-
-        int rate = 0;
-
-        public Rating() {
-        }
-
-        @JsonView(value = Views.Public.class)
-        public int getRate() {
-            return rate;
-        }
-
-        @JsonView(value = Views.Public.class)
-        public void setRate(int rate) {
-            this.rate = (rate < 0)
-                    ? 0
-                    : (rate > 6)
-                            ? 6
-                            : rate;
-        }
-    }
-
-    public static class Comment extends NameOnlyUserReference {
-
-        String comment = "";
-        long created;
-
-        public Comment() {
-            this.created = DateTime.now(DateTimeZone.UTC).getMillis();
-        }
-
-        @JsonView(value = Views.Public.class)
-        public String getComment() {
-            return comment;
-        }
-
-        @JsonView(value = Views.Public.class)
-        public void setComment(String comment) {
-            this.comment = comment;
-        }
-
-        @JsonView(value = Views.Public.class)
-        public long getCreated() {
-            return created;
-        }
-
-        @JsonView(value = Views.Ignore.class)
-        public void setCreated(long created) {
-            this.created = created;
-        }
     }
 
 }

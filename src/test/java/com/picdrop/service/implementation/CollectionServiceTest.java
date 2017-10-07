@@ -10,9 +10,10 @@ import com.picdrop.helper.TestHelper;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.Collection.CollectionItem;
-import com.picdrop.model.resource.Collection.Comment;
+import com.picdrop.model.resource.Comment;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.FileResourceReference;
+import com.picdrop.model.resource.Rating;
 import com.picdrop.model.user.RegisteredUser;
 import java.io.IOException;
 import static org.junit.Assert.*;
@@ -395,7 +396,9 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Rating r = new Collection.Rating();
+        when(ratingRepo.save(any())).thenAnswer(TestHelper.reflectWithId(0, ID2));
+
+        Rating r = new Rating();
         r.setRate(3);
         service.rate(ID2, ID1, r);
 
@@ -428,17 +431,14 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Comment comment = new Collection.Comment();
+        when(commentRepo.save(any())).thenAnswer(TestHelper.reflectWithId(0, ID2));
+
+        Comment comment = new Comment();
         comment.setComment("example");
 
-        CollectionItem actualCi = service.comment(ID2, ID1, comment);
+        Comment actual = service.comment(ID2, ID1, comment);
 
-        assertNotNull("comments null", actualCi.getComments());
-        assertEquals("wrong number of elements", actualCi.getComments().size(), 1);
-
-        Comment actual = actualCi.getComments().get(0);
         assertNotNull("text is null", actual.getComment());
-
         assertEquals("wrong name", "name", actual.getName());
 
         verify(ci, atLeastOnce()).addComment(any());
@@ -458,18 +458,15 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Comment comment = new Collection.Comment();
+        when(commentRepo.save(any())).thenAnswer(TestHelper.reflectWithId(0, ID2));
+
+        Comment comment = new Comment();
         comment.setName("other name");
         comment.setComment("example");
 
-        CollectionItem actualCi = service.comment(ID2, ID1, comment);
+        Comment actual = service.comment(ID2, ID1, comment);
 
-        assertNotNull("comments null", actualCi.getComments());
-        assertEquals("wrong number of elements", actualCi.getComments().size(), 1);
-
-        Comment actual = actualCi.getComments().get(0);
         assertNotNull("text is null", actual.getComment());
-
         assertEquals("wrong name", "name", actual.getName());
 
         verify(ci, atLeastOnce()).addComment(any());
@@ -490,18 +487,15 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Comment comment = new Collection.Comment();
+        when(commentRepo.save(any())).thenAnswer(TestHelper.reflectWithId(0, ID2));
+
+        Comment comment = new Comment();
         comment.setName("name");
         comment.setComment("example");
 
-        CollectionItem actualCi = service.comment(ID2, ID1, comment);
+        Comment actual = service.comment(ID2, ID1, comment);
 
-        assertNotNull("comments null", actualCi.getComments());
-        assertEquals("wrong number of elements", actualCi.getComments().size(), 1);
-
-        Comment actual = actualCi.getComments().get(0);
         assertNotNull("text is null", actual.getComment());
-
         assertEquals("wrong name", "name", actual.getName());
 
         verify(ci, atLeastOnce()).addComment(any());
@@ -532,7 +526,7 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Comment comment = new Collection.Comment();
+        Comment comment = new Comment();
         comment.setComment("example");
 
         StringBuilder sb = new StringBuilder();
@@ -567,7 +561,7 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Comment comment = new Collection.Comment();
+        Comment comment = new Comment();
         comment.setComment("example");
 
         comment.setName("abc%$&xyz");
@@ -594,7 +588,7 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Comment comment = new Collection.Comment();
+        Comment comment = new Comment();
         comment.setComment("example");
         comment.setName(null);
 
@@ -621,7 +615,7 @@ public class CollectionServiceTest extends ServiceTestBase {
         col.addItem(ci);
         when(collectionRepo.get(ID2)).thenReturn(col);
 
-        Collection.Comment comment = new Collection.Comment();
+        Comment comment = new Comment();
         comment.setName("example");
         comment.setComment(null);
 

@@ -16,9 +16,11 @@ import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.ShareReference;
 import com.picdrop.model.resource.Collection;
+import com.picdrop.model.resource.Comment;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.FileResourceReference;
-import com.picdrop.model.user.NameOnlyUserReference;
+import com.picdrop.model.resource.InteractionBase;
+import com.picdrop.model.resource.Rating;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
@@ -53,6 +55,8 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     Repository<String, Collection.CollectionItem> ciRepo;
     Repository<String, FileResource> fRepo;
     Repository<String, Share> sRepo;
+    Repository<String, Comment> commentRepo;
+    Repository<String, Rating> ratingRepo;
 
     @Inject
     Provider<RequestContext> context;
@@ -68,13 +72,17 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     public CollectionService(Repository<String, Collection> repo,
             Repository<String, Collection.CollectionItem> ciRepo,
             Repository<String, FileResource> fRepo,
-            Repository<String, Share> sRepo) {
+            Repository<String, Share> sRepo,
+            Repository<String, Comment> commentRepo,
+            Repository<String, Rating> ratingRepo) {
         super(repo);
         this.ciRepo = ciRepo;
         this.fRepo = fRepo;
         this.sRepo = sRepo;
+        this.commentRepo = commentRepo;
+        this.ratingRepo = ratingRepo;
 
-        log.trace(SERVICE, "created with ({},{},{})", ciRepo, fRepo, sRepo);
+        log.trace(SERVICE, "created with ({},{},{},{},{})", ciRepo, fRepo, sRepo, commentRepo, ratingRepo);
     }
 
     @Inject
@@ -395,9 +403,9 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @POST
     @Permission("comment")
     @Path("/{id}/elements/{eid}/comments")
-    public Collection.CollectionItem comment(@PathParam("id") String id,
+    public Comment comment(@PathParam("id") String id,
             @PathParam("eid") String eid,
-            Collection.Comment entity) throws ApplicationException {
+            Comment entity) throws ApplicationException {
         log.entry(id, eid, entity);
         if (entity == null) {
             throw new ApplicationException()
@@ -415,19 +423,22 @@ public class CollectionService extends CrudService<String, Collection, Repositor
                     .code(ErrorMessageCode.BAD_COMMENT);
         }
 
+        entity.setId(null); // Clear id
+        entity = commentRepo.save(entity);
+
         ci.addComment(entity);
 
         ci = this.ciRepo.update(ci.getId(), ci);
         log.info(SERVICE, "Comment created");
         log.traceExit();
-        return ci;
+        return entity;
     }
 
-    private <T extends NameOnlyUserReference> T setName(T entity) throws ApplicationException {
+    private <T extends InteractionBase> T setName(T entity) throws ApplicationException {
         User user = this.context.get().getPrincipal();
 
         if (user.isRegistered()) { // 1. Principle name to save user ref in comment
-            entity.setUser(user);
+            entity.setUser(user.to(RegisteredUser.class));
             return entity;
         }
         if (!Strings.isNullOrEmpty(user.getFullName())) { // 2. Could be delegate so just take name
@@ -449,9 +460,9 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @POST
     @Permission("rate")
     @Path("/{id}/elements/{eid}/ratings")
-    public Collection.CollectionItem rate(@PathParam("id") String id,
+    public Rating rate(@PathParam("id") String id,
             @PathParam("eid") String eid,
-            Collection.Rating entity) throws ApplicationException {
+            Rating entity) throws ApplicationException {
         log.entry(id, eid, entity);
         if (entity == null) {
             throw new ApplicationException()
@@ -463,12 +474,17 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         log.debug(SERVICE, "Validating rating's attributes");
         entity = setName(entity);
 
+        entity.setId(null);
+        entity = ratingRepo.save(entity);
+
         ci.addRating(entity);
 
         ci = this.ciRepo.update(ci.getId(), ci);
         log.info(SERVICE, "Rating created");
         log.traceExit();
-        return ci;
+        return entity;
+    }
+
     }
 
 }

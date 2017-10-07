@@ -20,8 +20,10 @@ import com.picdrop.model.TokenSet;
 import com.picdrop.model.TokenSetReference;
 import com.picdrop.model.resource.Collection;
 import com.picdrop.model.resource.CollectionReference;
+import com.picdrop.model.resource.Comment;
 import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.resource.FileResourceReference;
+import com.picdrop.model.resource.Rating;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.RegisteredUserReference;
 import com.picdrop.model.user.User;
@@ -40,8 +42,7 @@ public abstract class AbstractRepositoryModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-//        binder.bind(new TypeLiteral<Map<String, String>>() {
-//        }).annotatedWith(Queries.class).toInstance(NamedQueries.getQueries());
+
         // Registered user repo
         bindRegisteredUserRepo(binder);
         // Resource repo
@@ -54,14 +55,19 @@ public abstract class AbstractRepositoryModule implements Module {
         bindShareRepo(binder);
         // TokenSet repo
         bindTokenSetRepo(binder);
+        // Comment repo
+        bindCommentRepo(binder);
+        // Rating repo
+        bindRatingRepo(binder);
+        
         // Static bindings
         bindStaticRepoReferences(binder);
     }
-    
+
     @Provides
     @Queries
     @Singleton
-    protected Map<String,String> provideNamedQueries() {
+    protected Map<String, String> provideNamedQueries() {
         return NamedQueries.getQueries();
     }
 
@@ -113,6 +119,20 @@ public abstract class AbstractRepositoryModule implements Module {
         }).toInstance(repo);
     }
 
+    protected void bindCommentRepo(Binder binder) {
+        Repository<String, Comment> repo = provideCommentRepo();
+
+        binder.bind(new TypeLiteral<Repository<String, Comment>>() {
+        }).toInstance(repo);
+    }
+    
+        protected void bindRatingRepo(Binder binder) {
+        Repository<String, Rating> repo = provideRatingRepo();
+
+        binder.bind(new TypeLiteral<Repository<String, Rating>>() {
+        }).toInstance(repo);
+    }
+
     protected void bindStaticRepoReferences(Binder binder) {
         binder.requestStaticInjection(CollectionReference.class);
         binder.requestStaticInjection(FileResourceReference.class);
@@ -133,6 +153,10 @@ public abstract class AbstractRepositoryModule implements Module {
     protected abstract Repository<String, Collection.CollectionItem> provideCollectionItemRepo();
 
     protected abstract Repository<String, RegisteredUser> provideRegisteredUserRepo();
+
+    protected abstract Repository<String, Comment> provideCommentRepo();
+    
+    protected abstract Repository<String, Rating> provideRatingRepo();
 
     protected abstract AwareRepository<String, Collection, User> provideCollectionRepo();
 

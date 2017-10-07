@@ -11,8 +11,11 @@ import com.mongodb.client.MongoDatabase;
 import com.picdrop.model.Share;
 import com.picdrop.model.TokenSet;
 import com.picdrop.model.resource.Collection;
+import com.picdrop.model.resource.Comment;
 import com.picdrop.model.resource.FileResource;
+import com.picdrop.model.resource.Rating;
 import com.picdrop.model.user.RegisteredUser;
+import com.picdrop.repository.Repository;
 import com.picdrop.repository.mongo.MorphiaRepository;
 import com.picdrop.repository.mongo.PrincipalAwareMorphiaRepository;
 import java.util.Properties;
@@ -29,6 +32,8 @@ public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
     protected MorphiaRepository<TokenSet> tsrepo;
     protected MorphiaRepository<Collection.CollectionItem> cirepo;
     protected MorphiaRepository<RegisteredUser> urepo;
+    protected MorphiaRepository<Comment> comrepo;
+    protected MorphiaRepository<Rating> ratrepo;
 
     protected PrincipalAwareMorphiaRepository<Collection> crepo;
     protected PrincipalAwareMorphiaRepository<FileResource> rrepo;
@@ -40,6 +45,10 @@ public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
         this.cirepo = mock(new TypeLiteral<MorphiaRepository<Collection.CollectionItem>>() {
         }.getRawType());
         this.urepo = mock(new TypeLiteral<MorphiaRepository<RegisteredUser>>() {
+        }.getRawType());
+        this.comrepo = mock(new TypeLiteral<MorphiaRepository<Comment>>() {
+        }.getRawType());
+        this.ratrepo = mock(new TypeLiteral<MorphiaRepository<Rating>>() {
         }.getRawType());
 
         this.crepo = mock(new TypeLiteral<PrincipalAwareMorphiaRepository<Collection>>() {
@@ -79,6 +88,16 @@ public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
     @Override
     protected MorphiaRepository<TokenSet> provideTokenSetRepo() {
         return tsrepo;
+    }
+
+    @Override
+    protected MorphiaRepository<Comment> provideCommentRepo() {
+        return comrepo;
+    }
+
+    @Override
+    protected MorphiaRepository<Rating> provideRatingRepo() {
+        return ratrepo;
     }
 
     @Provides
@@ -145,6 +164,22 @@ public class RepositoryModuleMockNoDB extends AbstractRepositoryModule {
 
     public void setSrepo(PrincipalAwareMorphiaRepository<Share> srepo) {
         this.srepo = srepo;
+    }
+
+    public MorphiaRepository<Comment> getComrepo() {
+        return comrepo;
+    }
+
+    public void setComrepo(MorphiaRepository<Comment> comrepo) {
+        this.comrepo = comrepo;
+    }
+
+    public MorphiaRepository<Rating> getRatrepo() {
+        return ratrepo;
+    }
+
+    public void setRatrepo(MorphiaRepository<Rating> ratrepo) {
+        this.ratrepo = ratrepo;
     }
 
 }
