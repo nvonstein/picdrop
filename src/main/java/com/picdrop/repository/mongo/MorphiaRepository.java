@@ -194,8 +194,13 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         log.debug(REPO_GET, "Querying entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         DBObject dbObj = compileQuery(qname, params);
 
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        List<T> result = queryNamedInternal(dbObj);
         log.traceExit();
+        return result;
+    }
+
+    protected List<T> queryNamedInternal(DBObject dbObj) {
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
         return query.asList();
     }
 
@@ -205,10 +210,15 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         log.debug(REPO_DELETE, "Deleting entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         DBObject dbObj = compileQuery(qname, params);
 
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        int n = deleteNamedInternal(dbObj);
 
         log.traceExit();
-        return ds.delete(query, wc).getN();
+        return n;
+    }
+
+    protected int deleteNamedInternal(DBObject dbObj) {
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        return ds.delete(query).getN();
     }
 
     @Override
