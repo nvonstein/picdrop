@@ -153,9 +153,6 @@ public class RegisteredUser extends User {
             if (!Strings.isNullOrEmpty(nup.email)) {
                 this.email = nup.email;
             }
-            if (!Strings.isNullOrEmpty(nup.phash)) {
-                this.phash = nup.phash;
-            }
         }
         return this;
     }

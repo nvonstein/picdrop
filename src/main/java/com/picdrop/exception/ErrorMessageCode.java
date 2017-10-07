@@ -35,7 +35,8 @@ public enum ErrorMessageCode {
     BAD_NAME_TOO_LONG("ec000020","Bad request: Name exceeds length limit."), 
     BAD_NAME_ILLEGAL_FORMAT("ec000021","Bad request: Name has not a legal format."), 
     BAD_NAME_EMPTY("ec000022","Bad request: Name is empty."), 
-    LIMIT_STORAGE_FULL("ec000023","Bad request: You have reached your maximum storage capacity.");
+    LIMIT_STORAGE_FULL("ec000023","Bad request: You have reached your maximum storage capacity."), 
+    BAD_OLD_PASSWORD("ec000024","Bad request: Your previous password does not match.");
 
     private String code;
     private String defaultMessage;

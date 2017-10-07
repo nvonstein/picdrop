@@ -12,6 +12,7 @@ import com.google.inject.name.Named;
 import com.picdrop.exception.ApplicationException;
 import com.picdrop.exception.ErrorMessageCode;
 import static com.picdrop.helper.LogHelper.*;
+import com.picdrop.model.PasswordChange;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.TokenSet;
@@ -102,7 +103,7 @@ public class RegisteredUserService {
     }
 
     @Inject
-    public void setDefaultSizeLimit(@Named("service.limit.user.size")long defaultSizeLimit) {
+    public void setDefaultSizeLimit(@Named("service.limit.user.size") long defaultSizeLimit) {
         this.defaultSizeLimit = defaultSizeLimit;
     }
 
@@ -142,7 +143,7 @@ public class RegisteredUserService {
                     .status(400)
                     .code(ErrorMessageCode.BAD_NAME_TOO_LONG);
         }
-        
+
         entity.setSizeLimit(defaultSizeLimit);
 
         entity = repo.save(entity);
@@ -236,6 +237,34 @@ public class RegisteredUserService {
         log.info(SERVICE, "User updated");
         log.traceExit();
         return me;
+    }
+
+    @PUT
+    @Permission("write")
+    @Path("/me/password")
+    public void updatePassword(PasswordChange entity) throws ApplicationException {
+        log.traceEntry();
+        if (entity == null) {
+            throw new ApplicationException()
+                    .status(400)
+                    .code(ErrorMessageCode.BAD_REQUEST_BODY);
+        }
+
+        User u = contextProv.get().getPrincipal();
+        if (u.isRegistered()) {
+            RegisteredUser me = u.to(RegisteredUser.class);
+            
+            if (!me.getPhash().equals(entity.getOldPassword())) {
+                throw new ApplicationException()
+                        .status(400)
+                        .code(ErrorMessageCode.BAD_OLD_PASSWORD);
+            }
+            
+            me.setPhash(entity.getNewPassword());
+            repo.update(me.getId(), me);
+        }
+
+        log.traceExit();
     }
 
 }
