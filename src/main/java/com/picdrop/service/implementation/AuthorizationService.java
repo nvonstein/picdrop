@@ -18,6 +18,7 @@ import com.picdrop.guice.names.RefreshToken;
 import static com.picdrop.helper.LogHelper.*;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.TokenSet;
+import com.picdrop.model.resource.FileResource;
 import com.picdrop.model.user.RegisteredUser;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.Repository;
@@ -26,6 +27,8 @@ import com.picdrop.security.authentication.authenticator.Authenticator;
 import com.picdrop.security.token.ClaimSetFactory;
 import com.picdrop.security.token.WebTokenFactory;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -50,6 +53,7 @@ public class AuthorizationService {
 
     protected Repository<String, RegisteredUser> userRepo;
     protected Repository<String, TokenSet> tsRepo;
+    protected Repository<String, FileResource> frRepo;
 
     protected CookieProviderFactory cookieProvFactory;
     protected WebTokenFactory tokenFactory;
@@ -72,9 +76,11 @@ public class AuthorizationService {
     public AuthorizationService(
             Repository<String, RegisteredUser> userRepo,
             Repository<String, TokenSet> tsRepo,
+            Repository<String, FileResource> frRepo,
             WebTokenFactory tokenFactory) {
         this.tsRepo = tsRepo;
         this.userRepo = userRepo;
+        this.frRepo = frRepo;
 
         this.tokenFactory = tokenFactory;
         try {
@@ -187,6 +193,11 @@ public class AuthorizationService {
 
         log.debug(SERVICE, "Generating tokens");
         TokenSet.JsonWrapper tokens = generateTokens(user, nonce, name);
+        
+        log.debug(SERVICE, "Calculating up-to-date storage usage");
+        List<FileResource> frs = frRepo.list();
+        long total = frs.stream().map(fr -> fr.getSize()).collect(Collectors.summingLong(l -> l));
+        user.setSizeUsage(total);
 
         user.setLastLogin();
         userRepo.update(user.getId(), user);
