@@ -30,6 +30,9 @@ public class RegisteredUser extends User {
     @Indexed
     protected String email;
 
+    protected long sizeLimit;
+    protected long sizeUsage;
+
     protected long lastlogin;
 
     @NotSaved
@@ -82,6 +85,30 @@ public class RegisteredUser extends User {
     @JsonView(value = Views.Public.class)
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @JsonView(value = Views.Public.class)
+    public long getSizeLimit() {
+        return sizeLimit;
+    }
+
+    @JsonView(value = Views.Ignore.class)
+    public void setSizeLimit(long sizeLimit) {
+        this.sizeLimit = sizeLimit;
+    }
+
+    @JsonView(value = Views.Public.class)
+    public long getSizeUsage() {
+        return sizeUsage;
+    }
+
+    @JsonView(value = Views.Ignore.class)
+    public void setSizeUsage(long sizeUsage) {
+        this.sizeUsage = sizeUsage;
+    }
+    
+    public void incSizeUsage(long sizeUsage) {
+        this.sizeUsage = this.sizeUsage + sizeUsage;
     }
 
     @Override
