@@ -23,16 +23,6 @@ public class RegisteredUserDelegate extends User {
     }
 
     @Override
-    public String getName() {
-        return u.getName();
-    }
-
-    @Override
-    public String getFullName() {
-        return u.getFullName();
-    }
-
-    @Override
     public long getCreated() {
         return u.getCreated();
     }
