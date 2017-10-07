@@ -42,6 +42,9 @@ public class ApplicationConfig extends Application {
         resources.add(com.picdrop.service.implementation.FileResourceService.class);
         resources.add(com.picdrop.service.implementation.RegisteredUserService.class);
         resources.add(com.picdrop.service.implementation.ShareService.class);
+        resources.add(org.jboss.resteasy.plugins.providers.jackson.Jackson2JsonpInterceptor.class);
+        resources.add(org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider.class);
+        resources.add(org.jboss.resteasy.plugins.providers.jackson.UnrecognizedPropertyExceptionHandler.class);
     }
     
 }
