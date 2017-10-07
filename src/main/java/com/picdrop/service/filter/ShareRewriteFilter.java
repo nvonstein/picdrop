@@ -78,6 +78,8 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
             log.debug(FILTER, "Generating delegate with permissions");
             RequestContext rctx = context.get();
             RegisteredUserDelegate delegate = new RegisteredUserDelegate(s.getOwner(false));
+            
+            // TODO set predefined name from Share
 
             if (s.isAllowComment()) {
                 delegate.addPermission(String.format("/collections/%s/*/comment", r.getId()));
