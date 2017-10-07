@@ -24,6 +24,7 @@ import com.picdrop.guice.provider.implementation.ProcessorListProviders;
 import com.picdrop.guice.provider.implementation.UploadHandlerProviderImpl;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
+import com.picdrop.io.UsageValidationProcessor;
 import com.picdrop.io.repository.FileRepository;
 import com.picdrop.io.writer.FileReader;
 import com.picdrop.io.writer.FileWriter;
@@ -86,6 +87,7 @@ public abstract class AbstractFileHandlingModule implements Module {
 
     protected void bindProcessors(Binder binder) {
         binder.bind(ImageProcessor.class);
+        binder.bind(UsageValidationProcessor.class);
     }
 
     abstract FileRepository<String> provideFileRepository(Properties config) throws IOException;

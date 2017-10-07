@@ -34,7 +34,8 @@ public enum ErrorMessageCode {
     BAD_RESOURCE_NAME("ec000019","Bad request: Resource file name is too long."), 
     BAD_NAME_TOO_LONG("ec000020","Bad request: Name exceeds length limit."), 
     BAD_NAME_ILLEGAL_FORMAT("ec000021","Bad request: Name has not a legal format."), 
-    BAD_NAME_EMPTY("ec000022","Bad request: Name is empty.");
+    BAD_NAME_EMPTY("ec000022","Bad request: Name is empty."), 
+    LIMIT_STORAGE_FULL("ec000023","Bad request: You have reached your maximum storage capacity.");
 
     private String code;
     private String defaultMessage;

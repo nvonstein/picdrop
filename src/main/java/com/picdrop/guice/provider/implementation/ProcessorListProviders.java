@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.picdrop.io.ImageProcessor;
 import com.picdrop.io.Processor;
+import com.picdrop.io.UsageValidationProcessor;
 import com.picdrop.model.resource.FileResource;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +25,11 @@ public class ProcessorListProviders implements Provider<List<Processor<FileResou
 
     @Inject
     public ProcessorListProviders(
-            ImageProcessor imgp) {
+            ImageProcessor imgp,
+            UsageValidationProcessor ucvp) {
         // Adding handler
         pro.add(imgp);
+        pro.add(ucvp);
 
         pro = Collections.unmodifiableList(pro);
     }
