@@ -35,4 +35,9 @@ public class FileItemResourceContainer implements ResourceContainer {
         return this.fi.getName();
     }
 
+    @Override
+    public long getFileSize() {
+        return fi.getSize();
+    }
+
 }

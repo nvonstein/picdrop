@@ -15,6 +15,7 @@ import java.io.InputStream;
  */
 public interface ResourceContainer extends CheckedProvider<InputStream>{
     String getName();
+    long getFileSize();
 
     @Override
     public InputStream get() throws IOException;

@@ -21,6 +21,7 @@ public class FileResource extends Resource {
 
     protected String extension;
     protected String fileId;
+    protected long size;
 
     @Embedded
     ResourceDescriptor descriptor;
@@ -45,6 +46,16 @@ public class FileResource extends Resource {
         if (tmp.length > 1) {
             this.setExtension(tmp[tmp.length - 1]);
         }
+    }
+
+    @JsonView(value = Views.Public.class)
+    public long getSize() {
+        return size;
+    }
+
+    @JsonView(value = Views.Ignore.class)
+    public void setSize(long size) {
+        this.size = size;
     }
 
     @JsonView(value = Views.Public.class)
@@ -82,10 +93,10 @@ public class FileResource extends Resource {
         if (update == null) {
             return this;
         }
-        
+
         super.merge(update);
         if (update instanceof FileResource) {
-            FileResource nupdate = (FileResource) update;                   
+            FileResource nupdate = (FileResource) update;
             if (nupdate.descriptor != null) {
                 this.descriptor.merge(nupdate.descriptor);
             }
@@ -110,5 +121,5 @@ public class FileResource extends Resource {
     public String toResourceString() {
         return String.format("/resources/%s", this.getId());
     }
-    
+
 }

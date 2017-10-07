@@ -41,4 +41,9 @@ public class FileResourceContainer implements ResourceContainer {
         return this.res.getName();
     }
 
+    @Override
+    public long getFileSize() {
+        return res.getSize();
+    }
+
 }

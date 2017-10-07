@@ -358,6 +358,7 @@ public class FileResourceService {
 
                 FileResource r = new FileResource();
                 r.setName(file.getName());
+                r.setSize(file.getSize());
                 r.setOwner(contextProv.get().getPrincipal().to(RegisteredUser.class));
 
                 try {
