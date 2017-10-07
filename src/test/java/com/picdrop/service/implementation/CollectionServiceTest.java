@@ -400,7 +400,10 @@ public class CollectionServiceTest extends ServiceTestBase {
 
         Rating r = new Rating();
         r.setRate(3);
-        service.rate(ID2, ID1, r);
+        Rating actual = service.rate(ID2, ID1, r);
+
+        assertNotNull("parent is null", actual.getParent());
+        assertEquals("parent id differs", ID1, actual.getParent().getId());
 
         verify(ci, atLeastOnce()).addRating(any());
     }
@@ -440,6 +443,9 @@ public class CollectionServiceTest extends ServiceTestBase {
 
         assertNotNull("text is null", actual.getComment());
         assertEquals("wrong name", "name", actual.getName());
+
+        assertNotNull("parent is null", actual.getParent());
+        assertEquals("parent id differs", ID1, actual.getParent().getId());
 
         verify(ci, atLeastOnce()).addComment(any());
     }

@@ -20,7 +20,7 @@ import com.picdrop.model.user.UserReference;
 public abstract class InteractionBase extends Identifiable {
 
     RegisteredUserReference user;
-    ResourceReference parent;
+    Collection.CollectionItemReference parent;
     String name;
 
     public InteractionBase() {
@@ -53,18 +53,18 @@ public abstract class InteractionBase extends Identifiable {
     }
 
     @JsonView(value = Views.Ignore.class)
-    public ResourceReference getParent() {
+    public Collection.CollectionItemReference getParent() {
         return parent;
     }
 
     @JsonView(value = Views.Ignore.class)
-    public void setParent(ResourceReference parent) {
+    public void setParent(Collection.CollectionItemReference parent) {
         this.parent = parent;
     }
 
     @JsonIgnore
-    public void setParent(Resource res) {
-        this.parent = res.refer();
+    public void setParent(Collection.CollectionItem citem) {
+        this.parent = citem.refer();
     }
 
 }

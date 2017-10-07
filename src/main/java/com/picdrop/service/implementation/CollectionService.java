@@ -424,6 +424,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         }
 
         entity.setId(null); // Clear id
+        entity.setParent(ci);
         entity = commentRepo.save(entity);
 
         ci.addComment(entity);
@@ -475,6 +476,7 @@ public class CollectionService extends CrudService<String, Collection, Repositor
         entity = setName(entity);
 
         entity.setId(null);
+        entity.setParent(ci);
         entity = ratingRepo.save(entity);
 
         ci.addRating(entity);
