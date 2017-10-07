@@ -11,12 +11,12 @@ package com.picdrop.json;
  */
 public abstract class Views {
 
-    public static abstract class Public {
+    public static interface Public {
     };
 
-    public static abstract class Detailed extends Public {
+    public static interface Detailed extends Public {
     };
 
-    public static abstract class Ignore extends Detailed {
+    public static interface Ignore extends Detailed {
     };
 }
