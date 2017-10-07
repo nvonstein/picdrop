@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +28,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
 
 /**
@@ -132,6 +134,43 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         return ds.find(entityType).asList();
     }
 
+    protected UpdateOperations<T> compileUpdateOperation(Map<String, Object> flist) throws IOException {
+        UpdateOperations<T> uo = ds.createUpdateOperations(entityType);
+        for (Entry<String, Object> e : flist.entrySet()) {
+            if (Strings.isNullOrEmpty(e.getKey())) {
+                throw new IOException("invalid field provided must not be 'null' or empty");
+            }
+            if (e.getValue().getClass().isArray()) {
+                Object[] values = (Object[]) e.getValue();
+                String nfield = e.getKey().substring(1);
+
+                char op = e.getKey().charAt(0);
+                switch (op) {
+                    case '+':
+                        for (Object value : values) {
+                            uo.add(nfield, value, true);
+                        }
+                        continue;
+                    case '?':
+                        for (Object value : values) {
+                            uo.add(nfield, value, false);
+                        }
+                        continue;
+                    default: // Threat as regular field
+                        break;
+                }
+            }
+
+            if (e.getValue() != null) {
+                uo.set(e.getKey(), e.getValue());
+            } else {
+                uo.unset(e.getKey());
+            }
+        }
+
+        return uo;
+    }
+
     protected DBObject compileQuery(String qname, Object... params) throws IOException {
         String rawquery = this.namedQueries.get(qname);
         if (rawquery == null) {
@@ -178,13 +217,40 @@ public class MorphiaRepository<T> implements Repository<String, T> {
         log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         DBObject dbObj = compileQuery(qname, params);
 
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
-
-        // TODO This must be changed if multi-update is desired on named queries
-        UpdateResults ur = ds.updateFirst(query, entity, false);
+        T result = updateNamedInternal(entity, dbObj);
 
         log.traceExit();
-        return Arrays.asList();
+        return Arrays.asList(result);
+    }
+
+    protected T updateNamedInternal(T entity, DBObject dbObj) {
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+
+        UpdateResults ur = ds.updateFirst(query, entity, false);
+        return entity;
+    }
+
+    @Override
+    public int updateNamed(Map<String, Object> flist, String qname, Object... params) throws IOException {
+        log.traceEntry();
+        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
+        DBObject dbObj = compileQuery(qname, params);
+
+        int n = updateNamedInternal(flist, dbObj);
+
+        log.debug(REPO_UPDATE, "Updated '{}' entities", n);
+        log.traceExit();
+        return n;
+    }
+
+    protected int updateNamedInternal(Map<String, Object> flist, DBObject dbObj) throws IOException {
+        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+
+        UpdateOperations<T> uo = compileUpdateOperation(flist);
+
+        UpdateResults ur = ds.update(query, uo, false);
+
+        return ur.getUpdatedCount();
     }
 
     public static class BuildState<BUILDER extends AbstractRepositoryBuilder> {

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
@@ -224,6 +225,26 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         UpdateResults ur = ds.updateFirst(query, entity, false);
         log.traceExit();
         return Arrays.asList();
+    }
+
+    @Override
+    protected int updateNamedInternal(Map<String, Object> flist, DBObject dbObj) throws IOException {
+        DBObject awareDbObj = addPrincipalClause(dbObj);
+        return super.updateNamedInternal(flist, awareDbObj);
+    }
+
+    @Override
+    public int updateNamed(Map<String, Object> flist, String qname, User context, Object... params) throws IOException {
+        log.traceEntry();
+        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
+        DBObject dbObj = compileQuery(qname, params);
+        dbObj = addPrincipalClause(dbObj, context);
+
+        int n = super.updateNamedInternal(flist, dbObj);
+
+        log.debug(REPO_UPDATE, "Updated '{}' entities", n);
+        log.traceExit();
+        return n;
     }
 
     @Override
