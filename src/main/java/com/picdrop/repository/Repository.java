@@ -7,6 +7,7 @@ package com.picdrop.repository;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -29,4 +30,6 @@ public interface Repository<ID, T> {
     int deleteNamed(String qname, Object... params) throws IOException;
 
     List<T> updateNamed(T entity, String qname, Object... params) throws IOException;
+
+    int updateNamed(Map<String, Object> flist, String qname, Object... params) throws IOException;
 }

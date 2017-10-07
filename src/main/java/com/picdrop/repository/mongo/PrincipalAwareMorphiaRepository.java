@@ -7,7 +7,6 @@ package com.picdrop.repository.mongo;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import static com.picdrop.helper.LogHelper.*;
@@ -18,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
@@ -147,21 +147,9 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
     }
 
     @Override
-    public List<T> queryNamed(String qname, Object... params) throws IOException {
-        log.traceEntry();
-        DBObject dbObj = compileQuery(qname, params);
-
-        dbObj = addPrincipalClause(dbObj);
-
-        if (dbObj == null) {
-            return new ArrayList<>();
-            // TODO log
-        }
-
-        log.debug(REPO_GET, "Querying entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
-        log.traceExit();
-        return query.asList();
+    protected List<T> queryNamedInternal(DBObject dbObj) {
+        DBObject awareDbObj = addPrincipalClause(dbObj);
+        return super.queryNamedInternal(awareDbObj);
     }
 
     @Override
@@ -198,32 +186,32 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
     }
 
     @Override
-    public int deleteNamed(String qname, Object... params) throws IOException {
-        log.traceEntry();
-        DBObject dbObj = compileQuery(qname, params);
-
-        dbObj = addPrincipalClause(dbObj);
-
-        log.debug(REPO_DELETE, "Deleting entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
-
-        log.traceExit();
-        return ds.delete(query).getN();
+    protected int deleteNamedInternal(DBObject dbObj) {
+        DBObject awareDbObj = addPrincipalClause(dbObj);
+        return super.deleteNamedInternal(awareDbObj);
     }
 
     @Override
-    public List<T> updateNamed(T entity, String qname, Object... params) throws IOException {
+    protected int updateNamedInternal(Map<String, Object> flist, DBObject dbObj) throws IOException {
+        DBObject awareDbObj = addPrincipalClause(dbObj);
+        return super.updateNamedInternal(flist, awareDbObj);
+    }
+
+    @Override
+    public int updateNamed(Map<String, Object> flist, String qname, User context, Object... params) throws IOException {
         log.traceEntry();
+        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
         DBObject dbObj = compileQuery(qname, params);
 
-        dbObj = addPrincipalClause(dbObj);
+        if (context != null) {
+            dbObj = addPrincipalClause(dbObj, context);
+        }
 
-        log.debug(REPO_UPDATE, "Updating entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        int n = super.updateNamedInternal(flist, dbObj);
 
-        UpdateResults ur = ds.updateFirst(query, entity, false);
+        log.debug(REPO_UPDATE, "Updated '{}' entities", n);
         log.traceExit();
-        return Arrays.asList();
+        return n;
     }
 
     @Override
@@ -339,9 +327,10 @@ public class PrincipalAwareMorphiaRepository<T> extends MorphiaRepository<T> imp
         }
 
         log.debug(REPO_GET, "Querying entity of type '{}' with query '{}'", this.entityType.toString(), qname);
-        Query<T> query = ds.getQueryFactory().createQuery(ds, ds.getCollection(entityType), entityType, dbObj);
+        List<T> result = super.queryNamedInternal(dbObj);
+
         log.traceExit();
-        return query.asList();
+        return result;
     }
 
     public static class Builder<TYPE> extends AbstractRepositoryBuilder<Builder<TYPE>, PrincipalAwareMorphiaRepository<TYPE>, TYPE> {
