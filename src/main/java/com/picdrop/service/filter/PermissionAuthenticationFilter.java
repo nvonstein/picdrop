@@ -77,18 +77,17 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
             Permission methodAnnotation = method.getAnnotation(Permission.class);
 
             RequestContext rctx = this.context.get();
-            User user;
-            if (rctx.hasPrincipal()) {
-                user = rctx.getPrincipal();
-            } else {
-                log.debug(FILTER, "Authenticating User");
-                user = authenticator.authenticate(request);
-                if (user == null) {
-                    log.debug(FILTER, "Unable to authenticate a user.");
-                    crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
-                    return;
-                }
-                user.setPermissions(
+            RegisteredUser user;
+
+            log.debug(FILTER, "Authenticating User");
+            user = authenticator.authenticate(request);
+            if ((user == null) && !rctx.hasPrincipal()) {
+                log.debug(FILTER, "Unable to authenticate a user.");
+                crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+                return;
+            } else if (user != null) {
+                rctx.setUser(user);
+                rctx.addPermission(
                         Arrays.asList(
                                 "*/logout",
                                 "/resources/*/read",
@@ -101,13 +100,15 @@ public class PermissionAuthenticationFilter implements ContainerRequestFilter {
                                 "/shares/*/write",
                                 "/users/*/read",
                                 "/users/*/write"));
-                rctx.setPrincipal(user);
+                if (!rctx.hasPrincipal()) {
+                    rctx.setPrincipal(user);
+                }
             }
 
             String action = getAction(classAnnotation, methodAnnotation);
             String req = parsePermissionString(crc.getUriInfo().getPath(), action);
             log.debug(FILTER, "Checking required permission {}", req);
-            if (!resolvePermission(req, user.getPermissions())) {
+            if (!resolvePermission(req, rctx.getPermissions())) {
                 log.debug(FILTER, "User not authorized. Required permission: {}", req);
                 crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
                 return;

@@ -10,7 +10,6 @@ import static com.picdrop.helper.LogHelper.*;
 import com.picdrop.model.RequestContext;
 import com.picdrop.model.Share;
 import com.picdrop.model.resource.ResourceReference;
-import com.picdrop.model.user.RegisteredUserDelegate;
 import com.picdrop.model.user.User;
 import com.picdrop.repository.AwareRepository;
 import java.io.IOException;
@@ -77,19 +76,16 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
 
             log.debug(FILTER, "Generating delegate with permissions");
             RequestContext rctx = context.get();
-            RegisteredUserDelegate delegate = new RegisteredUserDelegate(s.getOwner(false));
-            
-            // TODO set predefined name from Share
 
             if (s.isAllowComment()) {
-                delegate.addPermission(String.format("/collections/%s/*/comment", r.getId()));
+                rctx.addPermission(String.format("/collections/%s/*/comment", r.getId()));
             }
             if (s.isAllowRating()) {
-                delegate.addPermission(String.format("/collections/%s/*/rate", r.getId()));
+                rctx.addPermission(String.format("/collections/%s/*/rate", r.getId()));
             }
-            delegate.addPermission(String.format("%s/*/read", r.toResourceString()));
+            rctx.addPermission(String.format("%s/*/read", r.toResourceString()));
 
-            rctx.setPrincipal(delegate);
+            rctx.setPrincipal(s.getOwner(false));
 
             // Rewrite route
             String newpath = path.replace(mtch.group(1), "");

@@ -9,20 +9,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.google.common.base.Strings;
 import com.picdrop.json.Views;
 import com.picdrop.model.Identifiable;
 import com.picdrop.model.Mergeable;
 import com.picdrop.model.Referable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.NotSaved;
 
 /**
  *
@@ -36,8 +32,6 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
 
     protected String name;
     protected long created;
-    @NotSaved
-    List<String> permissions = new ArrayList<>();
 
     public User() {
         this.created = DateTime.now(DateTimeZone.UTC).getMillis();
@@ -81,30 +75,6 @@ public abstract class User extends Identifiable implements Mergeable<User>, Refe
     @JsonView(value = Views.Ignore.class)
     public boolean isRegistered() {
         return false;
-    }
-
-    @JsonView(value = Views.Detailed.class)
-    public List<String> getPermissions() {
-        return permissions;
-    }
-
-    @JsonView(value = Views.Ignore.class)
-    public void setPermissions(List<String> permissions) {
-        this.permissions = permissions;
-    }
-
-    @JsonIgnore
-    public User addPermission(String perm) {
-        if (!Strings.isNullOrEmpty(perm)) {
-           this.permissions.add(perm); 
-        }    
-        return this;
-    }
-
-    @JsonIgnore
-    public User removePermission(String perm) {
-        this.permissions.remove(perm);
-        return this;
     }
 
     @Override

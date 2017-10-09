@@ -61,10 +61,10 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     @Inject
     Provider<RequestContext> context;
 
-    Pattern collNamePattern = Pattern.compile("^([\\w]|-)+$");
+    Pattern collNamePattern = Pattern.compile("^(\\w|-|\\s)+$");
     int collNameLengthLimit = 256;
 
-    Pattern userNamePattern = Pattern.compile("^([\\w]|-)+$");
+    Pattern userNamePattern = Pattern.compile("^(\\w|-|\\s)+$");
     int userNameLengthLimit = 256;
     int commentTextLengthLimit = 5000;
 
@@ -436,18 +436,19 @@ public class CollectionService extends CrudService<String, Collection, Repositor
     }
 
     private <T extends InteractionBase> T setName(T entity) throws ApplicationException {
-        User user = this.context.get().getPrincipal();
-
-        if (user.isRegistered()) { // 1. Principle name to save user ref in comment
-            entity.setUser(user.to(RegisteredUser.class));
-            return entity;
-        }
-        if (!Strings.isNullOrEmpty(user.getFullName())) { // 2. Could be delegate so just take name
-            entity.setName(user.getFullName());
-            return entity;
-        }
-        if (!Strings.isNullOrEmpty(entity.getName())) { // 3. Name set on comment itself
-            if (verifyName(entity.getName(), userNamePattern, userNameLengthLimit)) {
+        User user = this.context.get().getUser();
+        if (user == null) {
+            if (!Strings.isNullOrEmpty(entity.getName())) { // Name set on comment itself
+                if (verifyName(entity.getName(), userNamePattern, userNameLengthLimit)) {
+                    return entity;
+                }
+            }
+        } else {
+            if (user.isRegistered()) { // Principle name to save user ref in comment
+                entity.setUser(user.to(RegisteredUser.class));
+                return entity;
+            } else if (!Strings.isNullOrEmpty(user.getFullName())) { // Could be anonymous so just take name
+                entity.setName(user.getFullName());
                 return entity;
             }
         }

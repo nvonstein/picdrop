@@ -77,7 +77,6 @@ public class RegisteredUserJsonTest {
         ru.setLastname("foo");
         ru.setName("foo");
         ru.setPhash("foo");
-        ru.setPermissions(Arrays.asList("foo"));
         
         this.regUser = ru;
     }
@@ -132,9 +131,6 @@ public class RegisteredUserJsonTest {
                 .readerWithView(Views.Public.class)
                 .forType(RegisteredUser.class)
                 .readValue(mockJson);
-
-        
-        assertEquals(0, u.getPermissions().size());
 
         assertNotNull(u.getId());
         assertNotNull(u.getEmail());
