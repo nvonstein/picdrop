@@ -264,14 +264,14 @@ public class AuthorizationService {
         log.traceEntry();
         User user = contextProv.get().getPrincipal();
         if (user == null) {
-            return Response.ok().build();
+            return Response.noContent().build();
         }
 
         log.debug(SERVICE, "Deleting tokens");
         RegisteredUser ru = user.to(RegisteredUser.class);
         tsRepo.delete(ru.getActiveToken().getId());
 
-        Response.ResponseBuilder builder = Response.ok();
+        Response.ResponseBuilder builder = Response.noContent();
         if (cookieEnabled) {
             log.debug(SERVICE, "Generating kill cookies");
             NewCookie authC = cookieProvFactory.getSessionCookieProvider(authCookieName, "").get();
