@@ -47,7 +47,7 @@ public abstract class InteractionBase extends Identifiable {
         return name;
     }
 
-    @JsonView(value = Views.Ignore.class)
+    @JsonView(value = Views.Public.class)
     public void setName(String name) {
         this.name = name;
     }
