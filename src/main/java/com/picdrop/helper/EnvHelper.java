@@ -65,10 +65,10 @@ public class EnvHelper {
 
         p.put("service.validation.user.email.regex", "^[^@]+[@][^@]+[.][^@]+$");
 
-        p.put("service.validation.collection.name.regex", "^([\\w]|-)+$");
+        p.put("service.validation.collection.name.regex", "^(\\w|-|\\s)+$");
         p.put("service.validation.collection.name.length", "256");
 
-        p.put("service.validation.user.name.regex", "^([\\w]|-)+$");
+        p.put("service.validation.user.name.regex", "^(\\w|-|\\s)+$");
         p.put("service.validation.user.name.length", "256");
         
         p.put("service.validation.comment.text.length", "5000");
