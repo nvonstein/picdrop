@@ -50,16 +50,36 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
         this.pattern = Pattern.compile(regex);
     }
 
+    protected Matcher getMatcher(String uri) {
+        return this.pattern.matcher(uri);
+    }
+
+    protected boolean isResourceAccess(Matcher matcher) {
+        return matcher.matches();
+    }
+
+    protected String getShareResourceString(Matcher matcher) {
+        return matcher.group(1);
+    }
+
+    protected String getShareId(Matcher matcher) {
+        return matcher.group(2);
+    }
+
+    protected String getRootResourceString(Matcher matcher) {
+        return matcher.group(3);
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         URI uri = requestContext.getUriInfo().getRequestUri();
         String path = uri.getPath();
 
         log.debug(FILTER, "Checking request path match");
-        Matcher mtch = this.pattern.matcher(path);
-        if (mtch.matches()) {
+        Matcher mtch = getMatcher(path);
+        if (isResourceAccess(mtch)) {
             log.debug(FILTER, "Matching request detected");
-            String shareId = mtch.group(2);
+            String shareId = getShareId(mtch);
 
             Share s = srepo.get(shareId, null);
             if (s == null) {
@@ -69,26 +89,28 @@ public class ShareRewriteFilter implements ContainerRequestFilter {
 
             log.debug(FILTER, "Matching resource uri");
             ResourceReference r = s.getResource();
-            if (!r.toResourceString().equals(mtch.group(3))) {
+            if (!r.toResourceString().equals(getRootResourceString(mtch))) {
                 requestContext.abortWith(Response.status(Response.Status.NOT_FOUND).build());
                 return;
             }
 
-            log.debug(FILTER, "Generating delegate with permissions");
+            log.debug(FILTER, "Adding permissions");
             RequestContext rctx = context.get();
 
+            log.debug(FILTER, "Is commenting allowed: {}", s.isAllowComment());
             if (s.isAllowComment()) {
-                rctx.addPermission(String.format("/collections/%s/*/comment", r.getId()));
+                rctx.addPermission(String.format("%s/*/comment", r.toResourceString()));
             }
+            log.debug(FILTER, "Is rating allowed: {}", s.isAllowRating());
             if (s.isAllowRating()) {
-                rctx.addPermission(String.format("/collections/%s/*/rate", r.getId()));
+                rctx.addPermission(String.format("%s/*/rate", r.toResourceString()));
             }
             rctx.addPermission(String.format("%s/*/read", r.toResourceString()));
 
             rctx.setPrincipal(s.getOwner(false));
 
             // Rewrite route
-            String newpath = path.replace(mtch.group(1), "");
+            String newpath = path.replace(getShareResourceString(mtch), "");
             log.debug(FILTER, "Rewriting route from '{}' to '{}'", path, newpath);
             uri = URI.create(newpath);
             requestContext.setRequestUri(uri);

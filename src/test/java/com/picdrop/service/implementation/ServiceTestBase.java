@@ -34,25 +34,25 @@ import org.mockito.Mock;
  */
 public abstract class ServiceTestBase {
 
-    Repository<String, TokenSet> tokenSetRepo;
-    Repository<String, Collection.CollectionItem> collectionItemRepo;
-    Repository<String, RegisteredUser> registeredUserRepo;
-    Repository<String, Comment> commentRepo;
-    Repository<String, Rating> ratingRepo;
+    protected Repository<String, TokenSet> tokenSetRepo;
+    protected Repository<String, Collection.CollectionItem> collectionItemRepo;
+    protected Repository<String, RegisteredUser> registeredUserRepo;
+    protected Repository<String, Comment> commentRepo;
+    protected Repository<String, Rating> ratingRepo;
 
-    AwareRepository<String, FileResource, User> fileResourceRepo;
-    AwareRepository<String, Share, User> shareRepo;
-    AwareRepository<String, Collection, User> collectionRepo;
+    protected AwareRepository<String, FileResource, User> fileResourceRepo;
+    protected AwareRepository<String, Share, User> shareRepo;
+    protected AwareRepository<String, Collection, User> collectionRepo;
 
     @Mock
-    RequestContext ctx;
+    protected RequestContext ctx;
     @Mock
-    FileRepository<String> fileHandlingRepo;
+    protected FileRepository<String> fileHandlingRepo;
 
-    ApplicationModuleMock appModule = new ApplicationModuleMock();
-    RepositoryModuleMockNoDB repoModule = new RepositoryModuleMockNoDB();
+    protected ApplicationModuleMock appModule = new ApplicationModuleMock();
+    protected RepositoryModuleMockNoDB repoModule = new RepositoryModuleMockNoDB();
 
-    Injector inj;
+    protected Injector inj;
 
     @Before
     public void setUp() {
