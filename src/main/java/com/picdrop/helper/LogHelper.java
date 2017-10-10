@@ -22,4 +22,7 @@ public abstract class LogHelper {
     public static final Marker SERVICE = MarkerManager.getMarker("SERVICE");
     
     public static final Marker FILTER = MarkerManager.getMarker("FILTER");
+    
+    public static final Marker PROCESSOR = MarkerManager.getMarker("PROCESSOR");
+    public static final Marker PROCESSOR_USAGE_VALIDATION = MarkerManager.getMarker("PROCESSOR_USAGE_VALIDATION").addParents(PROCESSOR);
 }
