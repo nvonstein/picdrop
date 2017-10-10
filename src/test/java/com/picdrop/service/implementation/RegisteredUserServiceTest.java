@@ -177,6 +177,9 @@ public class RegisteredUserServiceTest extends ServiceTestBase {
     @Test
     public void testUpdateMe() throws ApplicationException, IOException {
         RegisteredUser user = new RegisteredUser(ID1);
+        user.setName("John");
+        user.setLastname("Doe");
+        
         when(ctx.getPrincipal()).thenReturn(user);
         when(registeredUserRepo.update(any(), any())).thenAnswer(TestHelper.reflect(1));
 

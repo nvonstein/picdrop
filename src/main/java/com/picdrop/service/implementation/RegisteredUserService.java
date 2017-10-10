@@ -197,7 +197,7 @@ public class RegisteredUserService {
         boolean nameChanged = false;
 
         log.entry(entity);
-        RegisteredUser me = contextProv.get().getPrincipal().to(RegisteredUser.class);
+        RegisteredUser me = contextProv.get().getPrincipal();
         if (me == null) {
             throw new ApplicationException()
                     .status(404)

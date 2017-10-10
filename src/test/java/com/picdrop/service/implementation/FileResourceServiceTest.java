@@ -65,7 +65,7 @@ public class FileResourceServiceTest {
     AwareRepository<String, Share, User> srepo;
     Repository<String, Collection.CollectionItem> cirepo;
     AwareRepository<String, Collection, User> crepo;
-    
+
     ApplicationModuleMock appModule = new ApplicationModuleMock();
 
     @Mock
@@ -305,9 +305,11 @@ public class FileResourceServiceTest {
     public void createTestPngValid() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture.png", "image/png", "somedata".getBytes()));
 
-        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/png");
-        
-        when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
+        when(appModule.getTika().detect(any(InputStream.class), any(Metadata.class))).thenReturn("image/png");
+
+        RegisteredUser u = new RegisteredUser(ID1);
+        u.setSizeLimit(1000000000);
+        when(ctx.getPrincipal()).thenReturn(u);
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
             public FileResource answer(InvocationOnMock arg0) throws Throwable {
@@ -349,9 +351,11 @@ public class FileResourceServiceTest {
     public void createTestJpegValid() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture.jpg", "image/jpeg", "somedata".getBytes()));
 
-        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/jpeg");
-        
-        when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
+        when(appModule.getTika().detect(any(InputStream.class), any(Metadata.class))).thenReturn("image/jpeg");
+
+        RegisteredUser u = new RegisteredUser(ID1);
+        u.setSizeLimit(1000000000);
+        when(ctx.getPrincipal()).thenReturn(u);
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
             public FileResource answer(InvocationOnMock arg0) throws Throwable {
@@ -393,9 +397,11 @@ public class FileResourceServiceTest {
     public void createTestTiffValid() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture.tiff", "image/tiff", "somedata".getBytes()));
 
-        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/tiff");
-        
-        when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
+        when(appModule.getTika().detect(any(InputStream.class), any(Metadata.class))).thenReturn("image/tiff");
+
+        RegisteredUser u = new RegisteredUser(ID1);
+        u.setSizeLimit(1000000000);
+        when(ctx.getPrincipal()).thenReturn(u);
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
             public FileResource answer(InvocationOnMock arg0) throws Throwable {
@@ -438,8 +444,8 @@ public class FileResourceServiceTest {
     public void createTestJpegInvalidFileContent() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture", "image/jpeg", "somedata".getBytes()));
 
-        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("text/plain");
-        
+        when(appModule.getTika().detect(any(InputStream.class), any(Metadata.class))).thenReturn("text/plain");
+
         when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
         when(repo.save(any())).thenAnswer(new Answer<FileResource>() {
             @Override
@@ -466,13 +472,15 @@ public class FileResourceServiceTest {
         }
     }
 
-    @Test(expected = ApplicationException.class)
+    @Test()
     public void createTestErrorOnFileSave() throws IOException, ApplicationException {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture", "image/jpeg", "somedata".getBytes()));
 
-        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/jpeg");
-        
-        when(ctx.getPrincipal()).thenReturn(new RegisteredUser(ID1));
+        when(appModule.getTika().detect(any(InputStream.class), any(Metadata.class))).thenReturn("image/jpeg");
+
+        RegisteredUser u = new RegisteredUser(ID1);
+        u.setSizeLimit(1000000000);
+        when(ctx.getPrincipal()).thenReturn(u);
         when(fr.write(any(), any())).thenThrow(new IOException("Some error occured!"));
 //        doReturn(FileType.IMAGE_JPEG).when(service).parseMimeType(any());
 
@@ -481,10 +489,11 @@ public class FileResourceServiceTest {
         } catch (ApplicationException ex) {
             assertEquals("Wrong http status code", ex.getStatus(), 500);
             assertTrue("Invalid supressed exception", ex.getCause() instanceof IOException);
-            throw ex;
+            return;
         } finally {
             verify(repo, times(0)).save(any());
         }
+        fail("No exception");
     }
 
     @Test
@@ -492,8 +501,8 @@ public class FileResourceServiceTest {
         HttpServletRequest req = TestHelper.generateFileRequest(new MockMultipartFile("file", "picture", "image/jpeg", "somedata".getBytes()));
         FileResource file = new FileResource(ID1);
         file.setFileId(ID1);
-        
-        when(appModule.getTika().detect(any(InputStream.class),any(Metadata.class))).thenReturn("image/jpeg");
+
+        when(appModule.getTika().detect(any(InputStream.class), any(Metadata.class))).thenReturn("image/jpeg");
 
         when(repo.get(ID1)).thenReturn(file);
         when(repo.update(eq(ID1), any())).thenAnswer(new Answer<FileResource>() {
